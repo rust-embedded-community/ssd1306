@@ -1,7 +1,10 @@
 [package]
+categories = ["embedded", "no-std"]
 name = "ssd1306"
 version = "0.1.0"
 authors = ["James Waples <jamwaffles@gmail.com>"]
+keywords = ["rtfm", "ssd1306", "oled", "embedded"]
+repository = "https://github.com/jamwaffles/ssd1306"
 
 [dependencies]
 embedded-hal = "0.1.0"

@@ -1,0 +1,7 @@
+[package]
+name = "ssd1306"
+version = "0.1.0"
+authors = ["James Waples <jamwaffles@gmail.com>"]
+
+[dependencies]
+embedded-hal = "0.1.0"

@@ -102,12 +102,12 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
         }
     }
 
-    fn draw_image_8bpp(&mut self, bytes: &[u8], w: u32, h: u32) {
+    fn draw_image_8bpp(&mut self, image: &[u8], w: u32, h: u32, left: u32, top: u32) {
         for x in 0..w {
             for y in 0..h {
                 let offset = (y * w) + x;
 
-                self.set_pixel(x, y, bytes[offset as usize]);
+                self.set_pixel(x + left, y + top, image[offset as usize]);
             }
         }
     }

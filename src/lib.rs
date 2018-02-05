@@ -56,7 +56,7 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
             0xD3, 0x0, // 5 display offset
             0x40, // 7 start line
             0x8D, 0x14, // 8 charge pump
-            0x20, 0x0, // 10 memory mode
+            0x20, 0x00, // 10 memory mode, 0x20 = address mode command, 0x00 = horizontal address mode
             0xA1, // 12 seg remap 1
             0xC8, // 13 comscandec
             0xDA, 0x12, // 14 set compins, height==64 ? 0x12:0x02,
@@ -88,24 +88,33 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
 }
 
 impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
-    fn set_pixel(&mut self, x: u8, y: u8, value: u8) {
-        let bit_value = value & 1;
-
+    fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
         let (byte_offset, bit_offset) = coords_to_index(x, y);
 
-        self.buffer[byte_offset as usize] = (self.buffer[byte_offset as usize] | & !(1 << bit_offset) | (bit_value << bit_offset))
+        if value == 0 {
+            self.buffer[byte_offset as usize] &= !(1 << bit_offset);
+        } else {
+            self.buffer[byte_offset as usize] |= (1 << bit_offset);
+        }
+    }
+
+    fn set_index(&mut self, idx: u32) {
+        let byte_offset = idx / 8;
+        let bit_offset = idx - byte_offset;
+
+        self.buffer[byte_offset as usize] |= (1 << bit_offset);
     }
 }
 
-fn coords_to_index(x: u8, y: u8) -> (usize, u8) {
+fn coords_to_index(x: u32, y: u32) -> (usize, u8) {
     let x_resolution = 128;
     let y_resolution = 64;
 
-    let num_bytes_in_col: u32 = y_resolution / 8;
-    let num_pixels_along: u32 = y as u32 + (x as u32 * y_resolution);
+    let page_index: u32 = (y / 8);
+    let page_offset: u32 = page_index * x_resolution;
 
-    let byte_offset = num_pixels_along / 8;
-    let bit_offset = num_pixels_along - (byte_offset * 8);
+    let byte_offset = page_offset + x;
+    let bit_offset = y - (page_index * 8);
 
     (byte_offset as usize, bit_offset as u8)
 }
@@ -121,12 +130,12 @@ mod tests {
 
     #[test]
     fn it_sets_bottom_left() {
-        assert_eq!(coords_to_index(0, 63), (7, 7));
+        assert_eq!(coords_to_index(0, 63), (896, 7));
     }
 
     #[test]
     fn it_sets_top_right() {
-        assert_eq!(coords_to_index(127, 0), ((127 * 8), 0));
+        assert_eq!(coords_to_index(127, 0), (127, 0));
     }
 
     #[test]

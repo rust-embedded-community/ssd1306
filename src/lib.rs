@@ -1,8 +1,10 @@
 #![no_std]
 
 extern crate embedded_hal as hal;
+extern crate embedded_graphics;
 
 use hal::digital::OutputPin;
+use embedded_graphics::Drawing;
 
 pub struct SSD1306<SPI, RST, DC>
 {
@@ -23,7 +25,7 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
             spi,
             rst,
             dc,
-            buffer: [0b10101010; 1024],
+            buffer: [0; 1024],
         }
     }
 
@@ -44,6 +46,7 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
         self.dc.set_high();
     }
 
+    // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
     pub fn init(&mut self) {
         let init_commands: [ u8; 25 ] = [
             0xAE, // 0 disp off
@@ -81,5 +84,53 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
         self.dc.set_high();
 
         self.spi.write(&self.buffer);
+    }
+}
+
+impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
+    fn set_pixel(&mut self, x: u8, y: u8, value: u8) {
+        let bit_value = value & 1;
+
+        let (byte_offset, bit_offset) = coords_to_index(x, y);
+
+        self.buffer[byte_offset as usize] = (self.buffer[byte_offset as usize] | & !(1 << bit_offset) | (bit_value << bit_offset))
+    }
+}
+
+fn coords_to_index(x: u8, y: u8) -> (usize, u8) {
+    let x_resolution = 128;
+    let y_resolution = 64;
+
+    let num_bytes_in_col: u32 = y_resolution / 8;
+    let num_pixels_along: u32 = y as u32 + (x as u32 * y_resolution);
+
+    let byte_offset = num_pixels_along / 8;
+    let bit_offset = num_pixels_along - (byte_offset * 8);
+
+    (byte_offset as usize, bit_offset as u8)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_sets_0_0() {
+        assert_eq!(coords_to_index(0, 0), (0, 0));
+    }
+
+    #[test]
+    fn it_sets_bottom_left() {
+        assert_eq!(coords_to_index(0, 63), (7, 7));
+    }
+
+    #[test]
+    fn it_sets_top_right() {
+        assert_eq!(coords_to_index(127, 0), ((127 * 8), 0));
+    }
+
+    #[test]
+    fn it_sets_bottom_right() {
+        assert_eq!(coords_to_index(127, 63), (1023, 7));
     }
 }

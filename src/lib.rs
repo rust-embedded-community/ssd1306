@@ -123,23 +123,42 @@ fn coords_to_index(x: u32, y: u32) -> (usize, u8) {
 mod tests {
     use super::*;
 
-    #[test]
-    fn it_sets_0_0() {
-        assert_eq!(coords_to_index(0, 0), (0, 0));
-    }
+    mod coords_to_index {
+        use super::*;
 
-    #[test]
-    fn it_sets_bottom_left() {
-        assert_eq!(coords_to_index(0, 63), (896, 7));
-    }
+        #[test]
+        fn it_sets_0_0() {
+            assert_eq!(coords_to_index(0, 0), (0, 0));
+        }
 
-    #[test]
-    fn it_sets_top_right() {
-        assert_eq!(coords_to_index(127, 0), (127, 0));
-    }
+        #[test]
+        fn it_sets_bottom_left() {
+            assert_eq!(coords_to_index(0, 63), (896, 7));
+        }
 
-    #[test]
-    fn it_sets_bottom_right() {
-        assert_eq!(coords_to_index(127, 63), (1023, 7));
+        #[test]
+        fn it_sets_top_right() {
+            assert_eq!(coords_to_index(127, 0), (127, 0));
+        }
+
+        #[test]
+        fn it_sets_bottom_right() {
+            assert_eq!(coords_to_index(127, 63), (1023, 7));
+        }
+
+        #[test]
+        fn it_sets_a_pixel_at_8x8() {
+            assert_eq!(coords_to_index(7, 7), (7, 7));
+        }
+
+        #[test]
+        fn it_sets_a_pixel_at_10x10() {
+            assert_eq!(coords_to_index(9, 9), (137, 1));
+        }
+
+        #[test]
+        fn it_sets_a_pixel_at_63x63() {
+            assert_eq!(coords_to_index(63, 63), (959, 7));
+        }
     }
 }

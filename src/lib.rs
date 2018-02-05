@@ -49,23 +49,23 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
     // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
     pub fn init(&mut self) {
         let init_commands: [ u8; 25 ] = [
-            0xAE, // 0 disp off
-            0xD5, // 1 clk div
-            0x80, // 2 suggested ratio
-            0xA8, 63, // 3 set multiplex, height-1
-            0xD3, 0x0, // 5 display offset
-            0x40, // 7 start line
+            0xAE,       // 0 disp off
+            0xD5,       // 1 clk div
+            0x80,       // 2 suggested ratio
+            0xA8, 63,   // 3 set multiplex, height-1
+            0xD3, 0x0,  // 5 display offset
+            0x40,       // 7 start line
             0x8D, 0x14, // 8 charge pump
             0x20, 0x00, // 10 memory mode, 0x20 = address mode command, 0x00 = horizontal address mode
-            0xA1, // 12 seg remap 1
-            0xC8, // 13 comscandec
+            0xA1,       // 12 seg remap 1
+            0xC8,       // 13 comscandec
             0xDA, 0x12, // 14 set compins, height==64 ? 0x12:0x02,
             0x81, 0xCF, // 16 set contrast
             0xD9, 0xF1, // 18 set precharge
             0xDb, 0x40, // 20 set vcom detect
-            0xA4, // 22 display all on
-            0xA6, // 23 display normal (non-inverted)
-            0xAf // 24 disp on
+            0xA4,       // 22 display all on
+            0xA6,       // 23 display normal (non-inverted)
+            0xAf        // 24 disp on
         ];
 
         self.cmds(&init_commands);
@@ -73,10 +73,14 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
 
     pub fn flush(&mut self) {
         let flush_commands: [ u8; 6 ] = [
-             0x21, // columns
-             0, 127,
-             0x22, // pages
-             0, 7 /* (height>>3)-1 */];
+            0x21, // Set column address from addr...
+            0,    // 0 to ...
+            127,  // 128 columns (0 indexed).
+
+            0x22, // Set pages from addr ...
+            0,    // 0 to ...
+            7     // 8 pages (0 indexed). 8 pages of 8 rows (1 byte) each = 64px high
+        ];
 
         self.cmds(&flush_commands);
 
@@ -92,26 +96,20 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
         let (byte_offset, bit_offset) = coords_to_index(x, y);
 
         if value == 0 {
-            self.buffer[byte_offset as usize] &= !(1 << bit_offset);
+            self.buffer[byte_offset] &= !(1 << bit_offset);
         } else {
-            self.buffer[byte_offset as usize] |= (1 << bit_offset);
+            self.buffer[byte_offset] |= 1 << bit_offset;
         }
-    }
-
-    fn set_index(&mut self, idx: u32) {
-        let byte_offset = idx / 8;
-        let bit_offset = idx - byte_offset;
-
-        self.buffer[byte_offset as usize] |= (1 << bit_offset);
     }
 }
 
 fn coords_to_index(x: u32, y: u32) -> (usize, u8) {
     let x_resolution = 128;
-    let y_resolution = 64;
+    // TODO: Dynamic width/height
+    // let y_resolution = 64;
 
-    let page_index: u32 = (y / 8);
-    let page_offset: u32 = page_index * x_resolution;
+    let page_index = y / 8;
+    let page_offset = page_index * x_resolution;
 
     let byte_offset = page_offset + x;
     let bit_offset = y - (page_index * 8);

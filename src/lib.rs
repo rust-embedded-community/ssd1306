@@ -4,7 +4,7 @@ extern crate embedded_hal as hal;
 extern crate embedded_graphics;
 
 use hal::digital::OutputPin;
-use embedded_graphics::Drawing;
+pub use embedded_graphics::Drawing;
 
 pub struct SSD1306<SPI, RST, DC>
 {

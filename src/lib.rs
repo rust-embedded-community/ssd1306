@@ -14,7 +14,7 @@ pub struct SSD1306<SPI, RST, DC>
     buffer: [u8; 1024],
 }
 
-// Currently only implemented for 4 wire SPI, 128x63 monocrhrome OLED
+// Currently only implemented for 4 wire SPI, 128x64 monochrome OLED
 impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
     SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
     RST: OutputPin,

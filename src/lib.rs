@@ -1,10 +1,12 @@
 #![no_std]
 
 extern crate embedded_hal as hal;
-extern crate embedded_graphics;
+pub extern crate embedded_graphics;
 
 use hal::digital::OutputPin;
+
 pub use embedded_graphics::Drawing;
+use embedded_graphics::image::Image8BPP;
 
 pub struct SSD1306<SPI, RST, DC>
 {
@@ -102,12 +104,15 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
         }
     }
 
-    fn draw_image_8bpp(&mut self, image: &[u8], w: u32, h: u32, left: u32, top: u32) {
+    fn draw_image_8bpp(&mut self, image: Image8BPP, left: u32, top: u32) {
+        let w = image.width;
+        let h = image.height;
+
         for x in 0..w {
             for y in 0..h {
                 let offset = (y * w) + x;
 
-                self.set_pixel(x + left, y + top, image[offset as usize]);
+                self.set_pixel(x + left, y + top, image.imagedata[offset as usize]);
             }
         }
     }

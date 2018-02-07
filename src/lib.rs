@@ -104,12 +104,12 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
         }
     }
 
-    fn draw_image_8bpp(&mut self, image: Image8BPP, left: u32, top: u32) {
+    fn draw_image_8bpp(&mut self, image: &Image8BPP, left: u32, top: u32) {
         let w = image.width;
         let h = image.height;
 
-        for x in 0..w {
-            for y in 0..h {
+        for y in 0..h {
+            for x in 0..w {
                 let offset = (y * w) + x;
 
                 self.set_pixel(x + left, y + top, image.imagedata[offset as usize]);

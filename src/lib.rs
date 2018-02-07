@@ -6,7 +6,7 @@ pub extern crate embedded_graphics;
 use hal::digital::OutputPin;
 
 pub use embedded_graphics::Drawing;
-use embedded_graphics::image::Image8BPP;
+use embedded_graphics::image::{ Image8BPP, Image1BPP };
 
 pub struct SSD1306<SPI, RST, DC>
 {
@@ -113,6 +113,27 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
                 let offset = (y * w) + x;
 
                 self.set_pixel(x + left, y + top, image.imagedata[offset as usize]);
+            }
+        }
+    }
+
+    fn draw_image_1bpp(&mut self, image: &Image1BPP, left: u32, top: u32) {
+        let w = image.width;
+        let h = image.height;
+
+        // Rows are padded to a full byte. Rust integer division rounds down, so add 1
+        let bytes_in_row = (w / 8) + 1;
+
+        for y in 0..h {
+            let row_start = bytes_in_row * y;
+
+            for x in 0..w {
+                let row_byte_index = x / 8;
+                let byte_index = row_start + row_byte_index;
+                let bit_offset = 7 - (x - (row_byte_index * 8));
+                let bit_value = (image.imagedata[byte_index as usize] >> bit_offset) & 1;
+
+                self.set_pixel(left + x, top + y, bit_value);
             }
         }
     }

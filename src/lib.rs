@@ -170,6 +170,12 @@ mod tests {
         }
 
         #[test]
+        fn it_sets_a_pixel_at_16x16() {
+            // FIXME
+            assert_eq!(coords_to_index(15, 15), ((128 + 15), 7));
+        }
+
+        #[test]
         fn it_sets_a_pixel_at_63x63() {
             assert_eq!(coords_to_index(63, 63), (959, 7));
         }

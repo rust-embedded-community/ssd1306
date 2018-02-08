@@ -7,6 +7,7 @@ use hal::digital::OutputPin;
 
 pub use embedded_graphics::Drawing;
 use embedded_graphics::image::{ Image8BPP, Image1BPP };
+// use embedded_graphics::fonts::{ Font, Font6x8 };
 
 pub struct SSD1306<SPI, RST, DC>
 {
@@ -136,6 +137,16 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
                 self.set_pixel(x, y, bit_value);
             }
         }
+    }
+
+    fn draw_text_1bpp(&mut self, text: &str, left: u32, top: u32) {
+        let (bitmap_data, bm_width, bm_height) = Font6x8::render_str(text).unwrap();
+
+        self.draw_image_1bpp(&Image1BPP {
+            width: bm_width,
+            height: bm_height,
+            imagedata: &bitmap_data,
+        }, left, top);
     }
 }
 

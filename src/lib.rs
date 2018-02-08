@@ -125,16 +125,16 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
         // Rows are padded to a full byte. Rust integer division rounds down, so add 1
         let bytes_in_row = (w / 8) + 1;
 
-        for y in left..(left + h) {
+        for y in 0..h {
             let row_start = bytes_in_row * y;
 
-            for x in top..(top + w) {
+            for x in 0..w {
                 let row_byte_index = x / 8;
                 let byte_index = row_start + row_byte_index;
                 let bit_offset = 7 - (x - (row_byte_index * 8));
                 let bit_value = (image.imagedata[byte_index as usize] >> bit_offset) & 1;
 
-                self.set_pixel(x, y, bit_value);
+                self.set_pixel(x + left, y + top, bit_value);
             }
         }
     }

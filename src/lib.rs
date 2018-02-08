@@ -72,6 +72,8 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
         ];
 
         self.cmds(&init_commands);
+
+        self.flush();
     }
 
     pub fn flush(&mut self) {

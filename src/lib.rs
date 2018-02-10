@@ -125,7 +125,7 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
         let h = image.height;
 
         // Rows are padded to a full byte. Rust integer division rounds down, so add 1
-        let bytes_in_row = (w / 8) + 1;
+        let bytes_in_row = (w / 8) + if w % 8 > 0 { 1 } else { 0 };
 
         for y in 0..h {
             let row_start = bytes_in_row * y;

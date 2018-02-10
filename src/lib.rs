@@ -1,4 +1,14 @@
 #![no_std]
+// TODO: Docs
+// #![deny(missing_docs)]
+// #![deny(missing_debug_implementations)]
+#![deny(missing_copy_implementations)]
+#![deny(trivial_casts)]
+#![deny(trivial_numeric_casts)]
+#![deny(unsafe_code)]
+#![deny(unstable_features)]
+#![deny(unused_import_braces)]
+#![deny(unused_qualifications)]
 
 extern crate embedded_hal as hal;
 pub extern crate embedded_graphics;
@@ -97,6 +107,11 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
 
 impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
     fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
+        // Noop if pixel is outside screen range
+        if x > 127 || y > 63 {
+            return;
+        }
+
         let (byte_offset, bit_offset) = coords_to_index(x, y);
 
         if value == 0 {

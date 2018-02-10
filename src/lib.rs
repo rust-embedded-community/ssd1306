@@ -122,36 +122,14 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
     }
 
     fn draw_image_8bpp(&mut self, image: &Image8BPP, left: u32, top: u32) {
-        let w = image.width;
-        let h = image.height;
-
-        for y in 0..h {
-            for x in 0..w {
-                let offset = (y * w) + x;
-
-                self.set_pixel(x + left, y + top, image.imagedata[offset as usize]);
-            }
+        for (x, y, value) in image.into_iter() {
+            self.set_pixel(x + left, y + top, value);
         }
     }
 
     fn draw_image_1bpp(&mut self, image: &Image1BPP, left: u32, top: u32) {
-        let w = image.width;
-        let h = image.height;
-
-        // Rows are padded to a full byte. Rust integer division rounds down, so add 1
-        let bytes_in_row = (w / 8) + if w % 8 > 0 { 1 } else { 0 };
-
-        for y in 0..h {
-            let row_start = bytes_in_row * y;
-
-            for x in 0..w {
-                let row_byte_index = x / 8;
-                let byte_index = row_start + row_byte_index;
-                let bit_offset = 7 - (x - (row_byte_index * 8));
-                let bit_value = (image.imagedata[byte_index as usize] >> bit_offset) & 1;
-
-                self.set_pixel(x + left, y + top, bit_value);
-            }
+        for (x, y, value) in image.into_iter() {
+            self.set_pixel(x + left, y + top, value);
         }
     }
 

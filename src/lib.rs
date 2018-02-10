@@ -7,10 +7,9 @@ use hal::digital::OutputPin;
 
 pub use embedded_graphics::Drawing;
 use embedded_graphics::image::{ Image8BPP, Image1BPP };
-// use embedded_graphics::fonts::{ Font, Font6x8 };
+use embedded_graphics::fonts::{ Font, Font6x8 };
 
-pub struct SSD1306<SPI, RST, DC>
-{
+pub struct SSD1306<SPI, RST, DC> {
     spi: SPI,
     rst: RST,
     dc: DC,

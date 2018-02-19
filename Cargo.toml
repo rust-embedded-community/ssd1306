@@ -3,11 +3,38 @@ categories = ["embedded", "no-std"]
 name = "ssd1306"
 version = "0.1.0"
 authors = ["James Waples <jamwaffles@gmail.com>"]
-keywords = ["rtfm", "ssd1306", "oled", "embedded", "embedded-hal-driver"]
+keywords = ["no-std", "rtfm", "ssd1306", "oled", "embedded", "embedded-hal-driver"]
 repository = "https://github.com/jamwaffles/ssd1306"
 
 [dependencies]
-embedded-hal = "0.1.0"
+embedded-hal = "0.1.2"
 
 [dependencies.embedded-graphics]
 path = "../embedded-graphics"
+
+[dev-dependencies]
+cortex-m = "0.4.3"
+aligned = "0.1.1"
+cortex-m-rtfm = "0.3.1"
+cortex-m-rtfm-macros = "0.3.0"
+
+[dev-dependencies.cortex-m-rt]
+features = ["abort-on-panic"]
+version = "0.3.12"
+
+# Must be installed from Git currently, not sure why it's not on crates.io
+# TODO: Replace this with a "normal" dependency in the future
+[dev-dependencies.stm32f103xx-hal]
+git = "https://github.com/japaric/stm32f103xx-hal.git"
+features = ["rt"]
+version = "*"
+
+# disable both incremental compilation and parallel codegen to reduce the chances of running into
+# rust-lang/rust#47074
+[profile.dev]
+codegen-units = 1
+incremental = false
+
+[profile.release]
+debug = true
+lto = true

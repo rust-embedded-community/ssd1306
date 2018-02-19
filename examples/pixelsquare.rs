@@ -1,10 +1,10 @@
-//! Send the test pattern to the OLED display connected to SPI1 on an STM32F103 "Blue Pill"
-//! This example does not use the `app!` macro from RTFM bust instead just starts a single task in main()
+//! This example draws a small square one pixel at a time in the top left corner of the display
+//!
+//! You will probably want to use the [`embedded_graphics`](https://crates.io/crates/embedded-graphics) crate to do more complex drawing.
 
 #![no_std]
 
 extern crate cortex_m;
-extern crate cortex_m_semihosting as sh;
 extern crate stm32f103xx_hal as blue_pill;
 extern crate embedded_hal as hal;
 
@@ -55,7 +55,25 @@ fn main() {
 
     disp.init();
 
-    // TODO: Write some data
+    // Top side
+    disp.set_pixel(0, 0, 1);
+    disp.set_pixel(1, 0, 1);
+    disp.set_pixel(2, 0, 1);
+
+    // Right side
+    disp.set_pixel(2, 0, 1);
+    disp.set_pixel(2, 1, 1);
+    disp.set_pixel(2, 2, 1);
+
+    // Bottom side
+    disp.set_pixel(0, 2, 1);
+    disp.set_pixel(1, 2, 1);
+    disp.set_pixel(2, 2, 1);
+
+    // Left side
+    disp.set_pixel(0, 0, 1);
+    disp.set_pixel(0, 1, 1);
+    disp.set_pixel(0, 2, 1);
 
     disp.flush();
 }

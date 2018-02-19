@@ -1,5 +1,6 @@
-//! Send the test pattern to the OLED display connected to SPI1 on an STM32F103 "Blue Pill"
-//! This example uses the `app!()` macro from RTFM and makes the display available as a shared resource under `DISP`.
+//! Alternate some text on the display at idle frequency. The "writing to a screen" equivalent of a Hello World blinky program.
+//! It uses the RTFM `app!()` macro and the [`embedded_graphics`](https://crates.io/crates/embedded-graphics) crate which adds some complexity.
+//! For a more barebones example, have a look at [the `pixelsquare` example]().
 
 #![no_std]
 #![feature(const_fn)]
@@ -9,7 +10,6 @@
 extern crate cortex_m;
 extern crate cortex_m_rtfm as rtfm;
 extern crate cortex_m_rtfm_macros;
-extern crate cortex_m_semihosting as sh;
 extern crate stm32f103xx_hal as blue_pill;
 extern crate embedded_hal as hal;
 
@@ -24,6 +24,7 @@ use blue_pill::gpio::{ Input, Output, PushPull, Floating, Alternate };
 use blue_pill::gpio::gpioa::{ PA5, PA6, PA7 };
 use blue_pill::gpio::gpiob::{ PB0, PB1 };
 use blue_pill::stm32f103xx::SPI1;
+use ssd1306::Drawing;
 
 use ssd1306::SSD1306;
 
@@ -46,11 +47,13 @@ app! {
 
     resources: {
         static DISP: OledDisplay;
+        static STATE: bool;
     },
 
     idle: {
         resources: [
             DISP,
+            STATE,
         ],
     },
 }
@@ -97,12 +100,22 @@ fn init(p: init::Peripherals) -> init::LateResources {
 
     init::LateResources {
         DISP: disp,
+        STATE: false,
     }
 }
 
+fn idle(_t: &mut Threshold, r: idle::Resources) -> ! {
+    let state: &'static mut bool = r.STATE;
+    let disp: &'static mut OledDisplay = r.DISP;
 
-fn idle(_t: &mut Threshold, _r: idle::Resources) -> ! {
     loop {
-        // NOOP
+        match *state {
+            true => disp.draw_text_1bpp("On!", 0, 0),
+            false => disp.draw_text_1bpp("Off :(", 0, 0),
+        }
+
+        disp.flush();
+
+        *state = !*state;
     }
 }

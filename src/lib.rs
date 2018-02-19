@@ -103,10 +103,8 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
 
         self.spi.write(&self.buffer);
     }
-}
 
-impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
-    fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
+    pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
         // Noop if pixel is outside screen range
         if x > 127 || y > 63 {
             return;
@@ -120,7 +118,13 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> {
             self.buffer[byte_offset] |= 1 << bit_offset;
         }
     }
+}
 
+impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> where
+    SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+    RST: OutputPin,
+    DC: OutputPin
+    {
     fn draw_image_8bpp(&mut self, image: &Image8BPP, left: u32, top: u32) {
         for (x, y, value) in image.into_iter() {
             self.set_pixel(x + left, y + top, value);

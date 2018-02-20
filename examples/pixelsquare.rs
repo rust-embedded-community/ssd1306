@@ -55,21 +55,25 @@ fn main() {
     disp.set_pixel(0, 0, 1);
     disp.set_pixel(1, 0, 1);
     disp.set_pixel(2, 0, 1);
+    disp.set_pixel(3, 0, 1);
 
     // Right side
-    disp.set_pixel(2, 0, 1);
-    disp.set_pixel(2, 1, 1);
-    disp.set_pixel(2, 2, 1);
+    disp.set_pixel(3, 0, 1);
+    disp.set_pixel(3, 1, 1);
+    disp.set_pixel(3, 2, 1);
+    disp.set_pixel(3, 3, 1);
 
     // Bottom side
-    disp.set_pixel(0, 2, 1);
-    disp.set_pixel(1, 2, 1);
-    disp.set_pixel(2, 2, 1);
+    disp.set_pixel(0, 3, 1);
+    disp.set_pixel(1, 3, 1);
+    disp.set_pixel(2, 3, 1);
+    disp.set_pixel(3, 3, 1);
 
     // Left side
     disp.set_pixel(0, 0, 1);
     disp.set_pixel(0, 1, 1);
     disp.set_pixel(0, 2, 1);
+    disp.set_pixel(0, 3, 1);
 
     disp.flush();
 }

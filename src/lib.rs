@@ -10,14 +10,15 @@
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 
+extern crate num_traits;
 extern crate embedded_hal as hal;
 pub extern crate embedded_graphics;
 
-use hal::digital::OutputPin;
-
 pub use embedded_graphics::Drawing;
-use embedded_graphics::image::{ Image8BPP, Image1BPP };
 use embedded_graphics::fonts::{ Font, Font6x8 };
+use embedded_graphics::image::{ Image8BPP, Image1BPP };
+use hal::digital::OutputPin;
+use num_traits::*;
 
 pub struct SSD1306<SPI, RST, DC> {
     spi: SPI,
@@ -122,6 +123,33 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
             self.buffer[byte_offset] &= !(1 << bit_offset);
         } else {
             self.buffer[byte_offset] |= 1 << bit_offset;
+        }
+    }
+
+    // Crappy implementation of [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
+    pub fn line(&mut self, start: (u32, u32), end: (u32, u32), value: u8) {
+        let startx = start.0;
+        let starty = start.1;
+        let endx = end.0;
+        let endy = end.1;
+
+        let dx = (endx - startx) as f32;
+        let dy = (endy - starty) as f32;
+
+        let derr: f32 = (dy / dx).abs();
+        let mut error = 0.0f32;
+
+        let mut y = starty;
+
+        for x in startx..endx {
+            self.set_pixel(x, y, value);
+
+            error += derr;
+
+            while error >= 0.5 {
+                y += dy.signum() as u32;
+                error -= 1.0;
+            }
         }
     }
 }

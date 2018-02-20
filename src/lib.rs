@@ -126,29 +126,81 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
         }
     }
 
-    // Crappy implementation of [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-    pub fn line(&mut self, start: (u32, u32), end: (u32, u32), value: u8) {
+    fn line_low(&mut self, start: (u32, u32), end: (u32, u32), value: u8) {
         let startx = start.0;
         let starty = start.1;
         let endx = end.0;
         let endy = end.1;
 
-        let dx = (endx - startx) as f32;
-        let dy = (endy - starty) as f32;
+        let mut dx = (endx - startx) as i32;
+        let mut dy: i32 = (endy - starty) as i32;
 
-        let derr: f32 = (dy / dx).abs();
-        let mut error = 0.0f32;
+        let mut yi: i32 = 1;
 
-        let mut y = starty;
+        if dy < 0 {
+            yi = -1;
+            dy *= -1;
+        }
 
-        for x in startx..endx {
-            self.set_pixel(x, y, value);
+        let mut delta = 2 * dy - dx;
+        let mut y = starty as i32;
 
-            error += derr;
+        for x in startx..(endx + 1) {
+            self.set_pixel(x, y as u32, value);
 
-            while error >= 0.5 {
-                y += dy.signum() as u32;
-                error -= 1.0;
+            if delta > 0 {
+                y += yi;
+                delta -= 2 * dx;
+            }
+
+            delta += 2 * dy;
+        }
+    }
+
+    fn line_high(&mut self, start: (u32, u32), end: (u32, u32), value: u8) {
+        let startx = start.0;
+        let starty = start.1;
+        let endx = end.0;
+        let endy = end.1;
+
+        let mut dx: i32 = (endx - startx) as i32;
+        let mut dy = (endy - starty) as i32;
+
+        let mut xi: i32 = 1;
+
+        if dx < 0 {
+            xi = -1;
+            dx *= -1;
+        }
+
+        let mut delta = 2 * dx - dy;
+        let mut x = startx as i32;
+
+        for y in starty..(endy + 1) {
+            self.set_pixel(x as u32, y, value);
+
+            if delta > 0 {
+                x += xi;
+                delta -= 2 * dy;
+            }
+
+            delta += 2 * dx;
+        }
+    }
+
+    // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
+    pub fn line(&mut self, start: (u32, u32), end: (u32, u32), value: u8) {
+        if (end.1 as f32 - start.1 as f32).abs() < (end.0 as f32 - start.0 as f32).abs() {
+            if start.0 > end.0 {
+                self.line_low(end, start, value);
+            } else {
+                self.line_low(start, end, value);
+            }
+        } else {
+            if start.1 > end.1 {
+                self.line_high(end, start, value);
+            } else {
+                self.line_high(start, end, value);
             }
         }
     }

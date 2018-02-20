@@ -92,12 +92,6 @@ fn init(p: init::Peripherals) -> init::LateResources {
 
     let mut disp = SSD1306::new(spi, rst, dc);
 
-    disp.reset();
-
-    disp.init();
-
-    disp.flush();
-
     init::LateResources {
         DISP: disp,
         STATE: false,

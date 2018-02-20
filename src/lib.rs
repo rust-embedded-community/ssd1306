@@ -33,12 +33,18 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
     DC: OutputPin
     {
     pub fn new(spi: SPI, rst: RST, dc: DC) -> Self {
-        SSD1306 {
+        let mut disp = SSD1306 {
             spi,
             rst,
             dc,
             buffer: [0; 1024],
-        }
+        };
+
+        disp.reset();
+
+        disp.init();
+
+        disp
     }
 
     pub fn reset(&mut self) {

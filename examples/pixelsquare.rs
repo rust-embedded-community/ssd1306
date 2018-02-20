@@ -51,10 +51,6 @@ fn main() {
 
     let mut disp = SSD1306::new(spi, rst, dc);
 
-    disp.reset();
-
-    disp.init();
-
     // Top side
     disp.set_pixel(0, 0, 1);
     disp.set_pixel(1, 0, 1);

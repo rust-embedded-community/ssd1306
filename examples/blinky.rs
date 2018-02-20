@@ -90,7 +90,7 @@ fn init(p: init::Peripherals) -> init::LateResources {
         &mut rcc.apb2,
     );
 
-    let mut disp = SSD1306::new(spi, rst, dc);
+    let disp = SSD1306::new(spi, rst, dc);
 
     init::LateResources {
         DISP: disp,

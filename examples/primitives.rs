@@ -49,7 +49,8 @@ fn main() {
 
     let mut disp = SSD1306::new(spi, rst, dc);
 
-    disp.line((8, 16), (127 - 8, 48), 1u8);
+    // Draw a square
+    disp.rect((48, 16), (48 + 16, 16 + 16), 1u8);
 
     disp.flush();
 }

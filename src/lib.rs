@@ -204,6 +204,20 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
             }
         }
     }
+
+    pub fn rect(&mut self, tl: (u32, u32), br: (u32, u32), value: u8) {
+        // Top
+        self.line((tl.0, tl.1), (br.0, tl.1), value);
+
+        // Right
+        self.line((br.0, tl.1), (br.0, br.1), value);
+
+        // Bottom
+        self.line((br.0, br.1), (tl.0, br.1), value);
+
+        // Left
+        self.line((tl.0, tl.1), (tl.0, br.1), value);
+    }
 }
 
 impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> where

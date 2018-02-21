@@ -49,6 +49,14 @@ fn main() {
 
     let mut disp = SSD1306::new(spi, rst, dc);
 
+    // Frame
+    disp.rect((0, 0), (127, 63), 1u8);
+
+    // Draw a triangle
+    disp.line((8, 16 + 16), (8 + 16, 16 + 16), 1u8);    // Bottom
+    disp.line((8, 16 + 16), (8 + 8, 16), 1u8);          // Left
+    disp.line((8 + 16, 16 + 16), (8 + 8, 16), 1u8);     // Right
+
     // Draw a square
     disp.rect((48, 16), (48 + 16, 16 + 16), 1u8);
 

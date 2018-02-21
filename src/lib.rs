@@ -132,8 +132,8 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
         let endx = end.0;
         let endy = end.1;
 
-        let mut dx = (endx - startx) as i32;
-        let mut dy: i32 = (endy - starty) as i32;
+        let mut dx = endx as i32 - startx as i32;
+        let mut dy = endy as i32 - starty as i32;
 
         let mut yi: i32 = 1;
 
@@ -163,8 +163,8 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
         let endx = end.0;
         let endy = end.1;
 
-        let mut dx: i32 = (endx - startx) as i32;
-        let mut dy = (endy - starty) as i32;
+        let mut dx = endx as i32 - startx as i32;
+        let mut dy = endy as i32 - starty as i32;
 
         let mut xi: i32 = 1;
 

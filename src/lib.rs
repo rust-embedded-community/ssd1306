@@ -132,7 +132,7 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
         let endx = end.0;
         let endy = end.1;
 
-        let mut dx = endx as i32 - startx as i32;
+        let dx = endx as i32 - startx as i32;
         let mut dy = endy as i32 - starty as i32;
 
         let mut yi: i32 = 1;
@@ -164,7 +164,7 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
         let endy = end.1;
 
         let mut dx = endx as i32 - startx as i32;
-        let mut dy = endy as i32 - starty as i32;
+        let dy = endy as i32 - starty as i32;
 
         let mut xi: i32 = 1;
 
@@ -252,11 +252,13 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> where
         let x0 = center.0 as i32;
         let y0 = center.1 as i32;
 
-        let mut x: i32 = radius as i32 - 1;
+        let rad = radius as i32 + 1;
+
+        let mut x: i32 = rad - 1;
         let mut y: i32 = 0;
         let mut dx: i32 = 1;
         let mut dy: i32 = 1;
-        let mut err: i32 = dx - (radius << 1) as i32;
+        let mut err: i32 = dx - (rad << 1);
 
         while x >= y {
             self.set_pixel((x0 + x) as u32, (y0 + y) as u32, value);
@@ -275,7 +277,7 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> where
             } if err > 0 {
                 x -= 1;
                 dx += 2;
-                err += dx - (radius << 1) as i32;
+                err += dx - (rad << 1);
             }
         }
     }

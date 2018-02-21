@@ -11,7 +11,8 @@ extern crate ssd1306;
 use blue_pill::prelude::*;
 use blue_pill::spi::{ Spi };
 use hal::spi::{ Mode, Phase, Polarity };
-use ssd1306::SSD1306;
+
+use ssd1306::{ SSD1306, Drawing };
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
@@ -59,6 +60,9 @@ fn main() {
 
     // Draw a square
     disp.rect((48, 16), (48 + 16, 16 + 16), 1u8);
+
+    // Draw a circle
+    disp.center_circle((96, 16 + 8), 8, 1u8);
 
     disp.flush();
 }

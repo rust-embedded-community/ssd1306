@@ -187,37 +187,6 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
             delta += 2 * dx;
         }
     }
-
-    // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
-    pub fn line(&mut self, start: (u32, u32), end: (u32, u32), value: u8) {
-        if (end.1 as f32 - start.1 as f32).abs() < (end.0 as f32 - start.0 as f32).abs() {
-            if start.0 > end.0 {
-                self.line_low(end, start, value);
-            } else {
-                self.line_low(start, end, value);
-            }
-        } else {
-            if start.1 > end.1 {
-                self.line_high(end, start, value);
-            } else {
-                self.line_high(start, end, value);
-            }
-        }
-    }
-
-    pub fn rect(&mut self, tl: (u32, u32), br: (u32, u32), value: u8) {
-        // Top
-        self.line((tl.0, tl.1), (br.0, tl.1), value);
-
-        // Right
-        self.line((br.0, tl.1), (br.0, br.1), value);
-
-        // Bottom
-        self.line((br.0, br.1), (tl.0, br.1), value);
-
-        // Left
-        self.line((tl.0, tl.1), (tl.0, br.1), value);
-    }
 }
 
 impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> where
@@ -245,6 +214,70 @@ impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> where
             height: bm_height,
             imagedata: &bitmap_data,
         }, left, top);
+    }
+
+    // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
+    fn line(&mut self, start: (u32, u32), end: (u32, u32), value: u8) {
+        if (end.1 as f32 - start.1 as f32).abs() < (end.0 as f32 - start.0 as f32).abs() {
+            if start.0 > end.0 {
+                self.line_low(end, start, value);
+            } else {
+                self.line_low(start, end, value);
+            }
+        } else {
+            if start.1 > end.1 {
+                self.line_high(end, start, value);
+            } else {
+                self.line_high(start, end, value);
+            }
+        }
+    }
+
+    fn rect(&mut self, tl: (u32, u32), br: (u32, u32), value: u8) {
+        // Top
+        self.line((tl.0, tl.1), (br.0, tl.1), value);
+
+        // Right
+        self.line((br.0, tl.1), (br.0, br.1), value);
+
+        // Bottom
+        self.line((br.0, br.1), (tl.0, br.1), value);
+
+        // Left
+        self.line((tl.0, tl.1), (tl.0, br.1), value);
+    }
+
+    // [Midpoint circle algorithm](https://en.wikipedia.org/wiki/Midpoint_circle_algorithm)
+    fn center_circle(&mut self, center: (u32, u32), radius: u32, value: u8) {
+        let x0 = center.0 as i32;
+        let y0 = center.1 as i32;
+
+        let mut x: i32 = radius as i32 - 1;
+        let mut y: i32 = 0;
+        let mut dx: i32 = 1;
+        let mut dy: i32 = 1;
+        let mut err: i32 = dx - (radius << 1) as i32;
+
+        while x >= y {
+            self.set_pixel((x0 + x) as u32, (y0 + y) as u32, value);
+            self.set_pixel((x0 + y) as u32, (y0 + x) as u32, value);
+            self.set_pixel((x0 - y) as u32, (y0 + x) as u32, value);
+            self.set_pixel((x0 - x) as u32, (y0 + y) as u32, value);
+            self.set_pixel((x0 - x) as u32, (y0 - y) as u32, value);
+            self.set_pixel((x0 - y) as u32, (y0 - x) as u32, value);
+            self.set_pixel((x0 + y) as u32, (y0 - x) as u32, value);
+            self.set_pixel((x0 + x) as u32, (y0 - y) as u32, value);
+
+            if err <= 0 {
+                y += 1;
+                err += dy;
+                dy += 2;
+            } if err > 0 {
+                x -= 1;
+                dx += 2;
+                err += dx - (radius << 1) as i32;
+            }
+        }
     }
 }
 

@@ -24,9 +24,8 @@ use blue_pill::gpio::{ Input, Output, PushPull, Floating, Alternate };
 use blue_pill::gpio::gpioa::{ PA5, PA6, PA7 };
 use blue_pill::gpio::gpiob::{ PB0, PB1 };
 use blue_pill::stm32f103xx::SPI1;
-use ssd1306::Drawing;
 
-use ssd1306::SSD1306;
+use ssd1306::{ SSD1306, Drawing };
 
 pub type OledDisplay = SSD1306<
     Spi<

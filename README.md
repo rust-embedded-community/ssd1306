@@ -12,6 +12,7 @@ This is a huge WIP. The example just dumps a test pattern to the screen at time 
 - [x] Line drawing
 - [x] Rect drawing
 - [x] Circle drawing
+- [x] Builder pattern
 - [ ] Other fonts
 - [ ] Refactor font drawing API to take a font struct as input
 - [ ] Investigate having one generic `draw()` function that takes any drawable object. Opens doors to custom impls.

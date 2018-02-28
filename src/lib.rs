@@ -24,6 +24,7 @@ mod interface;
 use interface::{ I2cInterface, SpiInterface };
 
 pub mod builder;
+pub use builder::Builder;
 
 pub struct SSD1306I2C<I2C> {
     iface: I2cInterface<I2C>,

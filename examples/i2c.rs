@@ -11,7 +11,7 @@ extern crate ssd1306;
 use blue_pill::prelude::*;
 use blue_pill::i2c::{ I2c, Mode };
 
-use ssd1306::{ SSD1306I2C, Drawing };
+use ssd1306::{ SSD1306I2C, Drawing, Builder };
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
@@ -28,8 +28,6 @@ fn main() {
     let scl = gpiob.pb8.into_alternate_open_drain(&mut gpiob.crh);
     let sda = gpiob.pb9.into_alternate_open_drain(&mut gpiob.crh);
 
-    // <I2c<I2C1, (PB6<AF4>, PB7<AF4>)>>
-
     let i2c = I2c::i2c1(
         dp.I2C1,
         (scl, sda),
@@ -39,7 +37,7 @@ fn main() {
         &mut rcc.apb1,
     );
 
-    let mut disp = SSD1306I2C::new(i2c);
+    let mut disp = Builder::new().connect_i2c(i2c);
 
     // Frame
     disp.rect((0, 0), (127, 63), 1u8);

@@ -13,7 +13,7 @@ extern crate ssd1306;
 use blue_pill::prelude::*;
 use blue_pill::spi::{ Spi };
 use hal::spi::{ Mode, Phase, Polarity };
-use ssd1306::SSD1306SPI;
+use ssd1306::Builder;
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
@@ -49,7 +49,7 @@ fn main() {
         &mut rcc.apb2,
     );
 
-    let mut disp = SSD1306SPI::new(spi, rst, dc);
+    let mut disp = Builder::new().connect_spi(spi, rst, dc);
 
     // Top side
     disp.set_pixel(0, 0, 1);

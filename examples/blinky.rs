@@ -25,7 +25,7 @@ use blue_pill::gpio::gpioa::{ PA5, PA6, PA7 };
 use blue_pill::gpio::gpiob::{ PB0, PB1 };
 use blue_pill::stm32f103xx::SPI1;
 
-use ssd1306::{ SSD1306SPI, Drawing };
+use ssd1306::{ SSD1306SPI, Drawing, Builder };
 
 pub type OledDisplay = SSD1306SPI<
     Spi<
@@ -89,7 +89,7 @@ fn init(p: init::Peripherals) -> init::LateResources {
         &mut rcc.apb2,
     );
 
-    let disp = SSD1306SPI::new(spi, rst, dc);
+    let disp = Builder::new().connect_spi(spi, rst, dc);
 
     init::LateResources {
         DISP: disp,

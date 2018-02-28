@@ -13,6 +13,8 @@ jobs:
       - run:
           name: Environment setup
           command: |
+            sudo apt-get install -y gcc-arm-none-eabi
+
             rustup install nightly
             rustup default nightly
 

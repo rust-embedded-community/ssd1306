@@ -24,9 +24,9 @@ jobs:
       #       - theapp-v1-{{ checksum "yarn.lock" }}-{{ checksum "elm-package.json" }}
 
       - run:
-        command: |
-          xargo build
-          xargo build --examples
+          command: |
+            xargo build
+            xargo build --examples
 
       # - store_artifacts:
       #     path: reports

@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: rustup:stable
+      - image: liuchong/rustup:stable
 
     steps:
       # - setup_remote_docker:

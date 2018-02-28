@@ -20,146 +20,41 @@ use embedded_graphics::image::{ Image8BPP, Image1BPP };
 use hal::digital::OutputPin;
 use num_traits::*;
 
+mod interface;
+use interface::{ I2cInterface, SpiInterface };
+
 pub mod builder;
 
-// pub struct SSD1306<SPI, RST, DC> {
-//     spi: SPI,
-//     rst: RST,
-//     dc: DC,
-//     buffer: [u8; 1024],
-// }
-pub struct SSD1306<I2C> {
-    i2c: I2C,
+pub struct SSD1306I2C<I2C> {
+    iface: I2cInterface<I2C>,
     buffer: [u8; 1024],
 }
 
-// Currently only implemented for 4 wire SPI, 128x64 monochrome OLED
-// impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
-//     SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
-//     RST: OutputPin,
-//     DC: OutputPin
-//     {
-impl<I2C> SSD1306<I2C> where
-    I2C: hal::blocking::i2c::Write
+pub struct SSD1306SPI<SPI, RST, DC> {
+    iface: SpiInterface<SPI, RST, DC>,
+    buffer: [u8; 1024],
+}
+
+impl<SPI, RST, DC> SSD1306SPI<SPI, RST, DC> where
+    SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+    RST: OutputPin,
+    DC: OutputPin
     {
-    pub fn new(i2c: I2C) -> Self {
-        // let mut disp = SSD1306 {
-        //     spi,
-        //     rst,
-        //     dc,
-        //     buffer: [0; 1024],
-        // };
-        let mut disp = SSD1306 {
-            i2c,
+    pub fn new(spi: SPI, rst: RST, dc: DC) -> Self {
+        let iface = SpiInterface::new(spi, rst, dc);
+        let mut disp = SSD1306SPI {
+            iface,
             buffer: [0; 1024],
         };
 
-        // disp.reset();
-
-        disp.init();
-
-        disp.flush();
+        disp.iface.flush(&disp.buffer);
 
         disp
     }
 
-    // pub fn reset(&mut self) {
-    //     self.rst.set_low();
-    //     self.rst.set_high();
-    // }
-
-    // pub fn cmd(&mut self, cmd: u8) {
-    //    self.cmds(&[ cmd ]);
-    // }
-
-    // pub fn cmds(&mut self, cmds: &[u8]) {
-    //     self.dc.set_low();
-
-    //     self.spi.write(cmds);
-
-    //     self.dc.set_high();
-    // }
-
-    pub fn cmd(&mut self, cmd: u8) {
-        // Section 8.1.5.2 2) in the datasheet explains 0x3c (0b0011_1100)
-        // 0 preceding cmd is command mode
-        self.i2c.write(0x3c, &[ 0, cmd ]);
-    }
-
-    pub fn cmds(&mut self, cmds: &[u8]) {
-        for c in cmds {
-            self.cmd(*c);
-        }
-    }
-
     pub fn flush(&mut self) {
-        let flush_commands: [ u8; 6 ] = [
-            0x21, // Set column address from addr...
-            0,    // 0 to ...
-            127,  // 128 columns (0 indexed).
-
-            0x22, // Set pages from addr ...
-            0,    // 0 to ...
-            7     // 8 pages (0 indexed). 8 pages of 8 rows (1 byte) each = 64px high
-        ];
-
-        self.cmds(&flush_commands);
-
-        // Data mode
-        // 8.1.5.2 5) b) in the datasheet
-        // self.i2c.write(0x3c, &[ 0x40 ]);
-
-        // self.i2c.write(0x3c, &self.buffer);
-        for byte in self.buffer.iter() {
-            self.i2c.write(0x3c, &[ 0x40, *byte ]);
-        }
+        self.iface.flush(&self.buffer);
     }
-
-    // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
-    pub fn init(&mut self) {
-        let init_commands: [ u8; 25 ] = [
-            0xAE,       // 0 disp off
-            0xD5,       // 1 clk div
-            0x80,       // 2 suggested ratio
-            0xA8, 63,   // 3 set multiplex, height-1
-            0xD3, 0x0,  // 5 display offset
-            0x40,       // 7 start line
-            0x8D, 0x14, // 8 charge pump
-            0x20, 0x00, // 10 memory mode, 0x20 = address mode command, 0x00 = horizontal address mode
-            0xA1,       // 12 seg remap 1
-            0xC8,       // 13 comscandec
-            0xDA, 0x12, // 14 set compins, height==64 ? 0x12:0x02,
-            0x81, 0xCF, // 16 set contrast
-            0xD9, 0xF1, // 18 set precharge
-            0xDb, 0x40, // 20 set vcom detect
-            0xA4,       // 22 display all on
-            0xA6,       // 23 display normal (non-inverted)
-            0xAf        // 24 disp on
-        ];
-
-        self.cmds(&init_commands);
-
-        self.flush();
-    }
-
-    // pub fn flush(&mut self) {
-    //     let flush_commands: [ u8; 6 ] = [
-    //         0x21, // Set column address from addr...
-    //         0,    // 0 to ...
-    //         127,  // 128 columns (0 indexed).
-
-    //         0x22, // Set pages from addr ...
-    //         0,    // 0 to ...
-    //         7     // 8 pages (0 indexed). 8 pages of 8 rows (1 byte) each = 64px high
-    //     ];
-
-    //     self.cmds(&flush_commands);
-
-    //     // 1 = data, 0 = command
-    //     self.dc.set_high();
-
-    //     self.spi.write(&self.buffer);
-    // }
 
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
         // Noop if pixel is outside screen range
@@ -239,12 +134,195 @@ impl<I2C> SSD1306<I2C> where
     }
 }
 
-// impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> where
-//     SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
-//     RST: OutputPin,
-//     DC: OutputPin
-impl<I2C> Drawing for SSD1306<I2C> where
-    I2C: hal::blocking::i2c::Write
+impl<I2C> SSD1306I2C<I2C> where I2C: hal::blocking::i2c::Write {
+    pub fn new(i2c: I2C) -> Self {
+        let iface = I2cInterface::new(i2c);
+        let mut disp = SSD1306I2C {
+            iface,
+            buffer: [0; 1024],
+        };
+
+        disp.iface.flush(&disp.buffer);
+
+        disp
+    }
+
+    pub fn flush(&mut self) {
+        self.iface.flush(&self.buffer);
+    }
+
+    pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
+        // Noop if pixel is outside screen range
+        if x > 127 || y > 63 {
+            return;
+        }
+
+        let (byte_offset, bit_offset) = coords_to_index(x, y);
+
+        if value == 0 {
+            self.buffer[byte_offset] &= !(1 << bit_offset);
+        } else {
+            self.buffer[byte_offset] |= 1 << bit_offset;
+        }
+    }
+
+    fn line_low(&mut self, start: (u32, u32), end: (u32, u32), value: u8) {
+        let startx = start.0;
+        let starty = start.1;
+        let endx = end.0;
+        let endy = end.1;
+
+        let dx = endx as i32 - startx as i32;
+        let mut dy = endy as i32 - starty as i32;
+
+        let mut yi: i32 = 1;
+
+        if dy < 0 {
+            yi = -1;
+            dy *= -1;
+        }
+
+        let mut delta = 2 * dy - dx;
+        let mut y = starty as i32;
+
+        for x in startx..(endx + 1) {
+            self.set_pixel(x, y as u32, value);
+
+            if delta > 0 {
+                y += yi;
+                delta -= 2 * dx;
+            }
+
+            delta += 2 * dy;
+        }
+    }
+
+    fn line_high(&mut self, start: (u32, u32), end: (u32, u32), value: u8) {
+        let startx = start.0;
+        let starty = start.1;
+        let endx = end.0;
+        let endy = end.1;
+
+        let mut dx = endx as i32 - startx as i32;
+        let dy = endy as i32 - starty as i32;
+
+        let mut xi: i32 = 1;
+
+        if dx < 0 {
+            xi = -1;
+            dx *= -1;
+        }
+
+        let mut delta = 2 * dx - dy;
+        let mut x = startx as i32;
+
+        for y in starty..(endy + 1) {
+            self.set_pixel(x as u32, y, value);
+
+            if delta > 0 {
+                x += xi;
+                delta -= 2 * dy;
+            }
+
+            delta += 2 * dx;
+        }
+    }
+}
+
+impl<I2C> Drawing for SSD1306I2C<I2C> where I2C: hal::blocking::i2c::Write {
+    fn draw_image_8bpp(&mut self, image: &Image8BPP, left: u32, top: u32) {
+        for (x, y, value) in image.into_iter() {
+            self.set_pixel(x + left, y + top, value);
+        }
+    }
+
+    fn draw_image_1bpp(&mut self, image: &Image1BPP, left: u32, top: u32) {
+        for (x, y, value) in image.into_iter() {
+            self.set_pixel(x + left, y + top, value);
+        }
+    }
+
+    fn draw_text_1bpp(&mut self, text: &str, left: u32, top: u32) {
+        let (bitmap_data, bm_width, bm_height) = Font6x8::render_str(text).unwrap();
+
+        self.draw_image_1bpp(&Image1BPP {
+            width: bm_width,
+            height: bm_height,
+            imagedata: &bitmap_data,
+        }, left, top);
+    }
+
+    // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
+    fn line(&mut self, start: (u32, u32), end: (u32, u32), value: u8) {
+        if (end.1 as f32 - start.1 as f32).abs() < (end.0 as f32 - start.0 as f32).abs() {
+            if start.0 > end.0 {
+                self.line_low(end, start, value);
+            } else {
+                self.line_low(start, end, value);
+            }
+        } else {
+            if start.1 > end.1 {
+                self.line_high(end, start, value);
+            } else {
+                self.line_high(start, end, value);
+            }
+        }
+    }
+
+    fn rect(&mut self, tl: (u32, u32), br: (u32, u32), value: u8) {
+        // Top
+        self.line((tl.0, tl.1), (br.0, tl.1), value);
+
+        // Right
+        self.line((br.0, tl.1), (br.0, br.1), value);
+
+        // Bottom
+        self.line((br.0, br.1), (tl.0, br.1), value);
+
+        // Left
+        self.line((tl.0, tl.1), (tl.0, br.1), value);
+    }
+
+    // [Midpoint circle algorithm](https://en.wikipedia.org/wiki/Midpoint_circle_algorithm)
+    fn center_circle(&mut self, center: (u32, u32), radius: u32, value: u8) {
+        let x0 = center.0 as i32;
+        let y0 = center.1 as i32;
+
+        let rad = radius as i32 + 1;
+
+        let mut x: i32 = rad - 1;
+        let mut y: i32 = 0;
+        let mut dx: i32 = 1;
+        let mut dy: i32 = 1;
+        let mut err: i32 = dx - (rad << 1);
+
+        while x >= y {
+            self.set_pixel((x0 + x) as u32, (y0 + y) as u32, value);
+            self.set_pixel((x0 + y) as u32, (y0 + x) as u32, value);
+            self.set_pixel((x0 - y) as u32, (y0 + x) as u32, value);
+            self.set_pixel((x0 - x) as u32, (y0 + y) as u32, value);
+            self.set_pixel((x0 - x) as u32, (y0 - y) as u32, value);
+            self.set_pixel((x0 - y) as u32, (y0 - x) as u32, value);
+            self.set_pixel((x0 + y) as u32, (y0 - x) as u32, value);
+            self.set_pixel((x0 + x) as u32, (y0 - y) as u32, value);
+
+            if err <= 0 {
+                y += 1;
+                err += dy;
+                dy += 2;
+            } if err > 0 {
+                x -= 1;
+                dx += 2;
+                err += dx - (rad << 1);
+            }
+        }
+    }
+}
+
+impl<SPI, RST, DC> Drawing for SSD1306SPI<SPI, RST, DC> where
+    SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+    RST: OutputPin,
+    DC: OutputPin
     {
     fn draw_image_8bpp(&mut self, image: &Image8BPP, left: u32, top: u32) {
         for (x, y, value) in image.into_iter() {

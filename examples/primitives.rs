@@ -12,7 +12,7 @@ use blue_pill::prelude::*;
 use blue_pill::spi::{ Spi };
 use hal::spi::{ Mode, Phase, Polarity };
 
-use ssd1306::{ SSD1306, Drawing };
+use ssd1306::{ SSD1306SPI, Drawing };
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
@@ -48,7 +48,7 @@ fn main() {
         &mut rcc.apb2,
     );
 
-    let mut disp = SSD1306::new(spi, rst, dc);
+    let mut disp = SSD1306SPI::new(spi, rst, dc);
 
     // Frame
     disp.rect((0, 0), (127, 63), 1u8);

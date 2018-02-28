@@ -14,14 +14,14 @@ jobs:
           name: Environment setup
           command: |
             apt-get update
-            apt-get install -y gcc-arm-none-eabi
+            apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi
 
             rustup install nightly
             rustup default nightly
 
-            rustup component add rust-src
-
             cargo install xargo
+
+            rustup component add rust-src
 
       # - restore_cache:
       #     keys:

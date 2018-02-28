@@ -30,8 +30,10 @@ version = "0.3.12"
 
 # Must be installed from Git currently, not sure why it's not on crates.io
 # TODO: Replace this with a "normal" dependency in the future
-[dev-dependencies.stm32f103xx-hal]
-git = "https://github.com/japaric/stm32f103xx-hal.git"
+# TODO: Replace with @japaric's HAL once I2C support has landed
+[dependencies.stm32f103xx-hal]
+git = "https://github.com/ilya-epifanov/stm32f103xx-hal.git"
+branch = "i2c-support"
 features = ["rt"]
 version = "*"
 

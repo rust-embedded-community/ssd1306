@@ -20,49 +20,99 @@ use embedded_graphics::image::{ Image8BPP, Image1BPP };
 use hal::digital::OutputPin;
 use num_traits::*;
 
-pub struct SSD1306<SPI, RST, DC> {
-    spi: SPI,
-    rst: RST,
-    dc: DC,
+pub mod builder;
+
+// pub struct SSD1306<SPI, RST, DC> {
+//     spi: SPI,
+//     rst: RST,
+//     dc: DC,
+//     buffer: [u8; 1024],
+// }
+pub struct SSD1306<I2C> {
+    i2c: I2C,
     buffer: [u8; 1024],
 }
 
 // Currently only implemented for 4 wire SPI, 128x64 monochrome OLED
-impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
-    SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
-    RST: OutputPin,
-    DC: OutputPin
+// impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
+//     SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+//     RST: OutputPin,
+//     DC: OutputPin
+//     {
+impl<I2C> SSD1306<I2C> where
+    I2C: hal::blocking::i2c::Write
     {
-    pub fn new(spi: SPI, rst: RST, dc: DC) -> Self {
+    pub fn new(i2c: I2C) -> Self {
+        // let mut disp = SSD1306 {
+        //     spi,
+        //     rst,
+        //     dc,
+        //     buffer: [0; 1024],
+        // };
         let mut disp = SSD1306 {
-            spi,
-            rst,
-            dc,
+            i2c,
             buffer: [0; 1024],
         };
 
-        disp.reset();
+        // disp.reset();
 
         disp.init();
+
+        disp.flush();
 
         disp
     }
 
-    pub fn reset(&mut self) {
-        self.rst.set_low();
-        self.rst.set_high();
-    }
+    // pub fn reset(&mut self) {
+    //     self.rst.set_low();
+    //     self.rst.set_high();
+    // }
+
+    // pub fn cmd(&mut self, cmd: u8) {
+    //    self.cmds(&[ cmd ]);
+    // }
+
+    // pub fn cmds(&mut self, cmds: &[u8]) {
+    //     self.dc.set_low();
+
+    //     self.spi.write(cmds);
+
+    //     self.dc.set_high();
+    // }
 
     pub fn cmd(&mut self, cmd: u8) {
-       self.cmds(&[ cmd ]);
+        // Section 8.1.5.2 2) in the datasheet explains 0x3c (0b0011_1100)
+        // 0 preceding cmd is command mode
+        self.i2c.write(0x3c, &[ 0, cmd ]);
     }
 
     pub fn cmds(&mut self, cmds: &[u8]) {
-        self.dc.set_low();
+        for c in cmds {
+            self.cmd(*c);
+        }
+    }
 
-        self.spi.write(cmds);
+    pub fn flush(&mut self) {
+        let flush_commands: [ u8; 6 ] = [
+            0x21, // Set column address from addr...
+            0,    // 0 to ...
+            127,  // 128 columns (0 indexed).
 
-        self.dc.set_high();
+            0x22, // Set pages from addr ...
+            0,    // 0 to ...
+            7     // 8 pages (0 indexed). 8 pages of 8 rows (1 byte) each = 64px high
+        ];
+
+        self.cmds(&flush_commands);
+
+        // Data mode
+        // 8.1.5.2 5) b) in the datasheet
+        // self.i2c.write(0x3c, &[ 0x40 ]);
+
+        // self.i2c.write(0x3c, &self.buffer);
+        for byte in self.buffer.iter() {
+            self.i2c.write(0x3c, &[ 0x40, *byte ]);
+        }
     }
 
     // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
@@ -92,24 +142,24 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
         self.flush();
     }
 
-    pub fn flush(&mut self) {
-        let flush_commands: [ u8; 6 ] = [
-            0x21, // Set column address from addr...
-            0,    // 0 to ...
-            127,  // 128 columns (0 indexed).
+    // pub fn flush(&mut self) {
+    //     let flush_commands: [ u8; 6 ] = [
+    //         0x21, // Set column address from addr...
+    //         0,    // 0 to ...
+    //         127,  // 128 columns (0 indexed).
 
-            0x22, // Set pages from addr ...
-            0,    // 0 to ...
-            7     // 8 pages (0 indexed). 8 pages of 8 rows (1 byte) each = 64px high
-        ];
+    //         0x22, // Set pages from addr ...
+    //         0,    // 0 to ...
+    //         7     // 8 pages (0 indexed). 8 pages of 8 rows (1 byte) each = 64px high
+    //     ];
 
-        self.cmds(&flush_commands);
+    //     self.cmds(&flush_commands);
 
-        // 1 = data, 0 = command
-        self.dc.set_high();
+    //     // 1 = data, 0 = command
+    //     self.dc.set_high();
 
-        self.spi.write(&self.buffer);
-    }
+    //     self.spi.write(&self.buffer);
+    // }
 
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
         // Noop if pixel is outside screen range
@@ -189,10 +239,12 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
     }
 }
 
-impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> where
-    SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
-    RST: OutputPin,
-    DC: OutputPin
+// impl<SPI, RST, DC> Drawing for SSD1306<SPI, RST, DC> where
+//     SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+//     RST: OutputPin,
+//     DC: OutputPin
+impl<I2C> Drawing for SSD1306<I2C> where
+    I2C: hal::blocking::i2c::Write
     {
     fn draw_image_8bpp(&mut self, image: &Image8BPP, left: u32, top: u32) {
         for (x, y, value) in image.into_iter() {

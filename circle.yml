@@ -13,7 +13,8 @@ jobs:
       - run:
           name: Environment setup
           command: |
-            rustup install stable
+            rustup install nightly
+            rustup default nightly
 
             rustup component add rust-src
 

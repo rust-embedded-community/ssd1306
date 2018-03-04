@@ -1,4 +1,6 @@
-//! Draw a square, circle and triangle on the screen
+//! Draw a square, circle and triangle on the screen using I2C1 on pins B9 and B9
+//!
+//! Requires pullup resistors on SDA and SCL to function correctly
 
 #![no_std]
 
@@ -9,7 +11,7 @@ extern crate embedded_hal as hal;
 extern crate ssd1306;
 
 use blue_pill::prelude::*;
-use blue_pill::i2c::{ I2c, Mode };
+use blue_pill::i2c::{ I2c, Mode, DutyCycle };
 
 use ssd1306::{ SSD1306I2C, Drawing, Builder };
 
@@ -32,7 +34,7 @@ fn main() {
         dp.I2C1,
         (scl, sda),
         &mut afio.mapr,
-        Mode::Standard { frequency: 100_000 },
+        Mode::Fast { frequency: 400_000, duty_cycle: DutyCycle::Ratio1to1 },
         clocks,
         &mut rcc.apb1,
     );

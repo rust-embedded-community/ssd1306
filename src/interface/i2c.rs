@@ -32,12 +32,17 @@ impl<I2C> I2cInterface<I2C> where I2C: hal::blocking::i2c::Write {
 
 	    self.cmds(&flush_commands);
 
+	    let mut writebuf: [ u8; 1025 ] = [ 0; 1025 ];
+
 	    // Data mode
 	    // 8.1.5.2 5) b) in the datasheet
-	    // TODO: Build one buffer and send as one `i2c.write()` call. The code below is slow as balls right now
-	    for byte in buf.iter() {
-	        self.i2c.write(0x3c, &[ 0x40, *byte ]);
+	    writebuf[0] = 0x40;
+
+	    for (index, byte) in buf.iter().enumerate() {
+	    	writebuf[index + 1] = *byte;
 	    }
+
+	    self.i2c.write(0x3c, &writebuf);
 	}
 
 	// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right

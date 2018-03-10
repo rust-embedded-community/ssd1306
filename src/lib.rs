@@ -14,9 +14,10 @@ extern crate num_traits;
 extern crate embedded_hal as hal;
 pub extern crate embedded_graphics;
 
-pub use embedded_graphics::Drawing;
 use embedded_graphics::fonts::{ Font, Font6x8 };
 use embedded_graphics::image::{ Image8BPP, Image1BPP };
+use embedded_graphics::drawable;
+pub use embedded_graphics::Drawing;
 use hal::digital::OutputPin;
 use num_traits::*;
 
@@ -318,6 +319,12 @@ impl<I2C> Drawing for SSD1306I2C<I2C> where I2C: hal::blocking::i2c::Write {
             }
         }
     }
+
+    fn draw<T>(&mut self, item_pixels: T) where T: Iterator<Item = drawable::Pixel> {
+        for (pos, color) in item_pixels {
+            self.set_pixel(pos.0, pos.1, color);
+        }
+    }
 }
 
 impl<SPI, RST, DC> Drawing for SSD1306SPI<SPI, RST, DC> where
@@ -410,6 +417,12 @@ impl<SPI, RST, DC> Drawing for SSD1306SPI<SPI, RST, DC> where
                 dx += 2;
                 err += dx - (rad << 1);
             }
+        }
+    }
+
+    fn draw<T>(&mut self, item_pixels: T) where T: Iterator<Item = drawable::Pixel> {
+        for (pos, color) in item_pixels {
+            self.set_pixel(pos.0, pos.1, color);
         }
     }
 }

@@ -51,9 +51,17 @@ fn main() {
 
     let mut disp = Builder::new().connect_spi(spi, rst, dc);
 
-    let line = primitives::Line { start: (0, 0), end: (16, 16), color: 1 };
+    let tri1 = primitives::Line { start: (8, 16 + 16), end: (8 + 16, 16 + 16), color: 1 };
+    let tri2 = primitives::Line { start: (8, 16 + 16), end: (8 + 8, 16), color: 1 };
+    let tri3 = primitives::Line { start: (8 + 16, 16 + 16), end: (8 + 8, 16), color: 1 };
 
-    disp.draw(line.into_iter());
+    disp.draw(tri1.into_iter());
+    disp.draw(tri2.into_iter());
+    disp.draw(tri3.into_iter());
+
+    disp.draw(primitives::Rect { top_left: (48, 16), bottom_right: (48 + 16, 16 + 16), color: 1u8 }.into_iter());
+
+    disp.draw(primitives::Circle { center: (96, 16 + 8), radius: 8, color: 1u8 }.into_iter());
 
     disp.flush();
 }

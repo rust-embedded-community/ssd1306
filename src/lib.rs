@@ -10,19 +10,19 @@
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 
-extern crate num_traits;
-extern crate embedded_hal as hal;
 pub extern crate embedded_graphics;
+extern crate embedded_hal as hal;
+extern crate num_traits;
 
-use embedded_graphics::fonts::{ Font, Font6x8 };
-use embedded_graphics::image::{ Image8BPP, Image1BPP };
+use embedded_graphics::fonts::{Font, Font6x8};
+use embedded_graphics::image::{Image1BPP, Image8BPP};
 use embedded_graphics::drawable;
 pub use embedded_graphics::Drawing;
 use hal::digital::OutputPin;
 use num_traits::*;
 
 mod interface;
-use interface::{ I2cInterface, SpiInterface };
+use interface::{I2cInterface, SpiInterface};
 
 pub mod builder;
 pub use builder::Builder;
@@ -37,11 +37,12 @@ pub struct SSD1306SPI<SPI, RST, DC> {
     buffer: [u8; 1024],
 }
 
-impl<SPI, RST, DC> SSD1306SPI<SPI, RST, DC> where
+impl<SPI, RST, DC> SSD1306SPI<SPI, RST, DC>
+where
     SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
     RST: OutputPin,
-    DC: OutputPin
-    {
+    DC: OutputPin,
+{
     pub fn new(spi: SPI, rst: RST, dc: DC) -> Self {
         let iface = SpiInterface::new(spi, rst, dc);
         let mut disp = SSD1306SPI {
@@ -136,7 +137,10 @@ impl<SPI, RST, DC> SSD1306SPI<SPI, RST, DC> where
     }
 }
 
-impl<I2C> SSD1306I2C<I2C> where I2C: hal::blocking::i2c::Write {
+impl<I2C> SSD1306I2C<I2C>
+where
+    I2C: hal::blocking::i2c::Write,
+{
     pub fn new(i2c: I2C) -> Self {
         let iface = I2cInterface::new(i2c);
         let mut disp = SSD1306I2C {
@@ -231,7 +235,10 @@ impl<I2C> SSD1306I2C<I2C> where I2C: hal::blocking::i2c::Write {
     }
 }
 
-impl<I2C> Drawing for SSD1306I2C<I2C> where I2C: hal::blocking::i2c::Write {
+impl<I2C> Drawing for SSD1306I2C<I2C>
+where
+    I2C: hal::blocking::i2c::Write,
+{
     fn draw_image_8bpp(&mut self, image: &Image8BPP, left: u32, top: u32) {
         for (x, y, value) in image.into_iter() {
             self.set_pixel(x + left, y + top, value);
@@ -247,11 +254,15 @@ impl<I2C> Drawing for SSD1306I2C<I2C> where I2C: hal::blocking::i2c::Write {
     fn draw_text_1bpp(&mut self, text: &str, left: u32, top: u32) {
         let (bitmap_data, bm_width, bm_height) = Font6x8::render_str(text).unwrap();
 
-        self.draw_image_1bpp(&Image1BPP {
-            width: bm_width,
-            height: bm_height,
-            imagedata: &bitmap_data,
-        }, left, top);
+        self.draw_image_1bpp(
+            &Image1BPP {
+                width: bm_width,
+                height: bm_height,
+                imagedata: &bitmap_data,
+            },
+            left,
+            top,
+        );
     }
 
     // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -312,7 +323,8 @@ impl<I2C> Drawing for SSD1306I2C<I2C> where I2C: hal::blocking::i2c::Write {
                 y += 1;
                 err += dy;
                 dy += 2;
-            } if err > 0 {
+            }
+            if err > 0 {
                 x -= 1;
                 dx += 2;
                 err += dx - (rad << 1);
@@ -320,18 +332,22 @@ impl<I2C> Drawing for SSD1306I2C<I2C> where I2C: hal::blocking::i2c::Write {
         }
     }
 
-    fn draw<T>(&mut self, item_pixels: T) where T: Iterator<Item = drawable::Pixel> {
+    fn draw<T>(&mut self, item_pixels: T)
+    where
+        T: Iterator<Item = drawable::Pixel>,
+    {
         for (pos, color) in item_pixels {
             self.set_pixel(pos.0, pos.1, color);
         }
     }
 }
 
-impl<SPI, RST, DC> Drawing for SSD1306SPI<SPI, RST, DC> where
+impl<SPI, RST, DC> Drawing for SSD1306SPI<SPI, RST, DC>
+where
     SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
     RST: OutputPin,
-    DC: OutputPin
-    {
+    DC: OutputPin,
+{
     fn draw_image_8bpp(&mut self, image: &Image8BPP, left: u32, top: u32) {
         for (x, y, value) in image.into_iter() {
             self.set_pixel(x + left, y + top, value);
@@ -347,11 +363,15 @@ impl<SPI, RST, DC> Drawing for SSD1306SPI<SPI, RST, DC> where
     fn draw_text_1bpp(&mut self, text: &str, left: u32, top: u32) {
         let (bitmap_data, bm_width, bm_height) = Font6x8::render_str(text).unwrap();
 
-        self.draw_image_1bpp(&Image1BPP {
-            width: bm_width,
-            height: bm_height,
-            imagedata: &bitmap_data,
-        }, left, top);
+        self.draw_image_1bpp(
+            &Image1BPP {
+                width: bm_width,
+                height: bm_height,
+                imagedata: &bitmap_data,
+            },
+            left,
+            top,
+        );
     }
 
     // [Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
@@ -412,7 +432,8 @@ impl<SPI, RST, DC> Drawing for SSD1306SPI<SPI, RST, DC> where
                 y += 1;
                 err += dy;
                 dy += 2;
-            } if err > 0 {
+            }
+            if err > 0 {
                 x -= 1;
                 dx += 2;
                 err += dx - (rad << 1);
@@ -420,7 +441,10 @@ impl<SPI, RST, DC> Drawing for SSD1306SPI<SPI, RST, DC> where
         }
     }
 
-    fn draw<T>(&mut self, item_pixels: T) where T: Iterator<Item = drawable::Pixel> {
+    fn draw<T>(&mut self, item_pixels: T)
+    where
+        T: Iterator<Item = drawable::Pixel>,
+    {
         for (pos, color) in item_pixels {
             self.set_pixel(pos.0, pos.1, color);
         }

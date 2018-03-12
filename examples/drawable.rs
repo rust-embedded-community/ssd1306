@@ -51,9 +51,9 @@ fn main() {
 
     let mut disp = Builder::new().connect_spi(spi, rst, dc);
 
-    disp.draw(Line::new((8, 16 + 16), (8 + 16, 16 + 16), 1).pixels());
-    disp.draw(Line::new((8, 16 + 16), (8 + 8, 16), 1).pixels());
-    disp.draw(Line::new((8 + 16, 16 + 16), (8 + 8, 16), 1).pixels());
+    disp.draw(Line::new((8, 16 + 16), (8 + 16, 16 + 16), 1).into_iter());
+    disp.draw(Line::new((8, 16 + 16), (8 + 8, 16), 1).into_iter());
+    disp.draw(Line::new((8 + 16, 16 + 16), (8 + 8, 16), 1).into_iter());
 
     disp.draw(Rect::new((48, 16), (48 + 16, 16 + 16), 1u8).into_iter());
 

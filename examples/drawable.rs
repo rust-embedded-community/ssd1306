@@ -6,14 +6,16 @@ extern crate cortex_m;
 extern crate embedded_hal as hal;
 extern crate stm32f103xx_hal as blue_pill;
 
+extern crate embedded_graphics;
 extern crate ssd1306;
 
 use blue_pill::prelude::*;
 use blue_pill::spi::Spi;
 use hal::spi::{Mode, Phase, Polarity};
 
-use ssd1306::embedded_graphics::primitives::{Circle, Line, Rect};
-use ssd1306::{Builder, Drawing, SSD1306SPI};
+use embedded_graphics::primitives::{Circle, Line, Rect};
+use embedded_graphics::Drawing;
+use ssd1306::Builder;
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();

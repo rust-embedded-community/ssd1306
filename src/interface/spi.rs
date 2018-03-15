@@ -1,36 +1,59 @@
 use hal;
 use hal::digital::OutputPin;
 
+use super::DisplayInterface;
+
 pub struct SpiInterface<SPI, RST, DC> {
-	spi: SPI,
-	rst: RST,
-	dc: DC,
+    spi: SPI,
+    rst: RST,
+    dc: DC,
 }
 
-impl<SPI, RST, DC> SpiInterface<SPI, RST, DC> where
+impl<SPI, RST, DC> SpiInterface<SPI, RST, DC>
+where
     SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
     RST: OutputPin,
-    DC: OutputPin
-    {
+    DC: OutputPin,
+{
     pub fn new(spi: SPI, rst: RST, dc: DC) -> Self {
-		let mut iface = Self { spi, rst, dc };
+        let mut iface = Self { spi, rst, dc };
 
-		iface.reset();
-		iface.init();
+        iface.reset();
+        iface.init();
 
-		iface
-	}
+        iface
+    }
 
-	fn cmds(&mut self, cmds: &[u8]) {
-	    self.dc.set_low();
+    pub fn reset(&mut self) {
+        self.rst.set_low();
+        self.rst.set_high();
+    }
+}
 
-	    self.spi.write(cmds);
+impl<SPI, RST, DC> DisplayInterface for SpiInterface<SPI, RST, DC>
+where
+    SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+    RST: OutputPin,
+    DC: OutputPin,
+{
+    fn cmds(&mut self, cmds: &[u8]) {
+        self.dc.set_low();
 
-	    self.dc.set_high();
-	}
+        self.spi.write(cmds);
 
-	pub fn flush(&mut self, buf: &[u8]) {
-        let flush_commands: [ u8; 6 ] = [
+        self.dc.set_high();
+    }
+
+    fn cmd(&mut self, cmd: u8) {
+        self.dc.set_low();
+
+        self.spi.write(&[cmd]);
+
+        self.dc.set_high();
+    }
+
+    fn flush(&mut self, buf: &[u8]) {
+        let flush_commands: [u8; 6] = [
             0x21, // Set column address from addr...
             0,    // 0 to ...
             127,  // 128 columns (0 indexed).
@@ -48,10 +71,9 @@ impl<SPI, RST, DC> SpiInterface<SPI, RST, DC> where
         self.spi.write(&buf);
     }
 
-
-	// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
-	fn init(&mut self) {
-	    let init_commands: [ u8; 25 ] = [
+    // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
+    fn init(&mut self) {
+        let init_commands: [u8; 25] = [
 	        0xAE,       // 0 disp off
 	        0xD5,       // 1 clk div
 	        0x80,       // 2 suggested ratio
@@ -71,13 +93,9 @@ impl<SPI, RST, DC> SpiInterface<SPI, RST, DC> where
 	        0xAf        // 24 disp on
 	    ];
 
-	    self.reset();
+        self.reset();
 
-	    self.cmds(&init_commands);
-	}
-
-	fn reset(&mut self) {
-	    self.rst.set_low();
-	    self.rst.set_high();
-	}
+        self.cmds(&init_commands);
+        // Command::DisplayOn(false).send(self);
+    }
 }

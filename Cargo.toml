@@ -12,12 +12,6 @@ embedded-hal = "0.1.2"
 [dependencies.embedded-graphics]
 path = "../embedded-graphics"
 
-[dependencies.num-traits]
-git = "https://github.com/rust-num/num-traits.git"
-rev = "bfd62d4"
-version = "0.2.0"
-default-features = false
-
 [dev-dependencies]
 cortex-m = "0.4.3"
 aligned = "0.1.1"

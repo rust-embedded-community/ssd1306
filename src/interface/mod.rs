@@ -1,12 +1,9 @@
 pub mod i2c;
 pub mod spi;
 
-// TODO: Implement me
 pub trait DisplayInterface {
-    fn cmds(&mut self, cmds: &[u8]);
-    fn cmd(&mut self, cmds: u8);
-    fn flush(&mut self, buf: &[u8]);
-    fn init(&mut self);
+    fn send_command(&mut self, cmd: u8);
+    fn send_data(&mut self, buf: &[u8]);
 }
 
 pub use self::i2c::I2cInterface;

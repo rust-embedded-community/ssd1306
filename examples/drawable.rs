@@ -11,6 +11,7 @@ extern crate ssd1306;
 
 use blue_pill::prelude::*;
 use blue_pill::spi::Spi;
+use blue_pill::delay::Delay;
 use hal::spi::{Mode, Phase, Polarity};
 
 use embedded_graphics::primitives::{Circle, Line, Rect};
@@ -18,6 +19,7 @@ use embedded_graphics::Drawing;
 use ssd1306::Builder;
 
 fn main() {
+    let cp = cortex_m::Peripherals::take().unwrap();
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
 
     let mut flash = dp.FLASH.constrain();
@@ -35,7 +37,9 @@ fn main() {
     let miso = gpioa.pa6;
     let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
 
-    let rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
+    let mut delay = Delay::new(cp.SYST, clocks);
+
+    let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
     let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
 
     let spi = Spi::spi1(
@@ -51,7 +55,11 @@ fn main() {
         &mut rcc.apb2,
     );
 
-    let mut disp = Builder::new().connect_spi(spi, rst, dc);
+    let mut disp = Builder::new().connect_spi(spi, dc);
+
+    disp.reset(&mut rst, &mut delay);
+    disp.init();
+    disp.flush();
 
     disp.draw(Line::new((8, 16 + 16), (8 + 16, 16 + 16), 1).into_iter());
     disp.draw(Line::new((8, 16 + 16), (8 + 8, 16), 1).into_iter());

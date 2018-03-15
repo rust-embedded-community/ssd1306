@@ -15,7 +15,8 @@ extern crate embedded_hal as hal;
 
 use embedded_graphics::Drawing;
 use embedded_graphics::drawable;
-
+use hal::digital::OutputPin;
+use hal::blocking::delay::DelayMs;
 mod command;
 use command::{AddrMode, Command, VcomhLevel};
 mod interface;
@@ -39,13 +40,31 @@ where
             buffer: [0; 1024],
         };
 
-        disp.init();
-        disp.flush();
-
         disp
     }
 
+    /// Reset display
+    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY)
+    where
+        RST: OutputPin,
+        DELAY: DelayMs<u8>,
+    {
+        rst.set_high();
+        delay.delay_ms(1);
+        rst.set_low();
+        delay.delay_ms(10);
+        rst.set_high();
+    }
+
     pub fn flush(&mut self) {
+        // TODO: Different width/height
+        // let ecol = 128 - 1;
+        // let epage = (64 / 8) - 1;
+
+        // TODO: Fix these here
+        // Command::ColumnAddress(0, ecol).send(&mut self.iface);
+        // Command::PageAddress(0.into(), epage.into()).send(&mut self.iface);
+
         self.iface.send_data(&self.buffer);
     }
 
@@ -65,8 +84,8 @@ where
         Command::DisplayOn(false).send(&mut self.iface);
         Command::DisplayClockDiv(0x8, 0x0).send(&mut self.iface);
         // TODO: What's this?
-        let mpx = 64 - 1;
-        Command::Multiplex(mpx).send(&mut self.iface);
+        // let mpx = 64 - 1;
+        // Command::Multiplex(mpx).send(&mut self.iface);
         Command::DisplayOffset(0).send(&mut self.iface);
         Command::StartLine(0).send(&mut self.iface);
         // TODO: Ability to turn charge pump on/off

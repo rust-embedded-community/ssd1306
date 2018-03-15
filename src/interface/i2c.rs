@@ -23,6 +23,7 @@ where
         self.i2c.write(0x3c, &[0, cmd]);
     }
 
+    // FIXME: I should be able to move all this command rubbish up into the SSD1306 impl. Hmm.
     fn send_data(&mut self, buf: &[u8]) {
         let flush_commands: [u8; 6] = [
             0x21, // Set column address from addr...

@@ -32,17 +32,11 @@ impl Builder {
         SSD1306::new(I2cInterface::new(i2c))
     }
 
-    pub fn connect_spi<SPI, RST, DC>(
-        &self,
-        spi: SPI,
-        rst: RST,
-        dc: DC,
-    ) -> SSD1306<SpiInterface<SPI, RST, DC>>
+    pub fn connect_spi<SPI, DC>(&self, spi: SPI, dc: DC) -> SSD1306<SpiInterface<SPI, DC>>
     where
         SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
-        RST: OutputPin,
         DC: OutputPin,
     {
-        SSD1306::new(SpiInterface::new(spi, rst, dc))
+        SSD1306::new(SpiInterface::new(spi, dc))
     }
 }

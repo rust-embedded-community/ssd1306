@@ -3,36 +3,24 @@ use hal::digital::OutputPin;
 
 use super::DisplayInterface;
 
-pub struct SpiInterface<SPI, RST, DC> {
+pub struct SpiInterface<SPI, DC> {
     spi: SPI,
-    rst: RST,
     dc: DC,
 }
 
-impl<SPI, RST, DC> SpiInterface<SPI, RST, DC>
+impl<SPI, DC> SpiInterface<SPI, DC>
 where
     SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
-    RST: OutputPin,
     DC: OutputPin,
 {
-    pub fn new(spi: SPI, rst: RST, dc: DC) -> Self {
-        let mut iface = Self { spi, rst, dc };
-
-        iface.reset();
-
-        iface
-    }
-
-    pub fn reset(&mut self) {
-        self.rst.set_low();
-        self.rst.set_high();
+    pub fn new(spi: SPI, dc: DC) -> Self {
+        Self { spi, dc }
     }
 }
 
-impl<SPI, RST, DC> DisplayInterface for SpiInterface<SPI, RST, DC>
+impl<SPI, DC> DisplayInterface for SpiInterface<SPI, DC>
 where
     SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
-    RST: OutputPin,
     DC: OutputPin,
 {
     fn send_command(&mut self, cmd: u8) {

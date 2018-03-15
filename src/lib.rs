@@ -60,17 +60,13 @@ where
     }
 
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
-        // Noop if pixel is outside screen range
-        if x > 127 || y > 63 {
-            return;
-        }
+        let byte = &mut self.buffer[((y as usize) / 8 * 128) + (x as usize)];
+        let bit = 1 << (y % 8);
 
-        let (byte_offset, bit_offset) = coords_to_index(x, y);
-
-        if value == 0 {
-            self.buffer[byte_offset] &= !(1 << bit_offset);
+        if *byte & bit == 0 {
+            *byte &= !bit;
         } else {
-            self.buffer[byte_offset] |= 1 << bit_offset;
+            *byte |= bit;
         }
     }
 

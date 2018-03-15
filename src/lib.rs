@@ -16,6 +16,8 @@ extern crate embedded_hal as hal;
 use embedded_graphics::Drawing;
 use embedded_graphics::drawable;
 
+mod command;
+use command::{AddrMode, Command, VcomhLevel};
 mod interface;
 use interface::DisplayInterface;
 
@@ -60,29 +62,35 @@ where
 
     // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
     pub fn init(&mut self) {
-        let init_commands: [u8; 25] = [
-            0xAE,       // 0 disp off
-            0xD5,       // 1 clk div
-            0x80,       // 2 suggested ratio
-            0xA8, 63,   // 3 set multiplex, height-1
-            0xD3, 0x0,  // 5 display offset
-            0x40,       // 7 start line
-            0x8D, 0x14, // 8 charge pump
-            0x20, 0x00, // 10 memory mode, 0x20 = address mode command, 0x00 = horizontal address mode
-            0xA1,       // 12 seg remap 1
-            0xC8,       // 13 comscandec
-            0xDA, 0x12, // 14 set compins, height==64 ? 0x12:0x02,
-            0x81, 0xCF, // 16 set contrast
-            0xD9, 0xF1, // 18 set precharge
-            0xDb, 0x40, // 20 set vcom detect
-            0xA4,       // 22 display all on
-            0xA6,       // 23 display normal (non-inverted)
-            0xAf        // 24 disp on
-        ];
+        Command::DisplayOn(false).send(&mut self.iface);
+        Command::DisplayClockDiv(0x8, 0x0).send(&mut self.iface);
+        // TODO: What's this?
+        let mpx = 64 - 1;
+        Command::Multiplex(mpx).send(&mut self.iface);
+        Command::DisplayOffset(0).send(&mut self.iface);
+        Command::StartLine(0).send(&mut self.iface);
+        // TODO: Ability to turn charge pump on/off
+        Command::ChargePump(true).send(&mut self.iface);
+        Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface);
+        Command::SegmentRemap(true).send(&mut self.iface);
+        Command::ReverseComDir(true).send(&mut self.iface);
 
-        for c in init_commands.iter() {
-            self.iface.send_command(*c);
-        }
+        // TODO: Display sizes
+        // if self.width == 128 && self.height == 32 {
+        //     Command::ComPinConfig(false, false).send(&mut self.iface);
+        // } else if self.width == 128 && self.height == 64 {
+        //     Command::ComPinConfig(true, false).send(&mut self.iface);
+        // } else if self.width == 96 && self.height == 16 {
+        //     Command::ComPinConfig(false, false).send(&mut self.iface);
+        // }
+
+        Command::Contrast(0x8F).send(&mut self.iface);
+        Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface);
+        Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface);
+        Command::AllOn(false).send(&mut self.iface);
+        Command::Invert(false).send(&mut self.iface);
+        Command::EnableScroll(false).send(&mut self.iface);
+        Command::DisplayOn(true).send(&mut self.iface);
     }
 }
 

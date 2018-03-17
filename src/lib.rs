@@ -57,13 +57,9 @@ where
     }
 
     pub fn flush(&mut self) {
-        // TODO: Different width/height
-        // let ecol = 128 - 1;
-        // let epage = (64 / 8) - 1;
-
-        // TODO: Fix these here
-        // Command::ColumnAddress(0, ecol).send(&mut self.iface);
-        // Command::PageAddress(0.into(), epage.into()).send(&mut self.iface);
+        // TODO: Dynamic width/height
+        Command::ColumnAddress(0, 127).send(&mut self.iface);
+        Command::PageAddress(0.into(), 63.into()).send(&mut self.iface);
 
         self.iface.send_data(&self.buffer);
     }

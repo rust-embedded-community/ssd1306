@@ -1,21 +1,20 @@
-//! Draw a square, circle and triangle on the screen
+//! Draw a square, circle and triangle on the screen using the embedded_graphics library over a 4
+//! wire SPI interface.
 
 #![no_std]
 
 extern crate cortex_m;
+extern crate embedded_graphics;
 extern crate embedded_hal as hal;
+extern crate ssd1306;
 extern crate stm32f103xx_hal as blue_pill;
 
-extern crate embedded_graphics;
-extern crate ssd1306;
-
+use blue_pill::delay::Delay;
 use blue_pill::prelude::*;
 use blue_pill::spi::Spi;
-use blue_pill::delay::Delay;
-use hal::spi::{Mode, Phase, Polarity};
-
-use embedded_graphics::primitives::{Circle, Line, Rect};
 use embedded_graphics::Drawing;
+use embedded_graphics::primitives::{Circle, Line, Rect};
+use hal::spi::{Mode, Phase, Polarity};
 use ssd1306::Builder;
 
 fn main() {

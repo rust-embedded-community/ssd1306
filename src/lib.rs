@@ -13,17 +13,17 @@
 extern crate embedded_graphics;
 extern crate embedded_hal as hal;
 
-use embedded_graphics::Drawing;
-use embedded_graphics::drawable;
-use hal::digital::OutputPin;
-use hal::blocking::delay::DelayMs;
 mod command;
-use command::{AddrMode, Command, VcomhLevel};
-mod interface;
-use interface::DisplayInterface;
-
 pub mod builder;
+pub mod interface;
+
 pub use builder::Builder;
+use command::{AddrMode, Command, VcomhLevel};
+use embedded_graphics::drawable;
+use embedded_graphics::Drawing;
+use hal::blocking::delay::DelayMs;
+use hal::digital::OutputPin;
+use interface::DisplayInterface;
 
 pub struct SSD1306<DI> {
     iface: DI,
@@ -35,12 +35,15 @@ where
     DI: DisplayInterface,
 {
     pub fn new(iface: DI) -> SSD1306<DI> {
-        let mut disp = SSD1306 {
+        SSD1306 {
             iface,
             buffer: [0; 1024],
-        };
+        }
+    }
 
-        disp
+    /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
+    pub fn clear(&mut self) {
+        self.buffer = [0; 1024];
     }
 
     /// Reset display
@@ -121,4 +124,9 @@ where
             self.set_pixel(pos.0, pos.1, color);
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+    // TODO lol
 }

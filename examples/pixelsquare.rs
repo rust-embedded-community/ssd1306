@@ -5,17 +5,18 @@
 #![no_std]
 
 extern crate cortex_m;
-extern crate stm32f103xx_hal as blue_pill;
 extern crate embedded_hal as hal;
-
 extern crate ssd1306;
+extern crate stm32f103xx_hal as blue_pill;
 
+use blue_pill::delay::Delay;
 use blue_pill::prelude::*;
-use blue_pill::spi::{ Spi };
-use hal::spi::{ Mode, Phase, Polarity };
+use blue_pill::spi::Spi;
+use hal::spi::{Mode, Phase, Polarity};
 use ssd1306::Builder;
 
 fn main() {
+    let cp = cortex_m::Peripherals::take().unwrap();
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
 
     let mut flash = dp.FLASH.constrain();
@@ -33,7 +34,9 @@ fn main() {
     let miso = gpioa.pa6;
     let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
 
-    let rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
+    let mut delay = Delay::new(cp.SYST, clocks);
+
+    let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
     let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
 
     let spi = Spi::spi1(
@@ -49,7 +52,11 @@ fn main() {
         &mut rcc.apb2,
     );
 
-    let mut disp = Builder::new().connect_spi(spi, rst, dc);
+    let mut disp = Builder::new().connect_spi(spi, dc);
+
+    disp.reset(&mut rst, &mut delay);
+    disp.init();
+    disp.flush();
 
     // Top side
     disp.set_pixel(0, 0, 1);

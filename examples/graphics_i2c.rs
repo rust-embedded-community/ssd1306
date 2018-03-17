@@ -1,19 +1,18 @@
-//! Draw a square, circle and triangle on the screen
+//! Draw a square, circle and triangle on the screen using I2C1 on pins B9 and B9 on the Blue Pill
+//! dev board. I found that it requires pullup resistors on SDA and SCL to function correctly
 
 #![no_std]
 
 extern crate cortex_m;
+extern crate embedded_graphics;
 extern crate embedded_hal as hal;
+extern crate ssd1306;
 extern crate stm32f103xx_hal as blue_pill;
 
-extern crate embedded_graphics;
-extern crate ssd1306;
-
-use blue_pill::prelude::*;
 use blue_pill::i2c::{DutyCycle, I2c, Mode};
-
-use embedded_graphics::primitives::{Circle, Line, Rect};
+use blue_pill::prelude::*;
 use embedded_graphics::Drawing;
+use embedded_graphics::primitives::{Circle, Line, Rect};
 use ssd1306::Builder;
 
 fn main() {

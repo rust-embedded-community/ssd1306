@@ -32,20 +32,6 @@ where
     }
 
     fn send_data(&mut self, buf: &[u8]) {
-        let flush_commands: [u8; 6] = [
-            0x21, // Set column address from addr...
-            0,    // 0 to ...
-            127,  // 128 columns (0 indexed).
-
-            0x22, // Set pages from addr ...
-            0,    // 0 to ...
-            7     // 8 pages (0 indexed). 8 pages of 8 rows (1 byte) each = 64px high
-        ];
-
-        for c in flush_commands.iter() {
-            self.send_command(*c);
-        }
-
         // 1 = data, 0 = command
         self.dc.set_high();
 

@@ -6,6 +6,7 @@ use super::interface::DisplayInterface;
 
 /// Commands
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum Command {
     /// Set contrast. Higher number is higher contrast. Default = 0x7F
     Contrast(u8),
@@ -195,6 +196,7 @@ impl Command {
 
 /// Horizontal Scroll Direction
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 pub enum HScrollDir {
     /// Left to right
     LeftToRight = 0,
@@ -204,6 +206,7 @@ pub enum HScrollDir {
 
 /// Vertical and horizontal scroll dir
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 pub enum VHScrollDir {
     /// Vertical and right horizontal
     VerticalRight = 0b01,
@@ -250,6 +253,7 @@ impl From<u8> for Page {
 
 /// Frame interval
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 pub enum NFrames {
     /// 2 Frames
     F2 = 0b111,
@@ -271,6 +275,7 @@ pub enum NFrames {
 
 /// Address mode
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 pub enum AddrMode {
     /// Horizontal mode
     Horizontal = 0b00,
@@ -282,6 +287,7 @@ pub enum AddrMode {
 
 /// Vcomh Deselect level
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 pub enum VcomhLevel {
     /// 0.65 * Vcc
     V065 = 0b001,

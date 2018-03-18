@@ -14,10 +14,12 @@ extern crate embedded_graphics;
 extern crate embedded_hal as hal;
 
 mod command;
+mod displaysize;
 pub mod builder;
 pub mod interface;
 
 pub use builder::Builder;
+pub use displaysize::DisplaySize;
 use command::{AddrMode, Command, VcomhLevel};
 use embedded_graphics::drawable;
 use embedded_graphics::Drawing;
@@ -28,15 +30,17 @@ use interface::DisplayInterface;
 pub struct SSD1306<DI> {
     iface: DI,
     buffer: [u8; 1024],
+    display_size: DisplaySize,
 }
 
 impl<DI> SSD1306<DI>
 where
     DI: DisplayInterface,
 {
-    pub fn new(iface: DI) -> SSD1306<DI> {
+    pub fn new(iface: DI, display_size: DisplaySize) -> SSD1306<DI> {
         SSD1306 {
             iface,
+            display_size,
             buffer: [0; 1024],
         }
     }
@@ -60,15 +64,21 @@ where
     }
 
     pub fn flush(&mut self) {
-        // TODO: Dynamic width/height
-        Command::ColumnAddress(0, 127).send(&mut self.iface);
-        Command::PageAddress(0.into(), 63.into()).send(&mut self.iface);
+        let (display_width, display_height) = self.display_size.dimensions();
 
-        self.iface.send_data(&self.buffer);
+        Command::ColumnAddress(0, display_width - 1).send(&mut self.iface);
+        Command::PageAddress(0.into(), (display_height - 1).into()).send(&mut self.iface);
+
+        match self.display_size {
+            DisplaySize::Display128x64 => self.iface.send_data(&self.buffer),
+            DisplaySize::Display128x32 => self.iface.send_data(&self.buffer[0..512]),
+        }
     }
 
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
-        let byte = &mut self.buffer[((y as usize) / 8 * 128) + (x as usize)];
+        let (display_width, _) = self.display_size.dimensions();
+
+        let byte = &mut self.buffer[((y as usize) / 8 * display_width as usize) + (x as usize)];
         let bit = 1 << (y % 8);
 
         if value == 0 {
@@ -80,11 +90,11 @@ where
 
     // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
     pub fn init(&mut self) {
+        let (_, display_height) = self.display_size.dimensions();
+
         Command::DisplayOn(false).send(&mut self.iface);
         Command::DisplayClockDiv(0x8, 0x0).send(&mut self.iface);
-        // TODO: What's this?
-        // let mpx = 64 - 1;
-        // Command::Multiplex(mpx).send(&mut self.iface);
+        Command::Multiplex(display_height - 1).send(&mut self.iface);
         Command::DisplayOffset(0).send(&mut self.iface);
         Command::StartLine(0).send(&mut self.iface);
         // TODO: Ability to turn charge pump on/off
@@ -92,6 +102,11 @@ where
         Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface);
         Command::SegmentRemap(true).send(&mut self.iface);
         Command::ReverseComDir(true).send(&mut self.iface);
+
+        match self.display_size {
+            DisplaySize::Display128x32 => Command::ComPinConfig(false, false).send(&mut self.iface),
+            DisplaySize::Display128x64 => Command::ComPinConfig(true, false).send(&mut self.iface),
+        }
 
         // TODO: Display sizes
         // if self.width == 128 && self.height == 32 {

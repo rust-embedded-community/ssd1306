@@ -1,4 +1,4 @@
-//! Draw a 1 bit per pixel black and white image.
+//! Draw a 1 bit per pixel black and white image. On a 128x64 SSD1306 display over I2C.
 //!
 //! Image was created with ImageMagick:
 //!
@@ -18,7 +18,7 @@ use blue_pill::i2c::{DutyCycle, I2c, Mode};
 use blue_pill::prelude::*;
 use embedded_graphics::Drawing;
 use ssd1306::Builder;
-use embedded_graphics::image::Image1BPP;
+use embedded_graphics::image::{Image, Image1BPP};
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
@@ -51,11 +51,7 @@ fn main() {
     disp.init();
     disp.flush();
 
-    let im = Image1BPP {
-        width: 64,
-        height: 64,
-        imagedata: include_bytes!("./rust.raw"),
-    };
+    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64, (32, 0));
 
     disp.draw(im.into_iter());
 

@@ -72,6 +72,7 @@ where
         match self.display_size {
             DisplaySize::Display128x64 => self.iface.send_data(&self.buffer),
             DisplaySize::Display128x32 => self.iface.send_data(&self.buffer[0..512]),
+            DisplaySize::Display96x16 => self.iface.send_data(&self.buffer[0..192]),
         }
     }
 
@@ -106,16 +107,8 @@ where
         match self.display_size {
             DisplaySize::Display128x32 => Command::ComPinConfig(false, false).send(&mut self.iface),
             DisplaySize::Display128x64 => Command::ComPinConfig(true, false).send(&mut self.iface),
+            DisplaySize::Display96x16 => Command::ComPinConfig(false, false).send(&mut self.iface),
         }
-
-        // TODO: Display sizes
-        // if self.width == 128 && self.height == 32 {
-        //     Command::ComPinConfig(false, false).send(&mut self.iface);
-        // } else if self.width == 128 && self.height == 64 {
-        //     Command::ComPinConfig(true, false).send(&mut self.iface);
-        // } else if self.width == 96 && self.height == 16 {
-        //     Command::ComPinConfig(false, false).send(&mut self.iface);
-        // }
 
         Command::Contrast(0x8F).send(&mut self.iface);
         Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface);

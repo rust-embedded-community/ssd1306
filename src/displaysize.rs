@@ -3,6 +3,7 @@
 pub enum DisplaySize {
     Display128x64,
     Display128x32,
+    Display96x16,
 }
 
 impl DisplaySize {
@@ -11,6 +12,7 @@ impl DisplaySize {
         match *self {
             DisplaySize::Display128x64 => (128, 64),
             DisplaySize::Display128x32 => (128, 32),
+            DisplaySize::Display96x16 => (96, 16),
         }
     }
 }

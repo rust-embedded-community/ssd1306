@@ -1,8 +1,13 @@
+//! SSD1306 SPI interface
+
 use hal;
 use hal::digital::OutputPin;
 
 use super::DisplayInterface;
 
+/// SPI display interface.
+///
+/// This combines the SPI peripheral and a data/command pin
 pub struct SpiInterface<SPI, DC> {
     spi: SPI,
     dc: DC,
@@ -13,6 +18,7 @@ where
     SPI: hal::blocking::spi::Write<u8>,
     DC: OutputPin,
 {
+    /// Create new SPI interface for communciation with SSD1306
     pub fn new(spi: SPI, dc: DC) -> Self {
         Self { spi, dc }
     }

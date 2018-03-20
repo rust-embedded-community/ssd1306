@@ -1,7 +1,10 @@
+//! SSD1306 I2C Interface
+
 use hal;
 
 use super::DisplayInterface;
 
+/// SSD1306 I2C communication interface
 pub struct I2cInterface<I2C> {
     i2c: I2C,
 }
@@ -10,6 +13,7 @@ impl<I2C> I2cInterface<I2C>
 where
     I2C: hal::blocking::i2c::Write,
 {
+    /// Create new SSD1306 I2C interface
     pub fn new(i2c: I2C) -> Self {
         Self { i2c }
     }

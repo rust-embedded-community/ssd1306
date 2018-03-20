@@ -27,20 +27,24 @@ where
         Ok(())
     }
 
-    // TODO: Send data in chunks to save memory. This code is particularly bad with 128x32 displays
-    // as half of `writebuf` is completely wasted.
     fn send_data(&mut self, buf: &[u8]) -> Result<(), I2C::Error> {
-        let mut writebuf: [u8; 1025] = [0; 1025];
+        let mut writebuf: [u8; 17] = [0; 17];
 
         // Data mode
         // 8.1.5.2 5) b) in the datasheet
         writebuf[0] = 0x40;
 
-        for (index, byte) in buf.iter().enumerate() {
-            writebuf[index + 1] = *byte;
+        // Noop if the data buffer is empty
+        if buf.is_empty() {
+            return Ok(());
         }
 
-        self.i2c.write(0x3c, &writebuf[0..buf.len() + 1])?;
+        for chunk in buf.chunks(16) {
+            for (i, byte) in chunk.iter().enumerate() {
+                writebuf[i + 1] = *byte;
+            }
+            self.i2c.write(0x3C, &writebuf[..1 + chunk.len()])?;
+        }
 
         Ok(())
     }

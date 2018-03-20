@@ -11,6 +11,7 @@ use super::SSD1306;
 #[derive(Clone, Copy)]
 pub struct Builder {
     display_size: DisplaySize,
+    i2c_addr: u8,
 }
 
 impl Builder {
@@ -18,12 +19,24 @@ impl Builder {
     pub fn new() -> Self {
         Self {
             display_size: DisplaySize::Display128x64,
+            i2c_addr: 0x3c,
         }
     }
 
     /// Create new builder for a specified size.
     pub fn with_size(&self, display_size: DisplaySize) -> Self {
-        Self { display_size }
+        Self {
+            display_size,
+            ..*self
+        }
+    }
+
+    /// Set the I2C address to use. Defaults to 0x3C which seems to be the most common address.
+    /// The other address specified in the datasheet is 0x3D.
+    ///
+    /// Ignored when using SPI interface
+    pub fn with_i2c_addr(&self, i2c_addr: u8) -> Self {
+        Self { i2c_addr, ..*self }
     }
 
     /// Create i2c communication interface
@@ -31,7 +44,7 @@ impl Builder {
     where
         I2C: hal::blocking::i2c::Write,
     {
-        SSD1306::new(I2cInterface::new(i2c), self.display_size)
+        SSD1306::new(I2cInterface::new(i2c, self.i2c_addr), self.display_size)
     }
 
     /// Create spi communication interface

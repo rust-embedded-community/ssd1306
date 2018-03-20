@@ -7,6 +7,7 @@ use super::DisplayInterface;
 /// SSD1306 I2C communication interface
 pub struct I2cInterface<I2C> {
     i2c: I2C,
+    addr: u8,
 }
 
 impl<I2C> I2cInterface<I2C>
@@ -14,8 +15,8 @@ where
     I2C: hal::blocking::i2c::Write,
 {
     /// Create new SSD1306 I2C interface
-    pub fn new(i2c: I2C) -> Self {
-        Self { i2c }
+    pub fn new(i2c: I2C, addr: u8) -> Self {
+        Self { i2c, addr }
     }
 }
 
@@ -26,7 +27,7 @@ where
     type Error = I2C::Error;
 
     fn send_command(&mut self, cmd: u8) -> Result<(), I2C::Error> {
-        self.i2c.write(0x3c, &[0, cmd])?;
+        self.i2c.write(self.addr, &[0, cmd])?;
 
         Ok(())
     }
@@ -47,7 +48,7 @@ where
             for (i, byte) in chunk.iter().enumerate() {
                 writebuf[i + 1] = *byte;
             }
-            self.i2c.write(0x3C, &writebuf[..1 + chunk.len()])?;
+            self.i2c.write(self.addr, &writebuf[..1 + chunk.len()])?;
         }
 
         Ok(())

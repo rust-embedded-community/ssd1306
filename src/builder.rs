@@ -14,13 +14,15 @@ pub struct Builder {
 }
 
 impl Builder {
-    /// Create new builder for default size of 128 x 32 pixels.
+    /// Create new builder for default size of 128 x 64 pixels.
     pub fn new() -> Self {
-        Builder::with_size(DisplaySize::Display128x32)
+        Self {
+            display_size: DisplaySize::Display128x64,
+        }
     }
 
     /// Create new builder for a specified size.
-    pub fn with_size(display_size: DisplaySize) -> Self {
+    pub fn with_size(&self, display_size: DisplaySize) -> Self {
         Self { display_size }
     }
 

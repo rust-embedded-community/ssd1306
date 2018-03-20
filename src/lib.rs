@@ -1,14 +1,10 @@
+//! SSD1306 OLED display driver
+
 #![no_std]
 // TODO: Docs
-// #![deny(missing_docs)]
 // #![deny(missing_debug_implementations)]
-#![deny(missing_copy_implementations)]
-#![deny(trivial_casts)]
-#![deny(trivial_numeric_casts)]
-#![deny(unsafe_code)]
-#![deny(unstable_features)]
-#![deny(unused_import_braces)]
-#![deny(unused_qualifications)]
+#![deny(missing_docs)]
+#![deny(warnings)]
 
 #[cfg(feature = "graphics")]
 extern crate embedded_graphics;
@@ -27,6 +23,7 @@ use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
 use interface::DisplayInterface;
 
+/// SSD1306
 pub struct SSD1306<DI> {
     iface: DI,
     buffer: [u8; 1024],
@@ -37,6 +34,7 @@ impl<DI> SSD1306<DI>
 where
     DI: DisplayInterface,
 {
+    /// Create new SSD1306 instance
     pub fn new(iface: DI, display_size: DisplaySize) -> SSD1306<DI> {
         SSD1306 {
             iface,
@@ -63,6 +61,7 @@ where
         rst.set_high();
     }
 
+    /// Write out data to display
     pub fn flush(&mut self) -> Result<(), DI::Error> {
         let (display_width, display_height) = self.display_size.dimensions();
 
@@ -76,6 +75,7 @@ where
         }
     }
 
+    /// Turn a pixel on or off
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
         let (display_width, _) = self.display_size.dimensions();
 
@@ -90,6 +90,7 @@ where
     }
 
     // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
+    /// Initialize display in column mode.
     pub fn init(&mut self) -> Result<(), DI::Error> {
         let (_, display_height) = self.display_size.dimensions();
 

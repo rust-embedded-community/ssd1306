@@ -10,7 +10,9 @@ repository = "https://github.com/jamwaffles/ssd1306"
 embedded-hal = "0.1.2"
 
 [dependencies.embedded-graphics]
-path = "../embedded-graphics"
+git = "https://github.com/jamwaffles/embedded-graphics.git"
+version = "*"
+optional = true
 
 [dev-dependencies]
 cortex-m = "0.4.3"
@@ -40,3 +42,7 @@ incremental = false
 [profile.release]
 debug = true
 lto = true
+
+[features]
+default = []
+graphics = ["embedded-graphics"]

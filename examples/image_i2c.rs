@@ -5,6 +5,8 @@
 //! ```bash
 //! convert rust.png -depth 1 gray:rust.raw
 //! ```
+//!
+//! Run on a Blue Pill with `xargo run --example image_i2c --features graphics`
 
 #![no_std]
 

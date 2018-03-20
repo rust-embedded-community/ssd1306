@@ -10,6 +10,7 @@
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 
+#[cfg(feature = "graphics")]
 extern crate embedded_graphics;
 extern crate embedded_hal as hal;
 
@@ -21,8 +22,7 @@ pub mod interface;
 pub use builder::Builder;
 pub use displaysize::DisplaySize;
 use command::{AddrMode, Command, VcomhLevel};
-use embedded_graphics::drawable;
-use embedded_graphics::Drawing;
+
 use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
 use interface::DisplayInterface;
@@ -120,6 +120,12 @@ where
     }
 }
 
+#[cfg(feature = "graphics")]
+use embedded_graphics::drawable;
+#[cfg(feature = "graphics")]
+use embedded_graphics::Drawing;
+
+#[cfg(feature = "graphics")]
 impl<DI> Drawing for SSD1306<DI>
 where
     DI: DisplayInterface,

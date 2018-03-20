@@ -1,6 +1,8 @@
 //! This example draws a small square one pixel at a time in the top left corner of the display
 //!
 //! You will probably want to use the [`embedded_graphics`](https://crates.io/crates/embedded-graphics) crate to do more complex drawing.
+//!
+//! Run on a Blue Pill with `xargo run --example pixelsquare
 
 #![no_std]
 

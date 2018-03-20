@@ -14,6 +14,8 @@
 //! PB0 -> RST
 //! PB1 -> D/C
 //! ```
+//!
+//! Run on a Blue Pill with `xargo run --example blinky --features graphics`
 
 #![no_std]
 #![feature(const_fn)]

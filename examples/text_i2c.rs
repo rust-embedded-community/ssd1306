@@ -1,5 +1,7 @@
 //! Draw a square, circle and triangle on the screen using I2C1 on pins B9 and B9 on the Blue Pill
 //! dev board. I found that it requires pullup resistors on SDA and SCL to function correctly
+//!
+//! Run on a Blue Pill with `xargo run --example text_i2c --features graphics`
 
 #![no_std]
 

@@ -1,5 +1,7 @@
 //! Draw a square, circle and triangle on the screen using the embedded_graphics library over a 4
 //! wire SPI interface.
+//!
+//! Run on a Blue Pill with `xargo run --example graphics --features graphics`
 
 #![no_std]
 

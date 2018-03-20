@@ -57,8 +57,8 @@ fn main() {
     let mut disp = Builder::new().connect_spi(spi, dc);
 
     disp.reset(&mut rst, &mut delay);
-    disp.init();
-    disp.flush();
+    disp.init().unwrap();
+    disp.flush().unwrap();
 
     // Top side
     disp.set_pixel(0, 0, 1);
@@ -84,5 +84,5 @@ fn main() {
     disp.set_pixel(0, 2, 1);
     disp.set_pixel(0, 3, 1);
 
-    disp.flush();
+    disp.flush().unwrap();
 }

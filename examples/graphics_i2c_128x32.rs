@@ -48,8 +48,8 @@ fn main() {
     let mut disp = Builder::new()
         .with_size(DisplaySize::Display128x32)
         .connect_i2c(i2c);
-    disp.init();
-    disp.flush();
+    disp.init().unwrap();
+    disp.flush().unwrap();
 
     let yoffset = 8;
 
@@ -61,5 +61,5 @@ fn main() {
 
     disp.draw(Circle::new((96, yoffset + 8), 8, 1u8).into_iter());
 
-    disp.flush();
+    disp.flush().unwrap();
 }

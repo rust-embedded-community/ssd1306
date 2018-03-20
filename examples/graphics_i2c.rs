@@ -45,8 +45,8 @@ fn main() {
     );
 
     let mut disp = Builder::new().connect_i2c(i2c);
-    disp.init();
-    disp.flush();
+    disp.init().unwrap();
+    disp.flush().unwrap();
 
     disp.draw(Line::new((8, 16 + 16), (8 + 16, 16 + 16), 1).into_iter());
     disp.draw(Line::new((8, 16 + 16), (8 + 8, 16), 1).into_iter());
@@ -56,5 +56,5 @@ fn main() {
 
     disp.draw(Circle::new((96, 16 + 8), 8, 1u8).into_iter());
 
-    disp.flush();
+    disp.flush().unwrap();
 }

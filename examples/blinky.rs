@@ -110,8 +110,8 @@ fn init(p: init::Peripherals) -> init::LateResources {
     let mut disp = Builder::new().connect_spi(spi, dc);
 
     disp.reset(&mut rst, &mut delay);
-    disp.init();
-    disp.flush();
+    disp.init().unwrap();
+    disp.flush().unwrap();
 
     init::LateResources {
         DISP: disp,
@@ -157,7 +157,7 @@ fn idle(_t: &mut Threshold, r: idle::Resources) -> ! {
             false => draw_square(&mut disp, 6, 0),
         }
 
-        disp.flush();
+        disp.flush().unwrap();
 
         *state = !*state;
     }

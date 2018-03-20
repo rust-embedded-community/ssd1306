@@ -45,11 +45,11 @@ fn main() {
     );
 
     let mut disp = Builder::new().connect_i2c(i2c);
-    disp.init();
-    disp.flush();
+    disp.init().unwrap();
+    disp.flush().unwrap();
 
     disp.draw(Font6x8::render_str("Hello world!", (0, 0)).into_iter());
     disp.draw(Font6x8::render_str("Hello Rust!", (0, 16)).into_iter());
 
-    disp.flush();
+    disp.flush().unwrap();
 }

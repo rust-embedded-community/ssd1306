@@ -5,6 +5,13 @@
 // #![deny(missing_debug_implementations)]
 #![deny(missing_docs)]
 #![deny(warnings)]
+#![deny(missing_copy_implementations)]
+#![deny(trivial_casts)]
+#![deny(trivial_numeric_casts)]
+#![deny(unsafe_code)]
+#![deny(unstable_features)]
+#![deny(unused_import_braces)]
+#![deny(unused_qualifications)]
 
 #[cfg(feature = "graphics")]
 extern crate embedded_graphics;

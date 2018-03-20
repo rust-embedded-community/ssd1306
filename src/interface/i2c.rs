@@ -19,13 +19,17 @@ impl<I2C> DisplayInterface for I2cInterface<I2C>
 where
     I2C: hal::blocking::i2c::Write,
 {
-    fn send_command(&mut self, cmd: u8) {
-        self.i2c.write(0x3c, &[0, cmd]);
+    type Error = I2C::Error;
+
+    fn send_command(&mut self, cmd: u8) -> Result<(), I2C::Error> {
+        self.i2c.write(0x3c, &[0, cmd])?;
+
+        Ok(())
     }
 
     // TODO: Send data in chunks to save memory. This code is particularly bad with 128x32 displays
     // as half of `writebuf` is completely wasted.
-    fn send_data(&mut self, buf: &[u8]) {
+    fn send_data(&mut self, buf: &[u8]) -> Result<(), I2C::Error> {
         let mut writebuf: [u8; 1025] = [0; 1025];
 
         // Data mode
@@ -36,6 +40,8 @@ where
             writebuf[index + 1] = *byte;
         }
 
-        self.i2c.write(0x3c, &writebuf[0..buf.len() + 1]);
+        self.i2c.write(0x3c, &writebuf[0..buf.len() + 1])?;
+
+        Ok(())
     }
 }

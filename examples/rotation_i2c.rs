@@ -51,7 +51,7 @@ fn main() {
     );
 
     let mut disp = Builder::new()
-        .with_rotation(DisplayRotation::Rotate180)
+        .with_rotation(DisplayRotation::Rotate90)
         .connect_i2c(i2c);
     disp.init();
     disp.flush();

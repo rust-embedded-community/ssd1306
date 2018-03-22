@@ -150,6 +150,17 @@ where
 
         Ok(())
     }
+
+    /// Get display dimensions, taking into account the current rotation of the display
+    // TODO: Replace (u8, u8) with a dimensioney type for consistency
+    pub fn get_dimensions(&self) -> (u8, u8) {
+        let (w, h) = self.display_size.dimensions();
+
+        match self.display_rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (w, h),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (h, w),
+        }
+    }
 }
 
 #[cfg(feature = "graphics")]

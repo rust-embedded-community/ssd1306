@@ -19,11 +19,13 @@ extern crate embedded_hal as hal;
 
 mod command;
 mod displaysize;
+pub mod displayrotation;
 pub mod builder;
 pub mod interface;
 
 pub use builder::Builder;
 pub use displaysize::DisplaySize;
+pub use displayrotation::DisplayRotation;
 use command::{AddrMode, Command, VcomhLevel};
 
 use hal::blocking::delay::DelayMs;
@@ -35,6 +37,7 @@ pub struct SSD1306<DI> {
     iface: DI,
     buffer: [u8; 1024],
     display_size: DisplaySize,
+    display_rotation: DisplayRotation,
 }
 
 impl<DI> SSD1306<DI>
@@ -42,10 +45,15 @@ where
     DI: DisplayInterface,
 {
     /// Create new SSD1306 instance
-    pub fn new(iface: DI, display_size: DisplaySize) -> SSD1306<DI> {
+    pub fn new(
+        iface: DI,
+        display_size: DisplaySize,
+        display_rotation: DisplayRotation,
+    ) -> SSD1306<DI> {
         SSD1306 {
             iface,
             display_size,
+            display_rotation,
             buffer: [0; 1024],
         }
     }
@@ -114,8 +122,17 @@ where
         // TODO: Ability to turn charge pump on/off
         Command::ChargePump(true).send(&mut self.iface)?;
         Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface)?;
-        Command::SegmentRemap(true).send(&mut self.iface)?;
-        Command::ReverseComDir(true).send(&mut self.iface)?;
+
+        match self.display_rotation {
+            DisplayRotation::Rotate180 => {
+                Command::SegmentRemap(false).send(&mut self.iface)?;
+                Command::ReverseComDir(false).send(&mut self.iface)?;
+            }
+            _ => {
+                Command::SegmentRemap(false).send(&mut self.iface)?;
+                Command::ReverseComDir(false).send(&mut self.iface)?;
+            }
+        };
 
         match self.display_size {
             DisplaySize::Display128x32 => Command::ComPinConfig(false, false).send(&mut self.iface),

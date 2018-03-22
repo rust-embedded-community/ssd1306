@@ -4,6 +4,7 @@ use hal;
 use hal::digital::OutputPin;
 
 use super::displaysize::DisplaySize;
+use super::displayrotation::DisplayRotation;
 use super::interface::{I2cInterface, SpiInterface};
 use super::SSD1306;
 
@@ -11,6 +12,7 @@ use super::SSD1306;
 #[derive(Clone, Copy)]
 pub struct Builder {
     display_size: DisplaySize,
+    rotation: DisplayRotation,
     i2c_addr: u8,
 }
 
@@ -19,6 +21,7 @@ impl Builder {
     pub fn new() -> Self {
         Self {
             display_size: DisplaySize::Display128x64,
+            rotation: DisplayRotation::Rotate0,
             i2c_addr: 0x3c,
         }
     }
@@ -39,12 +42,21 @@ impl Builder {
         Self { i2c_addr, ..*self }
     }
 
+    /// Set the rotation of the display to one of four values. Defaults to no rotation
+    pub fn with_rotation(&self, rotation: DisplayRotation) -> Self {
+        Self { rotation, ..*self }
+    }
+
     /// Create i2c communication interface
     pub fn connect_i2c<I2C>(&self, i2c: I2C) -> SSD1306<I2cInterface<I2C>>
     where
         I2C: hal::blocking::i2c::Write,
     {
-        SSD1306::new(I2cInterface::new(i2c, self.i2c_addr), self.display_size)
+        SSD1306::new(
+            I2cInterface::new(i2c, self.i2c_addr),
+            self.display_size,
+            self.rotation,
+        )
     }
 
     /// Create spi communication interface
@@ -53,6 +65,6 @@ impl Builder {
         SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
         DC: OutputPin,
     {
-        SSD1306::new(SpiInterface::new(spi, dc), self.display_size)
+        SSD1306::new(SpiInterface::new(spi, dc), self.display_size, self.rotation)
     }
 }

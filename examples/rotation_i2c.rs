@@ -1,4 +1,4 @@
-//! Draw a 1 bit per pixel black and white image. On a 128x64 SSD1306 display over I2C.
+//! Draw the Rust logo centered on a 90 degree rotated 128x64px display
 //!
 //! Image was created with ImageMagick:
 //!
@@ -6,7 +6,7 @@
 //! convert rust.png -depth 1 gray:rust.raw
 //! ```
 //!
-//! Run on a Blue Pill with `xargo run --example image_i2c --features graphics`
+//! Run on a Blue Pill with `xargo run --target thumbv7m-none-eabi --example image_i2c --features graphics`
 
 #![no_std]
 
@@ -56,7 +56,14 @@ fn main() {
     disp.init();
     disp.flush();
 
-    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64, (32, 0));
+    let (w, h) = disp.get_dimensions();
+
+    let im = Image1BPP::new(
+        include_bytes!("./rust.raw"),
+        64,
+        64,
+        (w as u32 / 2 - 64 / 2, h as u32 / 2 - 64 / 2),
+    );
 
     disp.draw(im.into_iter());
 

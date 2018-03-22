@@ -95,17 +95,41 @@ where
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
         let (display_width, _) = self.display_size.dimensions();
 
-        let idx = ((y as usize) / 8 * display_width as usize) + (x as usize);
-
-        if idx < self.buffer.len() {
-            let byte = &mut self.buffer[idx];
-            let bit = 1 << (y % 8);
-
-            if value == 0 {
-                *byte &= !bit;
-            } else {
-                *byte |= bit;
+        let idx = match self.display_rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                ((y as usize) / 8 * display_width as usize) + (x as usize)
             }
+
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                ((x as usize) / 8 * display_width as usize) + (y as usize)
+            }
+        };
+
+        if idx >= self.buffer.len() {
+            return;
+        }
+
+        let (byte, bit) = match self.display_rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                let byte =
+                    &mut self.buffer[((y as usize) / 8 * display_width as usize) + (x as usize)];
+                let bit = 1 << (y % 8);
+
+                (byte, bit)
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                let byte =
+                    &mut self.buffer[((x as usize) / 8 * display_width as usize) + (y as usize)];
+                let bit = 1 << (x % 8);
+
+                (byte, bit)
+            }
+        };
+
+        if value == 0 {
+            *byte &= !bit;
+        } else {
+            *byte |= bit;
         }
     }
 
@@ -124,13 +148,21 @@ where
         Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface)?;
 
         match self.display_rotation {
-            DisplayRotation::Rotate180 => {
+            DisplayRotation::Rotate0 => {
                 Command::SegmentRemap(false).send(&mut self.iface)?;
                 Command::ReverseComDir(false).send(&mut self.iface)?;
             }
-            _ => {
-                Command::SegmentRemap(false).send(&mut self.iface)?;
+            DisplayRotation::Rotate90 => {
+                Command::SegmentRemap(true).send(&mut self.iface)?;
                 Command::ReverseComDir(false).send(&mut self.iface)?;
+            }
+            DisplayRotation::Rotate180 => {
+                Command::SegmentRemap(true).send(&mut self.iface)?;
+                Command::ReverseComDir(true).send(&mut self.iface)?;
+            }
+            DisplayRotation::Rotate270 => {
+                Command::SegmentRemap(false).send(&mut self.iface)?;
+                Command::ReverseComDir(true).send(&mut self.iface)?;
             }
         };
 

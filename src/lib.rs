@@ -82,17 +82,22 @@ where
         }
     }
 
-    /// Turn a pixel on or off
+    /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
+    //// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
         let (display_width, _) = self.display_size.dimensions();
 
-        let byte = &mut self.buffer[((y as usize) / 8 * display_width as usize) + (x as usize)];
-        let bit = 1 << (y % 8);
+        let idx = ((y as usize) / 8 * display_width as usize) + (x as usize);
 
-        if value == 0 {
-            *byte &= !bit;
-        } else {
-            *byte |= bit;
+        if idx < self.buffer.len() {
+            let byte = &mut self.buffer[idx];
+            let bit = 1 << (y % 8);
+
+            if value == 0 {
+                *byte &= !bit;
+            } else {
+                *byte |= bit;
+            }
         }
     }
 

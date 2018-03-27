@@ -149,20 +149,20 @@ where
 
         match self.display_rotation {
             DisplayRotation::Rotate0 => {
-                Command::SegmentRemap(false).send(&mut self.iface)?;
-                Command::ReverseComDir(false).send(&mut self.iface)?;
+                Command::SegmentRemap(true).send(&mut self.iface)?;
+                Command::ReverseComDir(true).send(&mut self.iface)?;
             }
             DisplayRotation::Rotate90 => {
-                Command::SegmentRemap(true).send(&mut self.iface)?;
-                Command::ReverseComDir(false).send(&mut self.iface)?;
-            }
-            DisplayRotation::Rotate180 => {
-                Command::SegmentRemap(true).send(&mut self.iface)?;
-                Command::ReverseComDir(true).send(&mut self.iface)?;
-            }
-            DisplayRotation::Rotate270 => {
                 Command::SegmentRemap(false).send(&mut self.iface)?;
                 Command::ReverseComDir(true).send(&mut self.iface)?;
+            }
+            DisplayRotation::Rotate180 => {
+                Command::SegmentRemap(false).send(&mut self.iface)?;
+                Command::ReverseComDir(false).send(&mut self.iface)?;
+            }
+            DisplayRotation::Rotate270 => {
+                Command::SegmentRemap(true).send(&mut self.iface)?;
+                Command::ReverseComDir(false).send(&mut self.iface)?;
             }
         };
 

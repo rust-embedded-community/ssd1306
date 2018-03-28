@@ -50,12 +50,12 @@ fn main() {
     );
 
     let mut disp = Builder::new().connect_i2c(i2c);
-    disp.init();
-    disp.flush();
+    disp.init().unwrap();
+    disp.flush().unwrap();
 
     let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64, (32, 0));
 
     disp.draw(im.into_iter());
 
-    disp.flush();
+    disp.flush().unwrap();
 }

@@ -51,10 +51,16 @@ fn main() {
     );
 
     let mut disp = Builder::new()
+        // Set initial rotation at 90 degrees clockwise
         .with_rotation(DisplayRotation::Rotate90)
         .connect_i2c(i2c);
+
     disp.init().unwrap();
     disp.flush().unwrap();
+
+    // Contrived example to test builder and instance methods. Sets rotation to 270 degress
+    // or 90 degress counterclockwise
+    disp.set_rotation(DisplayRotation::Rotate270).unwrap();
 
     let (w, h) = disp.get_dimensions();
 

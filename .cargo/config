@@ -1,8 +1,10 @@
 [target.thumbv7m-none-eabi]
-runner = [ "arm-none-eabi-gdb.exe", "-iex", "set auto-load safe-path ." ]
 rustflags = [
   "-C", "link-arg=-Tlink.x",
   "-C", "linker=arm-none-eabi-ld",
   "-Z", "linker-flavor=ld",
   "-Z", "thinlto=no",
 ]
+
+[build]
+target = "thumbv7m-none-eabi"

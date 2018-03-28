@@ -147,6 +147,26 @@ where
         Command::ChargePump(true).send(&mut self.iface)?;
         Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface)?;
 
+        self.configure_rotation()?;
+
+        match self.display_size {
+            DisplaySize::Display128x32 => Command::ComPinConfig(false, false).send(&mut self.iface),
+            DisplaySize::Display128x64 => Command::ComPinConfig(true, false).send(&mut self.iface),
+            DisplaySize::Display96x16 => Command::ComPinConfig(false, false).send(&mut self.iface),
+        }?;
+
+        Command::Contrast(0x8F).send(&mut self.iface)?;
+        Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface)?;
+        Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
+        Command::AllOn(false).send(&mut self.iface)?;
+        Command::Invert(false).send(&mut self.iface)?;
+        Command::EnableScroll(false).send(&mut self.iface)?;
+        Command::DisplayOn(true).send(&mut self.iface)?;
+
+        Ok(())
+    }
+
+    fn configure_rotation(&mut self) -> Result<(), DI::Error> {
         match self.display_rotation {
             DisplayRotation::Rotate0 => {
                 Command::SegmentRemap(true).send(&mut self.iface)?;
@@ -166,20 +186,6 @@ where
             }
         };
 
-        match self.display_size {
-            DisplaySize::Display128x32 => Command::ComPinConfig(false, false).send(&mut self.iface),
-            DisplaySize::Display128x64 => Command::ComPinConfig(true, false).send(&mut self.iface),
-            DisplaySize::Display96x16 => Command::ComPinConfig(false, false).send(&mut self.iface),
-        }?;
-
-        Command::Contrast(0x8F).send(&mut self.iface)?;
-        Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface)?;
-        Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
-        Command::AllOn(false).send(&mut self.iface)?;
-        Command::Invert(false).send(&mut self.iface)?;
-        Command::EnableScroll(false).send(&mut self.iface)?;
-        Command::DisplayOn(true).send(&mut self.iface)?;
-
         Ok(())
     }
 
@@ -192,6 +198,13 @@ where
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (w, h),
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (h, w),
         }
+    }
+
+    /// Set the display rotation
+    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DI::Error> {
+        self.display_rotation = rot;
+
+        self.configure_rotation()
     }
 }
 

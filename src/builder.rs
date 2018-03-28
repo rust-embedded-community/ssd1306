@@ -6,7 +6,7 @@ use hal::digital::OutputPin;
 use super::displaysize::DisplaySize;
 use super::displayrotation::DisplayRotation;
 use super::interface::{I2cInterface, SpiInterface};
-use super::SSD1306;
+use super::egfx::SSD1306;
 
 /// Communication interface factory
 #[derive(Clone, Copy)]

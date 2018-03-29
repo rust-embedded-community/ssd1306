@@ -53,7 +53,7 @@ fn main() {
     let mut disp = Builder::new()
         // Set initial rotation at 90 degrees clockwise
         .with_rotation(DisplayRotation::Rotate90)
-        .connect_i2c(i2c);
+        .connect_i2c(i2c).into_egfx();
 
     disp.init().unwrap();
     disp.flush().unwrap();

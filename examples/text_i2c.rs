@@ -44,7 +44,7 @@ fn main() {
         &mut rcc.apb1,
     );
 
-    let mut disp = Builder::new().connect_i2c(i2c);
+    let mut disp = Builder::new().connect_i2c(i2c).into_egfx();
     disp.init().unwrap();
     disp.flush().unwrap();
 

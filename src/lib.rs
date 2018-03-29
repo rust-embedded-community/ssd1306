@@ -19,8 +19,9 @@ mod command;
 mod displaysize;
 pub mod displayrotation;
 pub mod builder;
-pub mod interface;
 pub mod egfx;
+pub mod interface;
+pub mod mode;
 
 pub use builder::Builder;
 pub use displaysize::DisplaySize;

@@ -40,9 +40,9 @@ use cortex_m_rtfm_macros::app;
 use hal::spi::{Mode, Phase, Polarity};
 use rtfm::Threshold;
 use ssd1306::interface::SpiInterface;
-use ssd1306::{Builder, egfx::SSD1306};
+use ssd1306::{Builder, egfx::EgfxMode};
 
-pub type OledDisplay = SSD1306<
+pub type OledDisplay = EgfxMode<
     SpiInterface<
         Spi<
             SPI1,

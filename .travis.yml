@@ -88,18 +88,14 @@ matrix:
 before_install:
   - set -e
   - rustup self update
-
-install:
-  - sh ci/install.sh
-  - source ~/.cargo/env || true
+  - cargo install xargo
 
 script:
-  - bash ci/script.sh
+  - xargo build --target $TARGET --examples
+  - xargo build --target $TARGET --examples --release
 
-after_script: set +e
-
-before_deploy:
-  - sh ci/before_deploy.sh
+# before_deploy:
+#   - sh ci/before_deploy.sh
 
 # deploy:
 #   # TODO update `api_key.secure`

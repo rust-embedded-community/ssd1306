@@ -6,7 +6,7 @@ use hal::digital::OutputPin;
 use super::displaysize::DisplaySize;
 use super::displayrotation::DisplayRotation;
 use super::interface::{I2cInterface, SpiInterface};
-use super::egfx::SSD1306;
+use super::egfx::EgfxMode;
 
 /// Communication interface factory
 #[derive(Clone, Copy)]
@@ -48,11 +48,11 @@ impl Builder {
     }
 
     /// Create i2c communication interface
-    pub fn connect_i2c<I2C>(&self, i2c: I2C) -> SSD1306<I2cInterface<I2C>>
+    pub fn connect_i2c<I2C>(&self, i2c: I2C) -> EgfxMode<I2cInterface<I2C>>
     where
         I2C: hal::blocking::i2c::Write,
     {
-        SSD1306::new(
+        EgfxMode::new(
             I2cInterface::new(i2c, self.i2c_addr),
             self.display_size,
             self.rotation,
@@ -60,11 +60,11 @@ impl Builder {
     }
 
     /// Create spi communication interface
-    pub fn connect_spi<SPI, DC>(&self, spi: SPI, dc: DC) -> SSD1306<SpiInterface<SPI, DC>>
+    pub fn connect_spi<SPI, DC>(&self, spi: SPI, dc: DC) -> EgfxMode<SpiInterface<SPI, DC>>
     where
         SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
         DC: OutputPin,
     {
-        SSD1306::new(SpiInterface::new(spi, dc), self.display_size, self.rotation)
+        EgfxMode::new(SpiInterface::new(spi, dc), self.display_size, self.rotation)
     }
 }

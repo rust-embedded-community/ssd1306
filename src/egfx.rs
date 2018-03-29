@@ -10,24 +10,24 @@ use hal::digital::OutputPin;
 use interface::DisplayInterface;
 
 /// SSD1306
-pub struct SSD1306<DI> {
+pub struct EgfxMode<DI> {
     iface: DI,
     buffer: [u8; 1024],
     display_size: DisplaySize,
     display_rotation: DisplayRotation,
 }
 
-impl<DI> SSD1306<DI>
+impl<DI> EgfxMode<DI>
 where
     DI: DisplayInterface,
 {
-    /// Create new SSD1306 instance
+    /// Create new EgfxMode instance
     pub fn new(
         iface: DI,
         display_size: DisplaySize,
         display_rotation: DisplayRotation,
-    ) -> SSD1306<DI> {
-        SSD1306 {
+    ) -> EgfxMode<DI> {
+        EgfxMode {
             iface,
             display_size,
             display_rotation,
@@ -193,7 +193,7 @@ use self::embedded_graphics::drawable;
 use self::embedded_graphics::Drawing;
 
 #[cfg(feature = "graphics")]
-impl<DI> Drawing for SSD1306<DI>
+impl<DI> Drawing for EgfxMode<DI>
 where
     DI: DisplayInterface,
 {

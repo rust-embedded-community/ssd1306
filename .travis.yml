@@ -5,13 +5,7 @@ dist: trusty
 language: rust
 rust:
   - nightly
-# services: docker
 sudo: required
-
-# env:
-#   global:
-#     # TODO Update this to match the name of your project.
-#     - CRATE_NAME=ssd1306
 
 matrix:
   # TODO These are all the build jobs. Adjust as necessary. Comment out what you
@@ -68,11 +62,9 @@ matrix:
     # - env: TARGET=x86_64-pc-windows-gnu
 
     # Bare metal
-    # These targets don't support std and as such are likely not suitable for
-    # most crates.
-    # - env: TARGET=thumbv6m-none-eabi
-    # - env: TARGET=thumbv7em-none-eabi
-    # - env: TARGET=thumbv7em-none-eabihf
+    - env: TARGET=thumbv6m-none-eabi
+    - env: TARGET=thumbv7em-none-eabi
+    - env: TARGET=thumbv7em-none-eabihf
     - env: TARGET=thumbv7m-none-eabi
 
     # # Testing other channels
@@ -92,6 +84,7 @@ install:
   - rustup override set nightly
   - rustup component add rust-src
   - rustup target add arm-unknown-linux-gnueabi
+  - rustup target add armv7-unknown-linux-gnueabihf
   - source ~/.cargo/env || true
   - mv .cargo ._cargo
   - cargo install xargo
@@ -101,38 +94,10 @@ script:
   - xargo build --target $TARGET --all-features --examples
   - xargo build --target $TARGET --all-features --examples --release
 
-# before_deploy:
-#   - sh ci/before_deploy.sh
-
-# deploy:
-#   # TODO update `api_key.secure`
-#   # - Create a `public_repo` GitHub token. Go to: https://github.com/settings/tokens/new
-#   # - Encrypt it: `travis encrypt 0123456789012345678901234567890123456789
-#   # - Paste the output down here
-#   api_key:
-#     secure: A9v3PIzQQ4U08OHFmDPQzNXbNHEb7YHyLXCvMF+dXFuNSvhUNlmQYykxqUf3dvikhJL2/bsZ14umm7ni7fQh0tGwJ4+lPpNzYAcweGgNXnWvjTpY6ovuRbr3gs4/srkyxp/GBDmSW5L8wFN3hKCB+Lm0YnIPB9IA2afP8a30+8VTXT9nv7pNqGny4ilN41ycr4DZi3sQoXdbruy7ClN7gsWW/GUiudBccHVIjmTapOFKLwZHODaUl/1/RDWQzh+i+17e1ivXuJPktDSrqmHPTZ15OjklnHKd6t179ry6VkGRg4R/R/YukVIqGzeaXGWAwdAQ5gE8cjGZghJLVi2jkDBJ85z8MvT+zLZLyliiuhLc/X8y7mkE1n0FKFtXXzFVt0l7V1LaEKbIbiV6XX3jsir4qgkqWjPHBZqO5mkGNFS16Dmt30/ZtEPAzXiINFXbWuWrpQ/LZ4NSto8IMrRTcoyDbAga/KYxJiNIeVuCe1E9dbytDM7K0GLtxJTul/WnnSeI6r//EFyC4bxYjyHhCXaag4q14KM+ak4rB0QgxsYzyGuh2MqyCoVj8YJLjLdKnL/SV7W7LPD40xlxvI6VCYTVi2ILHwL6vCxpukXYteX0c5IAIWkISDKu6nNBEgmCHXXPSqYSrgE5g7/QoCQHI8++nR8iKe0s7TWxZRydby8=
-#   file_glob: true
-#   file: $CRATE_NAME-$TRAVIS_TAG-$TARGET.*
-#   on:
-#     # TODO Here you can pick which targets will generate binary releases
-#     # In this example, there are some targets that are tested using the stable
-#     # and nightly channels. This condition makes sure there is only one release
-#     # for such targets and that's generated using the stable channel
-#     condition: $TRAVIS_RUST_VERSION = stable
-#     tags: true
-#   provider: releases
-#   skip_cleanup: true
-
 cache: cargo
 before_cache:
   # Travis can't cache files that are not readable by "others"
   - chmod -R a+r $HOME/.cargo
-
-# branches:
-#   only:
-#     # release tags
-#     - /^v\d+\.\d+\.\d+.*$/
-#     - master
 
 notifications:
   email:

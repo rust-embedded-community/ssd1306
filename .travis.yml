@@ -5,16 +5,13 @@ dist: trusty
 language: rust
 rust:
   - nightly
-services: docker
+# services: docker
 sudo: required
 
-# TODO Rust builds on stable by default, this can be
-# overridden on a case by case basis down below.
-
-env:
-  global:
-    # TODO Update this to match the name of your project.
-    - CRATE_NAME=ssd1306
+# env:
+#   global:
+#     # TODO Update this to match the name of your project.
+#     - CRATE_NAME=ssd1306
 
 matrix:
   # TODO These are all the build jobs. Adjust as necessary. Comment out what you
@@ -88,11 +85,21 @@ matrix:
 before_install:
   - set -e
   - rustup self update
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq gcc-arm-linux-gnueabi gcc-arm-none-eabi
+
+install:
+  - rustup override set nightly
+  - rustup component add rust-src
+  - rustup target add arm-unknown-linux-gnueabi
+  - source ~/.cargo/env || true
+  - mv .cargo ._cargo
   - cargo install xargo
+  - mv ._cargo .cargo
 
 script:
-  - xargo build --target $TARGET --examples
-  - xargo build --target $TARGET --examples --release
+  - xargo build --target $TARGET --all-features --examples
+  - xargo build --target $TARGET --all-features --examples --release
 
 # before_deploy:
 #   - sh ci/before_deploy.sh

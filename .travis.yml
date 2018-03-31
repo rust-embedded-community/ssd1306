@@ -32,8 +32,11 @@ matrix:
 
     # # Linux
     # - env: TARGET=aarch64-unknown-linux-gnu
-    # - env: TARGET=arm-unknown-linux-gnueabi
-    # - env: TARGET=armv7-unknown-linux-gnueabihf
+
+    # Raspberry Pi 1
+    - env: TARGET=arm-unknown-linux-gnueabi DISABLE_EXAMPLES=1
+    # Raspberry Pi 2, 3, etc
+    - env: TARGET=armv7-unknown-linux-gnueabihf DISABLE_EXAMPLES=1
     # - env: TARGET=i686-unknown-linux-gnu
     # - env: TARGET=i686-unknown-linux-musl
     # - env: TARGET=mips-unknown-linux-gnu
@@ -44,8 +47,8 @@ matrix:
     # - env: TARGET=powerpc64-unknown-linux-gnu
     # - env: TARGET=powerpc64le-unknown-linux-gnu
     # - env: TARGET=s390x-unknown-linux-gnu DISABLE_TESTS=1
-    # - env: TARGET=x86_64-unknown-linux-gnu
-    # - env: TARGET=x86_64-unknown-linux-musl
+    - env: TARGET=x86_64-unknown-linux-gnu DISABLE_EXAMPLES=1
+    - env: TARGET=x86_64-unknown-linux-musl DISABLE_EXAMPLES=1
 
     # # OSX
     # - env: TARGET=i686-apple-darwin
@@ -91,8 +94,7 @@ install:
   - mv ._cargo .cargo
 
 script:
-  - xargo build --target $TARGET --all-features --examples
-  - xargo build --target $TARGET --all-features --examples --release
+  - ./build.sh
 
 cache: cargo
 before_cache:

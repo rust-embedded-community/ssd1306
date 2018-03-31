@@ -44,5 +44,5 @@ debug = true
 lto = true
 
 [features]
-default = []
+default = ["graphics"]
 graphics = ["embedded-graphics"]

@@ -40,9 +40,9 @@ use cortex_m_rtfm_macros::app;
 use hal::spi::{Mode, Phase, Polarity};
 use rtfm::Threshold;
 use ssd1306::interface::SpiInterface;
-use ssd1306::{Builder, egfx::EgfxMode};
+use ssd1306::{Builder, mode::GraphicsMode};
 
-pub type OledDisplay = EgfxMode<
+pub type OledDisplay = GraphicsMode<
     SpiInterface<
         Spi<
             SPI1,
@@ -107,7 +107,7 @@ fn init(p: init::Peripherals) -> init::LateResources {
         &mut rcc.apb2,
     );
 
-    let mut disp = Builder::new().connect_spi(spi, dc).into_egfx();
+    let mut disp = Builder::new().connect_spi(spi, dc).into_graphicsmode();
 
     disp.reset(&mut rst, &mut delay);
     disp.init().unwrap();

@@ -54,7 +54,7 @@ fn main() {
         &mut rcc.apb2,
     );
 
-    let mut disp = Builder::new().connect_spi(spi, dc).into_egfx();
+    let mut disp = Builder::new().connect_spi(spi, dc).into_graphicsmode();
 
     disp.reset(&mut rst, &mut delay);
     disp.init().unwrap();

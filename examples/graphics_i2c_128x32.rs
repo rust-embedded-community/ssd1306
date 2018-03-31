@@ -47,7 +47,7 @@ fn main() {
 
     let mut disp = Builder::new()
         .with_size(DisplaySize::Display128x32)
-        .connect_i2c(i2c).into_egfx();
+        .connect_i2c(i2c).into_graphicsmode();
     disp.init().unwrap();
     disp.flush().unwrap();
 

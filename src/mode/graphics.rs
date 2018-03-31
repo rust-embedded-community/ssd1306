@@ -9,25 +9,25 @@ use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
 use interface::DisplayInterface;
 
-/// SSD1306
-pub struct EgfxMode<DI> {
+/// GraphicsMode
+pub struct GraphicsMode<DI> {
     iface: DI,
     buffer: [u8; 1024],
     display_size: DisplaySize,
     display_rotation: DisplayRotation,
 }
 
-impl<DI> EgfxMode<DI>
+impl<DI> GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
-    /// Create new EgfxMode instance
+    /// Create new GraphicsMode instance
     pub fn new(
         iface: DI,
         display_size: DisplaySize,
         display_rotation: DisplayRotation,
-    ) -> EgfxMode<DI> {
-        EgfxMode {
+    ) -> GraphicsMode<DI> {
+        GraphicsMode {
             iface,
             display_size,
             display_rotation,
@@ -193,7 +193,7 @@ use self::embedded_graphics::drawable;
 use self::embedded_graphics::Drawing;
 
 #[cfg(feature = "graphics")]
-impl<DI> Drawing for EgfxMode<DI>
+impl<DI> Drawing for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {

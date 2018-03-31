@@ -19,7 +19,6 @@ mod command;
 mod displaysize;
 pub mod displayrotation;
 pub mod builder;
-pub mod egfx;
 pub mod interface;
 pub mod mode;
 

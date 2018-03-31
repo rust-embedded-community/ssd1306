@@ -1,20 +1,19 @@
 //! Character display module
 
-use displaysize::DisplaySize;
-
-pub use displayrotation::DisplayRotation;
-use command::{AddrMode, Command, VcomhLevel};
+use displayrotation::DisplayRotation;
+use command::Command;
 use command::Page::{self, Page7};
 
 use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
 use interface::DisplayInterface;
+use properties::DisplayProperties;
+
+use core::fmt;
 
 /// Handling structure for character mode display
 pub struct CharacterMode<DI> {
-    iface: DI,
-    display_size: DisplaySize,
-    display_rotation: DisplayRotation,
+    properties: DisplayProperties<DI>,
 }
 
 impl<DI> CharacterMode<DI>
@@ -22,22 +21,18 @@ where
     DI: DisplayInterface,
 {
     /// Create new CharacterMode instance
-    pub fn new(
-        iface: DI,
-        display_size: DisplaySize,
-        display_rotation: DisplayRotation,
-    ) -> CharacterMode<DI> {
-        CharacterMode {
-            iface,
-            display_size,
-            display_rotation,
-        }
+    pub fn new(properties: DisplayProperties<DI>) -> Self {
+        CharacterMode { properties }
     }
 
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
-        for _ in 0..8 * 16 {
-            let _ = self.iface.send_data(&[0, 0, 0, 0, 0, 0, 0, 0]);
+        {
+            let iface = self.properties.borrow_iface_mut();
+
+            for _ in 0..8 * 16 {
+                let _ = iface.send_data(&[0, 0, 0, 0, 0, 0, 0, 0]);
+            }
         }
 
         // Reset position so we don't end up in some random place of our cleared screen
@@ -60,73 +55,6 @@ where
     /// Write out data to display
     pub fn flush(&mut self) -> Result<(), ()> {
         Ok(())
-    }
-
-    // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
-    /// Initialize display in column mode.
-    pub fn init(&mut self) -> Result<(), ()> {
-        let (_, display_height) = self.display_size.dimensions();
-
-        Command::DisplayOn(false).send(&mut self.iface)?;
-        Command::DisplayClockDiv(0x8, 0x0).send(&mut self.iface)?;
-        Command::Multiplex(display_height - 1).send(&mut self.iface)?;
-        Command::DisplayOffset(0).send(&mut self.iface)?;
-        Command::StartLine(0).send(&mut self.iface)?;
-        // TODO: Ability to turn charge pump on/off
-        Command::ChargePump(true).send(&mut self.iface)?;
-        Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface)?;
-
-        self.configure_rotation()?;
-
-        match self.display_size {
-            DisplaySize::Display128x32 => Command::ComPinConfig(false, false).send(&mut self.iface),
-            DisplaySize::Display128x64 => Command::ComPinConfig(true, false).send(&mut self.iface),
-            DisplaySize::Display96x16 => Command::ComPinConfig(false, false).send(&mut self.iface),
-        }?;
-
-        Command::Contrast(0x8F).send(&mut self.iface)?;
-        Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface)?;
-        Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
-        Command::AllOn(false).send(&mut self.iface)?;
-        Command::Invert(false).send(&mut self.iface)?;
-        Command::EnableScroll(false).send(&mut self.iface)?;
-        Command::DisplayOn(true).send(&mut self.iface)?;
-
-        Ok(())
-    }
-
-    fn configure_rotation(&mut self) -> Result<(), ()> {
-        match self.display_rotation {
-            DisplayRotation::Rotate0 => {
-                Command::SegmentRemap(true).send(&mut self.iface)?;
-                Command::ReverseComDir(true).send(&mut self.iface)?;
-            }
-            DisplayRotation::Rotate90 => {
-                Command::SegmentRemap(false).send(&mut self.iface)?;
-                Command::ReverseComDir(true).send(&mut self.iface)?;
-            }
-            DisplayRotation::Rotate180 => {
-                Command::SegmentRemap(false).send(&mut self.iface)?;
-                Command::ReverseComDir(false).send(&mut self.iface)?;
-            }
-            DisplayRotation::Rotate270 => {
-                Command::SegmentRemap(true).send(&mut self.iface)?;
-                Command::ReverseComDir(false).send(&mut self.iface)?;
-            }
-        };
-
-        Ok(())
-    }
-
-    /// Get display dimensions, taking into account the current rotation of the display
-    // TODO: Replace (u8, u8) with a dimensioney type for consistency
-    pub fn get_dimensions(&self) -> (u8, u8) {
-        let (w, h) = self.display_size.dimensions();
-
-        match self.display_rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (w, h),
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (h, w),
-        }
     }
 
     /// Print characters on the display with the embedded 7x7 font
@@ -230,6 +158,7 @@ where
         0x08, 0x08, 0x2A, 0x1C, 0x08, 0x00, 0x00,// ->
         0x08, 0x1C, 0x2A, 0x08, 0x08, 0x00, 0x00 // <-
     ];
+        let iface = self.properties.borrow_iface_mut();
 
         for c in bytes {
             // Create an array with our byte data instruction and a blank column at the end
@@ -243,24 +172,45 @@ where
             data[0..7].copy_from_slice(&FONT_7X7[index..index + 7]);
 
             /* Write it out to the I2C bus */
-            self.iface.send_data(&data)?
+            iface.send_data(&data)?
         }
 
         Ok(())
     }
 
+    /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
+    /// column 0 on the left, to column _n_ on the right
+    pub fn init(&mut self) -> Result<(), DI::Error> {
+        self.properties.init_column_mode()?;
+        Ok(())
+    }
+
+    /// Get display dimensions, taking into account the current rotation of the display
+    pub fn get_dimensions(&self) -> (u8, u8) {
+        self.properties.get_dimensions()
+    }
+
     /// Set the display rotation
     pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), ()> {
-        self.display_rotation = rot;
-
-        self.configure_rotation()
+        self.properties.set_rotation(rot)
     }
 
     /// Position cursor at specified x, y character coordinate (multiple of 8)
     pub fn set_position(&mut self, x: u8, y: u8) -> Result<(), ()> {
+        let iface = self.properties.borrow_iface_mut();
+
         // FIXME: Should be width
-        Command::ColumnAddress(x * 8, 0x7f).send(&mut self.iface)?;
-        Command::PageAddress(Page::from(y), Page7).send(&mut self.iface)
+        Command::ColumnAddress(x * 8, 0x7f).send(iface)?;
+        Command::PageAddress(Page::from(y), Page7).send(iface)
+    }
+}
+
+impl<DI> fmt::Write for CharacterMode<DI>
+where
+    DI: DisplayInterface,
+{
+    fn write_str(&mut self, s: &str) -> Result<(), fmt::Error> {
+        self.print_chars(s.as_bytes()).map_err(|_| fmt::Error)
     }
 }
 

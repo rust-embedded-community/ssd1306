@@ -35,10 +35,10 @@ use blue_pill::i2c::{DutyCycle, I2c, Mode};
 use cortex_m_rtfm_macros::app;
 use rtfm::Threshold;
 use ssd1306::interface::I2cInterface;
-use ssd1306::{Builder, SSD1306};
+use ssd1306::{Builder, mode::GraphicsMode};
 
 pub type OledDisplay =
-    SSD1306<I2cInterface<I2c<I2C1, (PB8<Alternate<OpenDrain>>, PB9<Alternate<OpenDrain>>)>>>;
+    GraphicsMode<I2cInterface<I2c<I2C1, (PB8<Alternate<OpenDrain>>, PB9<Alternate<OpenDrain>>)>>>;
 
 // Tasks and resources
 app! {
@@ -82,7 +82,7 @@ fn init(p: init::Peripherals) -> init::LateResources {
         &mut rcc.apb1,
     );
 
-    let mut disp = Builder::new().connect_i2c(i2c);
+    let mut disp = Builder::new().connect_i2c(i2c).into_graphicsmode();
 
     disp.init().unwrap();
     disp.flush().unwrap();

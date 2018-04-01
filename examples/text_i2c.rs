@@ -14,8 +14,9 @@ extern crate stm32f103xx_hal as blue_pill;
 use blue_pill::i2c::{DutyCycle, I2c, Mode};
 use blue_pill::prelude::*;
 use embedded_graphics::Drawing;
-use ssd1306::Builder;
 use embedded_graphics::fonts::{Font, Font6x8};
+use embedded_graphics::transform::Transform;
+use ssd1306::Builder;
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
@@ -48,8 +49,12 @@ fn main() {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    disp.draw(Font6x8::render_str("Hello world!", (0, 0)).into_iter());
-    disp.draw(Font6x8::render_str("Hello Rust!", (0, 16)).into_iter());
+    disp.draw(Font6x8::render_str("Hello world!").into_iter());
+    disp.draw(
+        Font6x8::render_str("Hello Rust!")
+            .translate((0, 16))
+            .into_iter(),
+    );
 
     disp.flush().unwrap();
 }

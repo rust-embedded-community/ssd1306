@@ -36,13 +36,13 @@ where
     }
 
     /// Get the configured display size
-    pub fn get_size(&self) -> &DisplaySize {
-        &self.display_size
+    pub fn get_size(&self) -> DisplaySize {
+        self.display_size
     }
 
     /// Get the display rotation
-    pub fn get_rotation(&self) -> &DisplayRotation {
-        &self.display_rotation
+    pub fn get_rotation(&self) -> DisplayRotation {
+        self.display_rotation
     }
 
     /// Set the display rotation

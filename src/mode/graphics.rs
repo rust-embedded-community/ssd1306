@@ -51,7 +51,7 @@ where
 
     /// Write out data to display
     pub fn flush(&mut self) -> Result<(), DI::Error> {
-        let display_size = self.properties.get_size().clone();
+        let display_size = self.properties.get_size();
         let iface = self.properties.borrow_iface_mut();
 
         let (display_width, display_height) = display_size.dimensions();
@@ -73,11 +73,11 @@ where
         let display_rotation = self.properties.get_rotation();
 
         let idx = match display_rotation {
-            &DisplayRotation::Rotate0 | &DisplayRotation::Rotate180 => {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
                 ((y as usize) / 8 * display_width as usize) + (x as usize)
             }
 
-            &DisplayRotation::Rotate90 | &DisplayRotation::Rotate270 => {
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
                 ((x as usize) / 8 * display_width as usize) + (y as usize)
             }
         };
@@ -87,14 +87,14 @@ where
         }
 
         let (byte, bit) = match display_rotation {
-            &DisplayRotation::Rotate0 | &DisplayRotation::Rotate180 => {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
                 let byte =
                     &mut self.buffer[((y as usize) / 8 * display_width as usize) + (x as usize)];
                 let bit = 1 << (y % 8);
 
                 (byte, bit)
             }
-            &DisplayRotation::Rotate90 | &DisplayRotation::Rotate270 => {
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
                 let byte =
                     &mut self.buffer[((x as usize) / 8 * display_width as usize) + (y as usize)];
                 let bit = 1 << (x % 8);
@@ -113,8 +113,8 @@ where
     // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
     /// Initialize display in column mode.
     pub fn init(&mut self) -> Result<(), DI::Error> {
-        let display_size = self.properties.get_size().clone();
-        let display_rotation = self.properties.get_rotation().clone();
+        let display_size = self.properties.get_size();
+        let display_rotation = self.properties.get_rotation();
         let (_, display_height) = display_size.dimensions();
 
         {
@@ -156,8 +156,8 @@ where
         let display_rotation = self.properties.get_rotation();
 
         match display_rotation {
-            &DisplayRotation::Rotate0 | &DisplayRotation::Rotate180 => (w, h),
-            &DisplayRotation::Rotate90 | &DisplayRotation::Rotate270 => (h, w),
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (w, h),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (h, w),
         }
     }
 

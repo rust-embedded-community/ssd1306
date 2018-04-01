@@ -11,7 +11,7 @@ embedded-hal = "0.1.2"
 
 [dependencies.embedded-graphics]
 git = "https://github.com/jamwaffles/embedded-graphics.git"
-version = "*"
+rev = "b9794421b74dc810979e9d4191718917f715575a"
 optional = true
 
 [dev-dependencies]

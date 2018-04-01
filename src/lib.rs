@@ -17,10 +17,11 @@ extern crate embedded_hal as hal;
 
 mod command;
 mod displaysize;
-pub mod displayrotation;
 pub mod builder;
+pub mod displayrotation;
 pub mod interface;
 pub mod mode;
+pub mod properties;
 
 pub use builder::Builder;
 pub use displaysize::DisplaySize;

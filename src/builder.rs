@@ -6,6 +6,7 @@ use hal::digital::OutputPin;
 use super::displaysize::DisplaySize;
 use super::displayrotation::DisplayRotation;
 use super::interface::{I2cInterface, SpiInterface};
+use super::properties::DisplayProperties;
 use mode::raw::RawMode;
 
 /// Communication interface factory
@@ -52,11 +53,12 @@ impl Builder {
     where
         I2C: hal::blocking::i2c::Write,
     {
-        RawMode::new(
+        let properties = DisplayProperties::new(
             I2cInterface::new(i2c, self.i2c_addr),
             self.display_size,
             self.rotation,
-        )
+        );
+        RawMode::new(properties)
     }
 
     /// Create spi communication interface
@@ -65,6 +67,8 @@ impl Builder {
         SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
         DC: OutputPin,
     {
-        RawMode::new(SpiInterface::new(spi, dc), self.display_size, self.rotation)
+        let properties =
+            DisplayProperties::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
+        RawMode::new(properties)
     }
 }

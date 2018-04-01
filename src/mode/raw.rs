@@ -1,31 +1,27 @@
 //! A raw display mode
 
-use displayrotation::DisplayRotation;
-use displaysize::DisplaySize;
 use interface::DisplayInterface;
+use properties::DisplayProperties;
 
 use mode::graphics::GraphicsMode;
 
 /// A display mode without higher level mostly meant as a stepstone for changing into higher
 /// abstracted modes
-pub struct RawMode<DI> {
-    iface: DI,
-    display_size: DisplaySize,
-    display_rotation: DisplayRotation,
+pub struct RawMode<DI>
+where
+    DI: DisplayInterface,
+{
+    properties: DisplayProperties<DI>,
 }
 
 impl<DI: DisplayInterface> RawMode<DI> {
     /// Create a new raw display mode
-    pub fn new(iface: DI, display_size: DisplaySize, display_rotation: DisplayRotation) -> Self {
-        RawMode {
-            iface,
-            display_size,
-            display_rotation,
-        }
+    pub fn new(properties: DisplayProperties<DI>) -> Self {
+        RawMode { properties }
     }
 
     /// Changed into graphics mode
     pub fn into_graphicsmode(self) -> GraphicsMode<DI> {
-        GraphicsMode::new(self.iface, self.display_size, self.display_rotation)
+        GraphicsMode::new(self.properties)
     }
 }

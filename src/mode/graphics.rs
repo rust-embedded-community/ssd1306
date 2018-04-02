@@ -111,8 +111,8 @@ where
         }
     }
 
-    // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
-    /// Initialize display in column mode.
+    /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
+    /// column 0 on the left, to column _n_ on the right
     pub fn init(&mut self) -> Result<(), DI::Error> {
         self.properties.init_column_mode()?;
         Ok(())

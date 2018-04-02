@@ -31,11 +31,10 @@ where
         }
     }
 
-    /// Initialize display in column mode
+    /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
+    /// column 0 on the left, to column _n_ on the right
     pub fn init_column_mode(&mut self) -> Result<(), DI::Error> {
         // TODO: Break up into nice bits so display modes can pick whathever they need
-        // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
-        // column 0 on the left, to column _n_ on the right
         let (_, display_height) = self.display_size.dimensions();
 
         let display_rotation = self.display_rotation;

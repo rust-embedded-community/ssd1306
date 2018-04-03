@@ -17,7 +17,7 @@ use blue_pill::spi::Spi;
 use embedded_graphics::Drawing;
 use embedded_graphics::primitives::{Circle, Line, Rect};
 use hal::spi::{Mode, Phase, Polarity};
-use ssd1306::Builder;
+use ssd1306::{Builder, mode::GraphicsMode};
 
 fn main() {
     let cp = cortex_m::Peripherals::take().unwrap();
@@ -56,7 +56,7 @@ fn main() {
         &mut rcc.apb2,
     );
 
-    let mut disp = Builder::new().connect_spi(spi, dc).into_graphicsmode();
+    let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
 
     disp.reset(&mut rst, &mut delay);
     disp.init().unwrap();

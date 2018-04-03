@@ -21,7 +21,7 @@ use blue_pill::prelude::*;
 use embedded_graphics::Drawing;
 use embedded_graphics::image::{Image, Image1BPP};
 use embedded_graphics::transform::Transform;
-use ssd1306::Builder;
+use ssd1306::{Builder, mode::GraphicsMode};
 use ssd1306::displayrotation::DisplayRotation;
 
 fn main() {
@@ -51,10 +51,10 @@ fn main() {
         &mut rcc.apb1,
     );
 
-    let mut disp = Builder::new()
+    let mut disp: GraphicsMode<_> = Builder::new()
         // Set initial rotation at 90 degrees clockwise
         .with_rotation(DisplayRotation::Rotate90)
-        .connect_i2c(i2c).into_graphicsmode();
+        .connect_i2c(i2c).into();
 
     disp.init().unwrap();
     disp.flush().unwrap();

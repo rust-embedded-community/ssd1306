@@ -15,7 +15,7 @@ use blue_pill::delay::Delay;
 use blue_pill::prelude::*;
 use blue_pill::spi::Spi;
 use hal::spi::{Mode, Phase, Polarity};
-use ssd1306::Builder;
+use ssd1306::{Builder, mode::GraphicsMode};
 
 fn main() {
     let cp = cortex_m::Peripherals::take().unwrap();
@@ -54,7 +54,7 @@ fn main() {
         &mut rcc.apb2,
     );
 
-    let mut disp = Builder::new().connect_spi(spi, dc).into_graphicsmode();
+    let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
 
     disp.reset(&mut rst, &mut delay);
     disp.init().unwrap();

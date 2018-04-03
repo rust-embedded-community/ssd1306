@@ -16,7 +16,7 @@ use blue_pill::i2c::{DutyCycle, I2c, Mode};
 use blue_pill::prelude::*;
 use embedded_graphics::Drawing;
 use embedded_graphics::primitives::{Circle, Line, Rect};
-use ssd1306::{Builder, DisplaySize};
+use ssd1306::{Builder, DisplaySize, mode::GraphicsMode};
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
@@ -45,9 +45,10 @@ fn main() {
         &mut rcc.apb1,
     );
 
-    let mut disp = Builder::new()
+    let mut disp: GraphicsMode<_> = Builder::new()
         .with_size(DisplaySize::Display128x32)
-        .connect_i2c(i2c).into_graphicsmode();
+        .connect_i2c(i2c)
+        .into();
     disp.init().unwrap();
     disp.flush().unwrap();
 

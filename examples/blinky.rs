@@ -107,7 +107,7 @@ fn init(p: init::Peripherals) -> init::LateResources {
         &mut rcc.apb2,
     );
 
-    let mut disp = Builder::new().connect_spi(spi, dc).into_graphicsmode();
+    let mut disp : GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
 
     disp.reset(&mut rst, &mut delay);
     disp.init().unwrap();

@@ -1,16 +1,15 @@
 //! Abstraction of different operating modes for the SSD1306
 
-use super::graphics::GraphicsMode;
 use super::raw::RawMode;
 
 use interface::DisplayInterface;
 use properties::DisplayProperties;
 
 /// Display mode abstraction
-pub struct DisplayMode<MODE>(MODE);
+pub struct DisplayMode<MODE>(pub MODE);
 
 /// Trait with core functionality for display mode switching
-pub trait DisplayTrait<DI> {
+pub trait DisplayModeTrait<DI> {
     /// Allocate all required data and initialise display for mode
     fn new(properties: DisplayProperties<DI>) -> Self;
 
@@ -19,7 +18,7 @@ pub trait DisplayTrait<DI> {
 }
 
 impl<MODE> DisplayMode<MODE> {
-    /// Setup display to run in Raw mode
+    /// Setup display to run in raw mode
     pub fn new<DI>(properties: DisplayProperties<DI>) -> DisplayMode<RawMode<DI>>
     where
         DI: DisplayInterface,
@@ -27,15 +26,14 @@ impl<MODE> DisplayMode<MODE> {
         DisplayMode(RawMode::new(properties))
     }
 
-    /// Change display mode into graphics mode
+    /// Change into any mode implementing DisplayModeTrait
     // TODO: Figure out how to stay as generic DisplayMode but act as particular mode
-    // TODO: Figure out how to get rid of explicit mode switching functions
-    pub fn into_graphicsmode<DI>(self) -> GraphicsMode<DI>
+    pub fn into<DI, NMODE: DisplayModeTrait<DI>>(self) -> NMODE
     where
         DI: DisplayInterface,
-        MODE: DisplayTrait<DI>,
+        MODE: DisplayModeTrait<DI>,
     {
         let properties = self.0.release();
-        GraphicsMode::new(properties)
+        NMODE::new(properties)
     }
 }

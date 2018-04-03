@@ -10,6 +10,8 @@ use displaysize::DisplaySize;
 use interface::DisplayInterface;
 use properties::DisplayProperties;
 
+use mode::displaymode::DisplayTrait;
+
 /// GraphicsMode
 pub struct GraphicsMode<DI>
 where
@@ -19,18 +21,28 @@ where
     buffer: [u8; 1024],
 }
 
-impl<DI> GraphicsMode<DI>
+impl<DI> DisplayTrait<DI> for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
     /// Create new GraphicsMode instance
-    pub fn new(properties: DisplayProperties<DI>) -> Self {
+    fn new(properties: DisplayProperties<DI>) -> Self {
         GraphicsMode {
             properties,
             buffer: [0; 1024],
         }
     }
 
+    /// Release all resources used by GraphicsMode
+    fn release(self) -> DisplayProperties<DI> {
+        self.properties
+    }
+}
+
+impl<DI> GraphicsMode<DI>
+where
+    DI: DisplayInterface,
+{
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
         self.buffer = [0; 1024];

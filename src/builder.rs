@@ -8,6 +8,7 @@ use super::displayrotation::DisplayRotation;
 use super::interface::{I2cInterface, SpiInterface};
 use super::properties::DisplayProperties;
 use mode::raw::RawMode;
+use mode::displaymode::DisplayMode;
 
 /// Communication interface factory
 #[derive(Clone, Copy)]
@@ -49,7 +50,7 @@ impl Builder {
     }
 
     /// Create i2c communication interface
-    pub fn connect_i2c<I2C>(&self, i2c: I2C) -> RawMode<I2cInterface<I2C>>
+    pub fn connect_i2c<I2C>(&self, i2c: I2C) -> DisplayMode<RawMode<I2cInterface<I2C>>>
     where
         I2C: hal::blocking::i2c::Write,
     {
@@ -58,17 +59,17 @@ impl Builder {
             self.display_size,
             self.rotation,
         );
-        RawMode::new(properties)
+        DisplayMode::<RawMode<I2cInterface<I2C>>>::new(properties)
     }
 
     /// Create spi communication interface
-    pub fn connect_spi<SPI, DC>(&self, spi: SPI, dc: DC) -> RawMode<SpiInterface<SPI, DC>>
+    pub fn connect_spi<SPI, DC>(&self, spi: SPI, dc: DC) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
     where
         SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
         DC: OutputPin,
     {
         let properties =
             DisplayProperties::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
-        RawMode::new(properties)
+        DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties)
     }
 }

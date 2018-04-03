@@ -10,7 +10,7 @@ use displaysize::DisplaySize;
 use interface::DisplayInterface;
 use properties::DisplayProperties;
 
-use mode::displaymode::DisplayTrait;
+use mode::displaymode::DisplayModeTrait;
 
 /// GraphicsMode
 pub struct GraphicsMode<DI>
@@ -21,7 +21,7 @@ where
     buffer: [u8; 1024],
 }
 
-impl<DI> DisplayTrait<DI> for GraphicsMode<DI>
+impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {

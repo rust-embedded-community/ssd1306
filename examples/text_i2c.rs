@@ -16,7 +16,7 @@ use blue_pill::prelude::*;
 use embedded_graphics::Drawing;
 use embedded_graphics::fonts::{Font, Font6x8};
 use embedded_graphics::transform::Transform;
-use ssd1306::Builder;
+use ssd1306::{Builder, mode::GraphicsMode};
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
@@ -45,7 +45,8 @@ fn main() {
         &mut rcc.apb1,
     );
 
-    let mut disp = Builder::new().connect_i2c(i2c).into_graphicsmode();
+    let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
+
     disp.init().unwrap();
     disp.flush().unwrap();
 

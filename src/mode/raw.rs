@@ -3,7 +3,7 @@
 use interface::DisplayInterface;
 use properties::DisplayProperties;
 
-use mode::displaymode::DisplayTrait;
+use mode::displaymode::DisplayModeTrait;
 
 /// A display mode without higher level mostly meant as a stepstone for changing into higher
 /// abstracted modes
@@ -14,7 +14,7 @@ where
     properties: DisplayProperties<DI>,
 }
 
-impl<DI> DisplayTrait<DI> for RawMode<DI>
+impl<DI> DisplayModeTrait<DI> for RawMode<DI>
 where
     DI: DisplayInterface,
 {

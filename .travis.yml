@@ -100,7 +100,7 @@ script:
 after_success:
   - rm -rf .cargo
   - cargo doc --release
-  - cargo doc-upload --branch doc-upload || true
+  - cargo doc-upload || true
 
 cache: cargo
 before_cache:

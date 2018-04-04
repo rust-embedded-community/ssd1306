@@ -1,6 +1,6 @@
 # SSD1306 driver
 
-![Travis build status](https://travis-ci.org/jamwaffles/ssd1306.svg?branch=master)
+[![Build Status](https://travis-ci.org/jamwaffles/ssd1306.svg?branch=master)](https://travis-ci.org/jamwaffles/ssd1306)
 
 ![CRIUS display showing the Rust logo](readme_banner.jpg?raw=true)
 

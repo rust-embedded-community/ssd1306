@@ -1,13 +1,15 @@
 //! Character display module
+use hal::blocking::delay::DelayMs;
+use hal::digital::OutputPin;
 
-use displayrotation::DisplayRotation;
 use command::Command;
 use command::Page::{self, Page7};
 
-use hal::blocking::delay::DelayMs;
-use hal::digital::OutputPin;
+use displayrotation::DisplayRotation;
 use interface::DisplayInterface;
 use properties::DisplayProperties;
+
+use mode::displaymode::DisplayModeTrait;
 
 use core::fmt;
 
@@ -16,15 +18,25 @@ pub struct CharacterMode<DI> {
     properties: DisplayProperties<DI>,
 }
 
-impl<DI> CharacterMode<DI>
+impl<DI> DisplayModeTrait<DI> for CharacterMode<DI>
 where
     DI: DisplayInterface,
 {
     /// Create new CharacterMode instance
-    pub fn new(properties: DisplayProperties<DI>) -> Self {
+    fn new(properties: DisplayProperties<DI>) -> Self {
         CharacterMode { properties }
     }
 
+    /// Release all resources used by CharacterMode
+    fn release(self) -> DisplayProperties<DI> {
+        self.properties
+    }
+}
+
+impl<DI> CharacterMode<DI>
+where
+    DI: DisplayInterface,
+{
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
         {
@@ -180,7 +192,7 @@ where
 
     /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
     /// column 0 on the left, to column _n_ on the right
-    pub fn init(&mut self) -> Result<(), DI::Error> {
+    pub fn init(&mut self) -> Result<(), ()> {
         self.properties.init_column_mode()?;
         Ok(())
     }

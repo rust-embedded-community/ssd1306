@@ -1,12 +1,12 @@
 //! Buffered display module for use with the embedded_graphics crate
 
-use displaysize::DisplaySize;
-use displayrotation::DisplayRotation;
-
-use command::{AddrMode, Command, VcomhLevel};
-
 use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
+
+use command::Command;
+
+use displayrotation::DisplayRotation;
+use displaysize::DisplaySize;
 use interface::DisplayInterface;
 use properties::DisplayProperties;
 
@@ -49,6 +49,7 @@ where
     }
 
     /// Reset display
+    // TODO: Move to a more appropriate place
     pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY)
     where
         RST: OutputPin,
@@ -122,55 +123,16 @@ where
         }
     }
 
-    // Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from column 0 on the left, to column _n_ on the right
-    /// Initialize display in column mode.
+    /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
+    /// column 0 on the left, to column _n_ on the right
     pub fn init(&mut self) -> Result<(), DI::Error> {
-        let display_size = self.properties.get_size();
-        let display_rotation = self.properties.get_rotation();
-        let (_, display_height) = display_size.dimensions();
-
-        {
-            let iface = self.properties.borrow_iface_mut();
-            Command::DisplayOn(false).send(iface)?;
-            Command::DisplayClockDiv(0x8, 0x0).send(iface)?;
-            Command::Multiplex(display_height - 1).send(iface)?;
-            Command::DisplayOffset(0).send(iface)?;
-            Command::StartLine(0).send(iface)?;
-            // TODO: Ability to turn charge pump on/off
-            Command::ChargePump(true).send(iface)?;
-            Command::AddressMode(AddrMode::Horizontal).send(iface)?;
-        }
-
-        self.set_rotation(display_rotation)?;
-
-        let iface = self.properties.borrow_iface_mut();
-        match display_size {
-            DisplaySize::Display128x32 => Command::ComPinConfig(false, false).send(iface),
-            DisplaySize::Display128x64 => Command::ComPinConfig(true, false).send(iface),
-            DisplaySize::Display96x16 => Command::ComPinConfig(false, false).send(iface),
-        }?;
-
-        Command::Contrast(0x8F).send(iface)?;
-        Command::PreChargePeriod(0x1, 0xF).send(iface)?;
-        Command::VcomhDeselect(VcomhLevel::Auto).send(iface)?;
-        Command::AllOn(false).send(iface)?;
-        Command::Invert(false).send(iface)?;
-        Command::EnableScroll(false).send(iface)?;
-        Command::DisplayOn(true).send(iface)?;
-
+        self.properties.init_column_mode()?;
         Ok(())
     }
 
     /// Get display dimensions, taking into account the current rotation of the display
-    // TODO: Replace (u8, u8) with a dimensioney type for consistency
     pub fn get_dimensions(&self) -> (u8, u8) {
-        let (w, h) = self.properties.get_size().dimensions();
-        let display_rotation = self.properties.get_rotation();
-
-        match display_rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (w, h),
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (h, w),
-        }
+        self.properties.get_dimensions()
     }
 
     /// Set the display rotation

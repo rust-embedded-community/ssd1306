@@ -29,9 +29,7 @@ where
     SPI: hal::blocking::spi::Write<u8>,
     DC: OutputPin,
 {
-    type Error = ();
-
-    fn send_command(&mut self, cmd: u8) -> Result<(), Self::Error> {
+    fn send_command(&mut self, cmd: u8) -> Result<(), ()> {
         self.dc.set_low();
 
         self.spi.write(&[cmd]).map_err(|_| ())?;
@@ -41,7 +39,7 @@ where
         Ok(())
     }
 
-    fn send_data(&mut self, buf: &[u8]) -> Result<(), Self::Error> {
+    fn send_data(&mut self, buf: &[u8]) -> Result<(), ()> {
         // 1 = data, 0 = command
         self.dc.set_high();
 

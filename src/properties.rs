@@ -33,7 +33,7 @@ where
 
     /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
     /// column 0 on the left, to column _n_ on the right
-    pub fn init_column_mode(&mut self) -> Result<(), DI::Error> {
+    pub fn init_column_mode(&mut self) -> Result<(), ()> {
         // TODO: Break up into nice bits so display modes can pick whathever they need
         let (_, display_height) = self.display_size.dimensions();
 
@@ -94,7 +94,7 @@ where
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), DI::Error> {
+    pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), ()> {
         self.display_rotation = display_rotation;
 
         match display_rotation {

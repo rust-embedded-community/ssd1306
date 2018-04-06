@@ -67,9 +67,17 @@ where
         Ok(())
     }
 
-    /// Borrow configured interface for raw communication
-    pub fn borrow_iface_mut(&mut self) -> &mut DI {
-        &mut self.iface
+    /// Set the area on the display the data should be rendered onto
+    pub fn set_render_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), DI::Error> {
+        Command::ColumnAddress(start.0, start.1 - 1).send(&mut self.iface)?;
+        Command::PageAddress(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
+        Ok(())
+    }
+
+    /// Render data onto the display
+    pub fn render(&mut self, buffer: &[u8]) -> Result<(), DI::Error> {
+        self.iface.send_data(&buffer)?;
+        Ok(())
     }
 
     /// Get the configured display size

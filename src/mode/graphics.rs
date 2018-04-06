@@ -3,8 +3,6 @@
 use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
 
-use command::Command;
-
 use displayrotation::DisplayRotation;
 use displaysize::DisplaySize;
 use interface::DisplayInterface;
@@ -65,17 +63,16 @@ where
     /// Write out data to display
     pub fn flush(&mut self) -> Result<(), ()> {
         let display_size = self.properties.get_size();
-        let iface = self.properties.borrow_iface_mut();
 
+        // Ensure the display buffer is at the origin of the display before we send the full frame
+        // to prevent accidental offsets
         let (display_width, display_height) = display_size.dimensions();
-
-        Command::ColumnAddress(0, display_width - 1).send(iface)?;
-        Command::PageAddress(0.into(), (display_height - 1).into()).send(iface)?;
+        self.properties.set_render_area((0, display_width), (0, display_height))?;
 
         match display_size {
-            DisplaySize::Display128x64 => iface.send_data(&self.buffer),
-            DisplaySize::Display128x32 => iface.send_data(&self.buffer[0..512]),
-            DisplaySize::Display96x16 => iface.send_data(&self.buffer[0..192]),
+            DisplaySize::Display128x64 => self.properties.render(&self.buffer),
+            DisplaySize::Display128x32 => self.properties.render(&self.buffer[0..512]),
+            DisplaySize::Display96x16 => self.properties.render(&self.buffer[0..192]),
         }
     }
 

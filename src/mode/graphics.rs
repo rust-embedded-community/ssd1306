@@ -63,7 +63,7 @@ where
     }
 
     /// Write out data to display
-    pub fn flush(&mut self) -> Result<(), DI::Error> {
+    pub fn flush(&mut self) -> Result<(), ()> {
         let display_size = self.properties.get_size();
         let iface = self.properties.borrow_iface_mut();
 
@@ -125,7 +125,7 @@ where
 
     /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
     /// column 0 on the left, to column _n_ on the right
-    pub fn init(&mut self) -> Result<(), DI::Error> {
+    pub fn init(&mut self) -> Result<(), ()> {
         self.properties.init_column_mode()?;
         Ok(())
     }
@@ -136,7 +136,7 @@ where
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DI::Error> {
+    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), ()> {
         self.properties.set_rotation(rot)
     }
 }

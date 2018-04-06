@@ -24,15 +24,13 @@ impl<I2C> DisplayInterface for I2cInterface<I2C>
 where
     I2C: hal::blocking::i2c::Write,
 {
-    type Error = ();
-
-    fn send_command(&mut self, cmd: u8) -> Result<(), Self::Error> {
+    fn send_command(&mut self, cmd: u8) -> Result<(), ()> {
         self.i2c.write(self.addr, &[0, cmd]).map_err(|_| ())?;
 
         Ok(())
     }
 
-    fn send_data(&mut self, buf: &[u8]) -> Result<(), Self::Error> {
+    fn send_data(&mut self, buf: &[u8]) -> Result<(), ()> {
         let mut writebuf: [u8; 17] = [0; 17];
 
         // Data mode

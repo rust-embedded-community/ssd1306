@@ -31,35 +31,26 @@ where
     }
 
     fn send_data(&mut self, buf: &[u8]) -> Result<(), ()> {
+        // Noop if the data buffer is empty
+        if buf.is_empty() {
+            return Ok(());
+        }
+
         let mut writebuf: [u8; 17] = [0; 17];
 
         // Data mode
         // 8.1.5.2 5) b) in the datasheet
         writebuf[0] = 0x40;
 
-        // Noop if the data buffer is empty
-        if buf.is_empty() {
-            return Ok(());
-        }
-
         for chunk in buf.chunks(16) {
-            let writebuf = {
-                let mut writebuf: [u8; 17] = Default::default();
+            let chunklen = chunk.len();
 
-                // Data mode
-                // 8.1.5.2 5) b) in the datasheet
-                writebuf[0] = 0x40;
+            // Copy over all data from buffer, leaving the data command byte intact
+            writebuf[1..=chunklen].copy_from_slice(&chunk[0..chunklen]);
 
-                writebuf
-                    .iter_mut()
-                    .skip(1)
-                    .zip(chunk)
-                    .for_each(|(dst, src)| *dst = *src);
-
-                writebuf
-            };
-
-            self.i2c.write(self.addr, &writebuf[..1 + chunk.len()]).map_err(|_| ())?;
+            self.i2c
+                .write(self.addr, &writebuf[..=chunklen])
+                .map_err(|_| ())?;
         }
 
         Ok(())

@@ -1,7 +1,5 @@
 //! Abstraction of different operating modes for the SSD1306
 
-use super::raw::RawMode;
-
 use interface::DisplayInterface;
 use properties::DisplayProperties;
 
@@ -18,12 +16,13 @@ pub trait DisplayModeTrait<DI> {
 }
 
 impl<MODE> DisplayMode<MODE> {
-    /// Setup display to run in raw mode
-    pub fn new<DI>(properties: DisplayProperties<DI>) -> DisplayMode<RawMode<DI>>
+    /// Setup display to run in requested mode
+    pub fn new<DI>(properties: DisplayProperties<DI>) -> Self
     where
         DI: DisplayInterface,
+        MODE: DisplayModeTrait<DI>,
     {
-        DisplayMode(RawMode::new(properties))
+        DisplayMode(MODE::new(properties))
     }
 
     /// Change into any mode implementing DisplayModeTrait

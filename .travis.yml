@@ -4,7 +4,7 @@
 dist: trusty
 language: rust
 rust:
-  - nightly
+  - nightly-2018-04-08
 sudo: required
 
 matrix:
@@ -86,12 +86,16 @@ before_install:
 install:
   - rustup override set nightly
   - rustup component add rust-src
-  - rustup target add arm-unknown-linux-gnueabi
-  - rustup target add armv7-unknown-linux-gnueabihf
+  - rustup target add \
+      arm-unknown-linux-gnueabi \
+      armv7-unknown-linux-gnueabihf \
+      thumbv6m-none-eabi \
+      thumbv7em-none-eabi \
+      thumbv7em-none-eabihf \
+      thumbv7m-none-eabi
   - source ~/.cargo/env || true
   - mv .cargo ._cargo
   - cargo install cargo-travis || true
-  - cargo install xargo || true
   - mv ._cargo .cargo
 
 script:

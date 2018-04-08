@@ -2,8 +2,8 @@
 
 set -e
 
-xargo build --target $TARGET --all-features --release
+cargo build --target $TARGET --all-features --release
 
 if [ -z $DISABLE_EXAMPLES ]; then
-	xargo build --target $TARGET --all-features --examples
+	cargo build --target $TARGET --all-features --examples
 fi

@@ -84,7 +84,6 @@ before_install:
   - sudo apt-get install -qq gcc-arm-none-eabi
 
 install:
-  - rustup override set nightly
   - rustup component add rust-src
   - |
       SYSROOT=$(rustc --print sysroot)

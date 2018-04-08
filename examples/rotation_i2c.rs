@@ -6,7 +6,7 @@
 //! convert rust.png -depth 1 gray:rust.raw
 //! ```
 //!
-//! Run on a Blue Pill with `xargo run --target thumbv7m-none-eabi --example image_i2c --features graphics`
+//! Run on a Blue Pill with `cargo run --target thumbv7m-none-eabi --example image_i2c --features graphics`
 
 #![no_std]
 
@@ -21,8 +21,8 @@ use blue_pill::prelude::*;
 use embedded_graphics::Drawing;
 use embedded_graphics::image::{Image, Image1BPP};
 use embedded_graphics::transform::Transform;
-use ssd1306::{Builder, mode::GraphicsMode};
 use ssd1306::displayrotation::DisplayRotation;
+use ssd1306::{Builder, mode::GraphicsMode};
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();

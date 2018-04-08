@@ -15,7 +15,7 @@
 //! PB1 -> D/C
 //! ```
 //!
-//! Run on a Blue Pill with `xargo run --example blinky --features graphics`
+//! Run on a Blue Pill with `cargo run --example blinky --features graphics`
 
 #![no_std]
 #![feature(const_fn)]
@@ -107,7 +107,7 @@ fn init(p: init::Peripherals) -> init::LateResources {
         &mut rcc.apb2,
     );
 
-    let mut disp : GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
 
     disp.reset(&mut rst, &mut delay);
     disp.init().unwrap();

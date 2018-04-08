@@ -2,7 +2,7 @@
 //! dev board. I found that it requires pullup resistors on SDA and SCL to function correctly. Uses
 //! a 128x32px display as opposed to 128x64 (default).
 //!
-//! Run on a Blue Pill with `xargo run --example graphics_i2c_128x32 --features graphics`
+//! Run on a Blue Pill with `cargo run --example graphics_i2c_128x32 --features graphics`
 
 #![no_std]
 

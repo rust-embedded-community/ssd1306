@@ -67,12 +67,12 @@ where
         // Ensure the display buffer is at the origin of the display before we send the full frame
         // to prevent accidental offsets
         let (display_width, display_height) = display_size.dimensions();
-        self.properties.set_render_area((0, display_width), (0, display_height))?;
+        self.properties.set_draw_area((0, display_width), (0, display_height))?;
 
         match display_size {
-            DisplaySize::Display128x64 => self.properties.render(&self.buffer),
-            DisplaySize::Display128x32 => self.properties.render(&self.buffer[0..512]),
-            DisplaySize::Display96x16 => self.properties.render(&self.buffer[0..192]),
+            DisplaySize::Display128x64 => self.properties.draw(&self.buffer),
+            DisplaySize::Display128x32 => self.properties.draw(&self.buffer[0..512]),
+            DisplaySize::Display96x16 => self.properties.draw(&self.buffer[0..192]),
         }
     }
 

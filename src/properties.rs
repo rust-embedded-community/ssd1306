@@ -67,15 +67,19 @@ where
         Ok(())
     }
 
-    /// Set the area on the display the data should be rendered onto
-    pub fn set_render_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), ()> {
+    /// Set the position in the framebuffer of the display where any sent data should be
+    /// drawn. This method can be used for changing the affected area on the screen as well
+    /// as (re-)setting the start point of the next `draw` call.
+    pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), ()> {
         Command::ColumnAddress(start.0, start.1 - 1).send(&mut self.iface)?;
         Command::PageAddress(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
         Ok(())
     }
 
-    /// Render data onto the display
-    pub fn render(&mut self, buffer: &[u8]) -> Result<(), ()> {
+    /// Send the data to the display for drawing at the current position in the framebuffer
+    /// and advance the position accordingly. Cf. `set_draw_area` to modify the affected area by
+    /// this method.
+    pub fn draw(&mut self, buffer: &[u8]) -> Result<(), ()> {
         self.iface.send_data(&buffer)?;
         Ok(())
     }

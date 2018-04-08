@@ -2,7 +2,7 @@
 //!
 //! You will probably want to use the [`embedded_graphics`](https://crates.io/crates/embedded-graphics) crate to do more complex drawing.
 //!
-//! Run on a Blue Pill with `xargo run --example pixelsquare
+//! Run on a Blue Pill with `cargo run --example pixelsquare
 
 #![no_std]
 

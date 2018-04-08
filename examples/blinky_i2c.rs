@@ -13,7 +13,7 @@
 //! (green)  SCL -> PB8
 //! ```
 //!
-//! Run on a Blue Pill with `xargo run --example blinky_i2c`, currently only works on nightly.
+//! Run on a Blue Pill with `cargo run --example blinky_i2c`, currently only works on nightly.
 
 #![no_std]
 #![feature(const_fn)]
@@ -29,9 +29,9 @@ extern crate stm32f103xx_hal as blue_pill;
 
 use blue_pill::gpio::gpiob::{PB8, PB9};
 use blue_pill::gpio::{Alternate, OpenDrain};
+use blue_pill::i2c::{DutyCycle, I2c, Mode};
 use blue_pill::prelude::*;
 use blue_pill::stm32f103xx::I2C1;
-use blue_pill::i2c::{DutyCycle, I2c, Mode};
 use cortex_m_rtfm_macros::app;
 use rtfm::Threshold;
 use ssd1306::interface::I2cInterface;

@@ -18,6 +18,12 @@ pub struct Builder {
     i2c_addr: u8,
 }
 
+impl Default for Builder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Builder {
     /// Create new builder for default size of 128 x 64 pixels.
     pub fn new() -> Self {
@@ -63,7 +69,11 @@ impl Builder {
     }
 
     /// Create spi communication interface
-    pub fn connect_spi<SPI, DC>(&self, spi: SPI, dc: DC) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
+    pub fn connect_spi<SPI, DC>(
+        &self,
+        spi: SPI,
+        dc: DC,
+    ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
     where
         SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
         DC: OutputPin,

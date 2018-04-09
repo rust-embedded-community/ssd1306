@@ -1,4 +1,20 @@
 //! SSD1306 OLED display driver
+//!
+//! The driver must be initialised by passing an I2C or SPI interface peripheral to the [`Builder`],
+//! which will in turn create a driver instance in a particular mode. By default, the builder
+//! returns a [`mode::RawMode`] instance which isn't very useful by itself. You can coerce the driver
+//! into a more useful mode by calling `into()` and defining the type you want to coerce to. For
+//! example, to initialise the display with an I2C interface and [mode::GraphicsMode], you would do
+//! something like this:
+//!
+//! ```rust,ignore
+//! let i2c = I2c::i2c1(/* snip */);
+//!
+//! let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
+//! disp.init();
+//!
+//! // Display is now ready to draw to
+//! ```
 
 #![no_std]
 // TODO: Docs
@@ -15,10 +31,10 @@
 
 extern crate embedded_hal as hal;
 
-mod command;
-mod displaysize;
 pub mod builder;
+mod command;
 pub mod displayrotation;
+mod displaysize;
 pub mod interface;
 pub mod mode;
 pub mod properties;

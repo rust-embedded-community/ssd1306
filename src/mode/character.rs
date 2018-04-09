@@ -2,10 +2,8 @@
 use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
 
-use command::Command;
-use command::Page::{self, Page7};
-
 use displayrotation::DisplayRotation;
+use displaysize::DisplaySize;
 use interface::DisplayInterface;
 use properties::DisplayProperties;
 
@@ -39,12 +37,16 @@ where
 {
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
-        {
-            let iface = self.properties.borrow_iface_mut();
+        let display_size = self.properties.get_size();
 
-            for _ in 0..8 * 16 {
-                let _ = iface.send_data(&[0, 0, 0, 0, 0, 0, 0, 0]);
-            }
+        let numchars = match display_size {
+            DisplaySize::Display128x64 => 128,
+            DisplaySize::Display128x32 => 64,
+            DisplaySize::Display96x16 => 24,
+        };
+
+        for _ in 0..numchars {
+            let _ = self.properties.draw(&[0, 0, 0, 0, 0, 0, 0, 0]);
         }
 
         // Reset position so we don't end up in some random place of our cleared screen
@@ -170,7 +172,6 @@ where
         0x08, 0x08, 0x2A, 0x1C, 0x08, 0x00, 0x00,// ->
         0x08, 0x1C, 0x2A, 0x08, 0x08, 0x00, 0x00 // <-
     ];
-        let iface = self.properties.borrow_iface_mut();
 
         for c in bytes {
             // Create an array with our byte data instruction and a blank column at the end
@@ -184,7 +185,7 @@ where
             data[0..7].copy_from_slice(&FONT_7X7[index..index + 7]);
 
             /* Write it out to the I2C bus */
-            iface.send_data(&data)?
+            self.properties.draw(&data)?
         }
 
         Ok(())
@@ -209,11 +210,9 @@ where
 
     /// Position cursor at specified x, y character coordinate (multiple of 8)
     pub fn set_position(&mut self, x: u8, y: u8) -> Result<(), ()> {
-        let iface = self.properties.borrow_iface_mut();
-
-        // FIXME: Should be width
-        Command::ColumnAddress(x * 8, 0x7f).send(iface)?;
-        Command::PageAddress(Page::from(y), Page7).send(iface)
+        let (display_width, display_height) = self.properties.get_size().dimensions();
+        self.properties
+            .set_draw_area((x * 8, y), (display_width, display_height))
     }
 }
 

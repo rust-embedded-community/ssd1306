@@ -1,4 +1,4 @@
-//! Buffered display module for use with the embedded_graphics crate
+//! Buffered display module for use with the [embedded_graphics] crate
 
 use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;

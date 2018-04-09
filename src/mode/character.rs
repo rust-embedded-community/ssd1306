@@ -46,7 +46,7 @@ where
         };
 
         for _ in 0..numchars {
-            let _ = self.properties.draw(&[0, 0, 0, 0, 0, 0, 0, 0]);
+            let _ = self.properties.draw(&[0; 8]);
         }
 
         // Reset position so we don't end up in some random place of our cleared screen
@@ -175,16 +175,15 @@ where
 
         for c in bytes {
             // Create an array with our byte data instruction and a blank column at the end
-            let mut data: [u8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+            let mut data: [u8; 8] = [0; 8];
 
-            /* Calculate our index into the character table above */
+            // Calculate our index into the character table above
             let index = (*c as usize - 0x20) * 7;
 
-            /* Populate the middle of the array with the data from the character array at the right
-             * index */
+            // Populate the middle of the array with the data from the character array at the right index
             data[0..7].copy_from_slice(&FONT_7X7[index..index + 7]);
 
-            /* Write it out to the I2C bus */
+            // Send the pixel data to the display
             self.properties.draw(&data)?
         }
 
@@ -196,11 +195,6 @@ where
     pub fn init(&mut self) -> Result<(), ()> {
         self.properties.init_column_mode()?;
         Ok(())
-    }
-
-    /// Get display dimensions, taking into account the current rotation of the display
-    pub fn get_dimensions(&self) -> (u8, u8) {
-        self.properties.get_dimensions()
     }
 
     /// Set the display rotation

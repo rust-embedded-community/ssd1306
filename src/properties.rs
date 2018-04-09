@@ -1,4 +1,4 @@
-//! Module to handle common display properties
+//! Container to store display properties
 
 use command::{AddrMode, Command, VcomhLevel};
 
@@ -31,7 +31,7 @@ where
         }
     }
 
-    /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
+    /// Set display up in column mode, i.e. a byte walks down a column of 8 pixels from
     /// column 0 on the left, to column _n_ on the right
     pub fn init_column_mode(&mut self) -> Result<(), ()> {
         // TODO: Break up into nice bits so display modes can pick whathever they need

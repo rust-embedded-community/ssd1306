@@ -12,7 +12,7 @@ extern crate stm32f103xx_hal as blue_pill;
 
 use blue_pill::i2c::{DutyCycle, I2c, Mode};
 use blue_pill::prelude::*;
-use ssd1306::{Builder, mode::CharacterMode};
+use ssd1306::{Builder, mode::TerminalMode};
 use core::fmt::Write;
 
 fn main() {
@@ -42,7 +42,7 @@ fn main() {
         &mut rcc.apb1,
     );
 
-    let mut disp: CharacterMode<_> = Builder::new().connect_i2c(i2c).into();
+    let mut disp: TerminalMode<_> = Builder::new().connect_i2c(i2c).into();
     disp.init().unwrap();
     disp.clear();
 

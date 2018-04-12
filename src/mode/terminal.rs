@@ -148,7 +148,7 @@ where
     DI: DisplayInterface,
 {
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
-    pub fn clear(&mut self) {
+    pub fn clear(&mut self) -> Result<(), ()> {
         let display_size = self.properties.get_size();
 
         let numchars = match display_size {
@@ -159,12 +159,13 @@ where
 
         // Reset position so we don't end up in some random place of our cleared screen
         let (display_width, display_height) = self.properties.get_size().dimensions();
-        let _ = self.properties
-            .set_draw_area((0, 0), (display_width, display_height));
+        self.properties.set_draw_area((0, 0), (display_width, display_height))?;
 
         for _ in 0..numchars {
-            let _ = self.properties.draw(&[0; 8]);
+            self.properties.draw(&[0; 8])?;
         }
+
+        Ok(())
     }
 
     /// Reset display
@@ -213,9 +214,7 @@ where
     DI: DisplayInterface,
 {
     fn write_str(&mut self, s: &str) -> Result<(), fmt::Error> {
-        s.chars()
-            .map(move |c| self.print_char(c))
-            .last();
+        s.chars().map(move |c| self.print_char(c)).last();
         Ok(())
     }
 }

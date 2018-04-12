@@ -1,6 +1,6 @@
 //! Endlessly fill the screen with characters from the alphabet
 //!
-//! Run on a Blue Pill with `xargo run --example character_i2c
+//! Run on a Blue Pill with `cargo run --example terminal_i2c
 
 #![no_std]
 
@@ -44,7 +44,7 @@ fn main() {
 
     let mut disp: TerminalMode<_> = Builder::new().connect_i2c(i2c).into();
     disp.init().unwrap();
-    disp.clear();
+    let _ = disp.clear();
 
     /* Endless loop */
     loop {

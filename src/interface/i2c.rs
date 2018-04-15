@@ -24,8 +24,14 @@ impl<I2C> DisplayInterface for I2cInterface<I2C>
 where
     I2C: hal::blocking::i2c::Write,
 {
-    fn send_command(&mut self, cmd: u8) -> Result<(), ()> {
-        self.i2c.write(self.addr, &[0, cmd]).map_err(|_| ())?;
+    fn send_commands(&mut self, cmds: &[u8]) -> Result<(), ()> {
+        // Copy over given commands to new aray to prefix with command identifier
+        let mut writebuf: [u8; 8] = [0; 8];
+        writebuf[1..=cmds.len()].copy_from_slice(&cmds[0..cmds.len()]);
+
+        self.i2c
+            .write(self.addr, &writebuf[..=cmds.len()])
+            .map_err(|_| ())?;
 
         Ok(())
     }

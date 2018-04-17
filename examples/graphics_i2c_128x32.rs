@@ -1,8 +1,9 @@
-//! Draw a square, circle and triangle on the screen using I2C1 on pins B9 and B9 on the Blue Pill
-//! dev board. I found that it requires pullup resistors on SDA and SCL to function correctly. Uses
-//! a 128x32px display as opposed to 128x64 (default).
+//! Draw a square, circle and triangle on a 128x32px display.
 //!
-//! Run on a Blue Pill with `cargo run --example graphics_i2c_128x32 --features graphics`
+//! This example is for the STM32F103 "Blue Pill" board using I2C1.
+//!
+//! Run on a Blue Pill with `cargo run --example graphics_i2c_128x32`, currently only works on
+//! nightly.
 
 #![no_std]
 

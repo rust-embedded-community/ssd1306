@@ -15,7 +15,7 @@
 //! PB1 -> D/C
 //! ```
 //!
-//! Run on a Blue Pill with `cargo run --example blinky --features graphics`
+//! Run on a Blue Pill with `cargo run --example blinky`
 
 #![no_std]
 #![feature(const_fn)]

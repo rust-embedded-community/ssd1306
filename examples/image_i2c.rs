@@ -6,7 +6,19 @@
 //! convert rust.png -depth 1 gray:rust.raw
 //! ```
 //!
-//! Run on a Blue Pill with `cargo run --example image_i2c --features graphics`
+//! This example is for the STM32F103 "Blue Pill" board using I2C1.
+//!
+//! Wiring connections are as follows for a CRIUS-branded display:
+//!
+//! ```
+//!      Display -> Blue Pill
+//! (black)  GND -> GND
+//! (red)    +5V -> VCC
+//! (yellow) SDA -> PB9
+//! (green)  SCL -> PB8
+//! ```
+//!
+//! Run on a Blue Pill with `cargo run --example image_i2c`, currently only works on nightly.
 
 #![no_std]
 

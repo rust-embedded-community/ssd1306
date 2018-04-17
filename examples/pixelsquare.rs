@@ -2,7 +2,21 @@
 //!
 //! You will probably want to use the [`embedded_graphics`](https://crates.io/crates/embedded-graphics) crate to do more complex drawing.
 //!
-//! Run on a Blue Pill with `cargo run --example pixelsquare
+//! This example is for the STM32F103 "Blue Pill" board using a 4 wire interface to the display on
+//! SPI1.
+//!
+//! Wiring connections are as follows
+//!
+//! ```
+//! GND -> GND
+//! 3V3 -> VCC
+//! PA5 -> SCL
+//! PA7 -> SDA
+//! PB0 -> RST
+//! PB1 -> D/C
+//! ```
+//!
+//! Run on a Blue Pill with `cargo run --example pixelsquare`
 
 #![no_std]
 

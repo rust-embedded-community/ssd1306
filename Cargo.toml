@@ -17,12 +17,12 @@ optional = true
 [dev-dependencies]
 cortex-m = "0.4.3"
 aligned = "0.1.1"
-cortex-m-rtfm = "0.3.1"
-cortex-m-rtfm-macros = "0.3.0"
-
-[dev-dependencies.cortex-m-rt]
-features = ["abort-on-panic"]
-version = "0.3.12"
+cortex-m-rtfm = "0.3.2"
+cortex-m-rtfm-macros = "0.3.1"
+cortex-m-semihosting = "0.2.0"
+cortex-m-rt = "0.4.0"
+panic-semihosting = "0.1.0"
+panic-abort = "0.1.0"
 
 # Must be installed from Git currently, not sure why it's not on crates.io
 # TODO: Replace this with a "normal" dependency in the future

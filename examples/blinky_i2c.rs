@@ -24,6 +24,7 @@ extern crate cortex_m;
 extern crate cortex_m_rtfm as rtfm;
 extern crate cortex_m_rtfm_macros;
 extern crate embedded_hal as hal;
+extern crate panic_abort;
 extern crate ssd1306;
 extern crate stm32f103xx_hal as blue_pill;
 
@@ -35,7 +36,7 @@ use blue_pill::stm32f103xx::I2C1;
 use cortex_m_rtfm_macros::app;
 use rtfm::Threshold;
 use ssd1306::interface::I2cInterface;
-use ssd1306::{Builder, mode::GraphicsMode};
+use ssd1306::{mode::GraphicsMode, Builder};
 
 pub type OledDisplay =
     GraphicsMode<I2cInterface<I2c<I2C1, (PB8<Alternate<OpenDrain>>, PB9<Alternate<OpenDrain>>)>>>;

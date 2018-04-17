@@ -1,7 +1,21 @@
 //! Draw a square, circle and triangle on the screen using the embedded_graphics library over a 4
 //! wire SPI interface.
 //!
-//! Run on a Blue Pill with `cargo run --example graphics --features graphics`
+//! This example is for the STM32F103 "Blue Pill" board using a 4 wire interface to the display on
+//! SPI1.
+//!
+//! Wiring connections are as follows
+//!
+//! ```
+//! GND -> GND
+//! 3V3 -> VCC
+//! PA5 -> SCL
+//! PA7 -> SDA
+//! PB0 -> RST
+//! PB1 -> D/C
+//! ```
+//!
+//! Run on a Blue Pill with `cargo run --example graphics`
 
 #![no_std]
 

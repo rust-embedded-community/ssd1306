@@ -80,8 +80,6 @@ matrix:
 before_install:
   - set -e
   - rustup self update
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq gcc-arm-none-eabi
 
 install:
   - rustup component add rust-src

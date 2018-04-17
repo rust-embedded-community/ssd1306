@@ -1,15 +1,15 @@
 //! Raw mode for coercion into richer driver types
+//!
+//! A display driver instance without high level functionality used as a return type from the
+//! builder. Used as a source to coerce the driver into richer modes like
+//! [`GraphicsMode`](../graphics/index.html) and [`TerminalMode`](../termina/index.html).
 
 use interface::DisplayInterface;
 use properties::DisplayProperties;
 
 use mode::displaymode::DisplayModeTrait;
 
-/// A display mode without higher level mostly meant as a stepstone for changing into higher
-/// abstracted modes
-
-/// A display driver instance without high level functionality used as a return type from the
-/// builder. Used as a source to coerce the driver into richer modes.
+/// Raw display mode
 pub struct RawMode<DI>
 where
     DI: DisplayInterface,

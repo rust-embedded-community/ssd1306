@@ -1,7 +1,9 @@
 //! SSD1306 Communication Interface (I2C/SPI)
 //!
 //! These are the two supported interfaces for communicating with the display. They're used by the
-//! [Builder] methods [connect_i2c] and [connect_spi].
+//! [builder](../builder/index.html) methods
+//! [connect_i2c](../builder/struct.Builder.html#method.connect_i2c) and
+//! [connect_spi](../builder/struct.Builder.html#method.connect_spi).
 //!
 //! The types that these interfaces define are quite lengthy, so it is recommended that you create
 //! a type alias. Here's an example for the I2C1 on an STM32F103xx:

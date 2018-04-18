@@ -13,8 +13,22 @@
 //! let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //! disp.init();
 //!
-//! // Display is now ready to draw to
+//! disp.set_pixel(10, 20, 1);
 //! ```
+//!
+//! There is also [mode::TerminalMode] which allows drawing of characters to the display without
+//! using a display buffer:
+//!
+//! ```rust,ignore
+//! let i2c = I2c::i2c1(/* snip */);
+//!
+//! let mut disp: TerminalMode<_> = Builder::new().connect_i2c(i2c).into();
+//!
+//! disp.print_char('A');
+//! ```
+//!
+//! It's possible to customise the driver to suit your display/application. Take a look at the
+//! [Builder] for available options.
 
 #![no_std]
 // TODO: Docs

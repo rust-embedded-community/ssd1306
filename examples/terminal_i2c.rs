@@ -5,15 +5,14 @@
 #![no_std]
 
 extern crate cortex_m;
-extern crate embedded_graphics;
 extern crate embedded_hal as hal;
 extern crate ssd1306;
 extern crate stm32f103xx_hal as blue_pill;
 
 use blue_pill::i2c::{DutyCycle, I2c, Mode};
 use blue_pill::prelude::*;
-use ssd1306::{Builder, mode::TerminalMode};
 use core::fmt::Write;
+use ssd1306::{mode::TerminalMode, Builder};
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();

@@ -14,9 +14,9 @@ extern crate stm32f103xx_hal as blue_pill;
 
 use blue_pill::i2c::{DutyCycle, I2c, Mode};
 use blue_pill::prelude::*;
-use embedded_graphics::Drawing;
+use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rect};
-use ssd1306::{Builder, DisplaySize, mode::GraphicsMode};
+use ssd1306::{mode::GraphicsMode, Builder, DisplaySize};
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();

@@ -8,7 +8,7 @@
 //!
 //! # Examples
 //!
-//! Connect over SPI with default rotation and size (128x64):
+//! Connect over SPI with default rotation (0 deg) and size (128x64):
 //!
 //! ```rust,ignore
 //! let spi = /* SPI interface from your HAL of choice */;
@@ -17,7 +17,7 @@
 //! Builder::new().connect_spi(spi, dc);
 //! ```
 //!
-//! Connect over I2C with lots of options
+//! Connect over I2C, changing lots of options
 //!
 //! ```rust,ignore
 //! let i2c = /* I2C interface from your HAL of choice */;
@@ -27,6 +27,17 @@
 //!     .with_i2c_addr(0x3D)
 //!     .with_size(DisplaySize::Display128x32)
 //!     .connect_i2c(i2c);
+//! ```
+//!
+//! The above examples will produce a [RawMode](../mode/raw/struct.RawMode.html) instance
+//! by default. You need to coerce them into a mode by specifying a type on assignment. For
+//! example, to use [`TerminalMode` mode](../mode/terminal/struct.TerminalMode.html):
+//!
+//! ```rust,ignore
+//! let spi = /* SPI interface from your HAL of choice */;
+//! let dc = /* GPIO data/command select pin */;
+//!
+//! let display: TerminalMode<_> = Builder::new().connect_spi(spi, dc);
 //! ```
 
 use hal;

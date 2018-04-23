@@ -1,4 +1,4 @@
-//! Container to store display properties
+//! Container to store and set display properties
 
 use command::{AddrMode, Command, VcomhLevel};
 
@@ -7,7 +7,7 @@ use displaysize::DisplaySize;
 
 use interface::DisplayInterface;
 
-/// DisplayProperties
+/// Display properties struct
 pub struct DisplayProperties<DI> {
     iface: DI,
     display_size: DisplaySize,
@@ -31,8 +31,8 @@ where
         }
     }
 
-    /// Set display up in column mode, i.e. a byte walks down a column of 8 pixels from
-    /// column 0 on the left, to column _n_ on the right
+    /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
+    /// column 0 on the left and column _(display_width - 1)_ on the right.
     pub fn init_column_mode(&mut self) -> Result<(), ()> {
         // TODO: Break up into nice bits so display modes can pick whathever they need
         let (_, display_height) = self.display_size.dimensions();

@@ -2,7 +2,7 @@
 //!
 //! A display driver instance without high level functionality used as a return type from the
 //! builder. Used as a source to coerce the driver into richer modes like
-//! [`GraphicsMode`](../graphics/index.html) and [`TerminalMode`](../termina/index.html).
+//! [`GraphicsMode`](../graphics/index.html) and [`TerminalMode`](../terminal/index.html).
 
 use interface::DisplayInterface;
 use properties::DisplayProperties;

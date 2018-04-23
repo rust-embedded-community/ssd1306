@@ -4,6 +4,19 @@
 //! draw characters to the display without needing a framebuffer. It will write characters from top
 //! left to bottom right in an 8x8 pixel grid, restarting at the top left of the display once full.
 //! The display itself takes care of wrapping lines.
+//!
+//! ```rust,ignore
+//! let i2c = /* I2C interface from your HAL of choice */;
+//! let display: TerminalMode<_> = Builder::new().connect_i2c(i2c).into();
+//!
+//! display.init().unwrap();
+//! display.clear().unwrap();
+//!
+//! // Print a-zA-Z
+//! for c in 97..123 {
+//!     display.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) }).unwrap();
+//! }
+//! ```
 
 use core::fmt;
 use displayrotation::DisplayRotation;

@@ -139,6 +139,7 @@ where
     }
 }
 
+// TODO: Add to prelude
 /// Terminal mode handler
 pub struct TerminalMode<DI> {
     properties: DisplayProperties<DI>,

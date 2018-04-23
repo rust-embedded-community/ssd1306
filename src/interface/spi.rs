@@ -5,6 +5,7 @@ use hal::digital::OutputPin;
 
 use super::DisplayInterface;
 
+// TODO: Add to prelude
 /// SPI display interface.
 ///
 /// This combines the SPI peripheral and a data/command pin

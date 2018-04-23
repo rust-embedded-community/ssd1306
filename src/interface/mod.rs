@@ -21,7 +21,9 @@
 //!   GraphicsMode<I2cInterface<I2c<I2C1, (PB8<Alternate<OpenDrain>>, PB9<Alternate<OpenDrain>>)>>>;
 //! ```
 //!
-//! Here's one for SPI1 on an STM32F103x:
+//! [Example](https://github.com/jamwaffles/ssd1306/blob/master/examples/blinky_i2c.rs)
+//!
+//! Here's one for SPI1 on an STM32F103xx:
 //!
 //! ```rust
 //! # extern crate ssd1306;
@@ -46,6 +48,8 @@
 //!     >,
 //! >;
 //! ```
+//!
+//! [Example](https://github.com/jamwaffles/ssd1306/blob/master/examples/blinky.rs)
 
 pub mod i2c;
 pub mod spi;

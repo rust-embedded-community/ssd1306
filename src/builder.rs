@@ -50,7 +50,7 @@ use super::properties::DisplayProperties;
 use mode::displaymode::DisplayMode;
 use mode::raw::RawMode;
 
-/// Driver builder
+/// Builder struct. Driver options and interface are set using its methods.
 #[derive(Clone, Copy)]
 pub struct Builder {
     display_size: DisplaySize,
@@ -74,7 +74,7 @@ impl Builder {
         }
     }
 
-    /// Set the size of the display. Supported sizes are defined by [DisplaySize]
+    /// Set the size of the display. Supported sizes are defined by [DisplaySize].
     pub fn with_size(&self, display_size: DisplaySize) -> Self {
         Self {
             display_size,
@@ -82,7 +82,7 @@ impl Builder {
         }
     }
 
-    /// Set the I2C address to use. Defaults to 0x3C which seems to be the most common address.
+    /// Set the I2C address to use. Defaults to 0x3C which is the most common address.
     /// The other address specified in the datasheet is 0x3D. Ignored when using SPI interface.
     pub fn with_i2c_addr(&self, i2c_addr: u8) -> Self {
         Self { i2c_addr, ..*self }

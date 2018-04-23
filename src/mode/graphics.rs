@@ -10,7 +10,7 @@ use properties::DisplayProperties;
 
 use mode::displaymode::DisplayModeTrait;
 
-/// GraphicsMode
+/// Graphics mode handler
 pub struct GraphicsMode<DI>
 where
     DI: DisplayInterface,

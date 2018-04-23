@@ -1,17 +1,20 @@
-//! Terminal display module
-use hal::blocking::delay::DelayMs;
-use hal::digital::OutputPin;
-
-use displayrotation::DisplayRotation;
-use displaysize::DisplaySize;
-use interface::DisplayInterface;
-use properties::DisplayProperties;
-
-use mode::displaymode::DisplayModeTrait;
+//! Unbuffered terminal display mode
+//!
+//! This mode uses the 7x7 pixel [MarioChrome](https://github.com/techninja/MarioChron/) font to
+//! draw characters to the display without needing a framebuffer. It will write characters from top
+//! left to bottom right in an 8x8 pixel grid, restarting at the top left of the display once full.
+//! The display itself takes care of wrapping lines.
 
 use core::fmt;
+use displayrotation::DisplayRotation;
+use displaysize::DisplaySize;
+use hal::blocking::delay::DelayMs;
+use hal::digital::OutputPin;
+use interface::DisplayInterface;
+use mode::displaymode::DisplayModeTrait;
+use properties::DisplayProperties;
 
-/// A trait representing a conversion from a character to a 8x8 bitmap
+/// A trait to convert from a character to 8x8 bitmap
 pub trait CharacterBitmap<T> {
     /// Turn input of type T into a displayable 8x8 bitmap
     fn to_bitmap(input: T) -> [u8; 8];
@@ -123,7 +126,7 @@ where
     }
 }
 
-/// Handling structure for character mode display
+/// Terminal mode handler
 pub struct TerminalMode<DI> {
     properties: DisplayProperties<DI>,
 }
@@ -147,7 +150,7 @@ impl<DI> TerminalMode<DI>
 where
     DI: DisplayInterface,
 {
-    /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
+    /// Clear the display
     pub fn clear(&mut self) -> Result<(), ()> {
         let display_size = self.properties.get_size();
 
@@ -159,7 +162,8 @@ where
 
         // Reset position so we don't end up in some random place of our cleared screen
         let (display_width, display_height) = self.properties.get_size().dimensions();
-        self.properties.set_draw_area((0, 0), (display_width, display_height))?;
+        self.properties
+            .set_draw_area((0, 0), (display_width, display_height))?;
 
         for _ in 0..numchars {
             self.properties.draw(&[0; 8])?;
@@ -181,12 +185,12 @@ where
         rst.set_high();
     }
 
-    /// Write out data to display
+    /// Write out data to display. This is a noop in terminal mode.
     pub fn flush(&mut self) -> Result<(), ()> {
         Ok(())
     }
 
-    /// Print character on the display with some font
+    /// Print a character to the display
     pub fn print_char<T>(&mut self, c: T) -> Result<(), ()>
     where
         TerminalMode<DI>: CharacterBitmap<T>,
@@ -196,8 +200,8 @@ where
         Ok(())
     }
 
-    /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
-    /// column 0 on the left, to column _n_ on the right
+    /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
+    /// column 0 on the left and column _(display_width - 1)_ on the right.
     pub fn init(&mut self) -> Result<(), ()> {
         self.properties.init_column_mode()?;
         Ok(())
@@ -217,9 +221,4 @@ where
         s.chars().map(move |c| self.print_char(c)).last();
         Ok(())
     }
-}
-
-#[cfg(test)]
-mod tests {
-    // TODO lol
 }

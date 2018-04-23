@@ -25,6 +25,7 @@ use properties::DisplayProperties;
 
 use mode::displaymode::DisplayModeTrait;
 
+// TODO: Add to prelude
 /// Graphics mode handler
 pub struct GraphicsMode<DI>
 where

@@ -4,6 +4,7 @@ use hal;
 
 use super::DisplayInterface;
 
+// TODO: Add to prelude
 /// SSD1306 I2C communication interface
 pub struct I2cInterface<I2C> {
     i2c: I2C,

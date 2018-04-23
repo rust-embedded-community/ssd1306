@@ -16,6 +16,10 @@
 //! disp.set_pixel(10, 20, 1);
 //! ```
 //!
+//! See the [example](https://github.com/jamwaffles/ssd1306/blob/master/examples/graphics_i2c.rs)
+//! for more usage. The [entire `embedded_graphics` featureset](https://github.com/jamwaffles/embedded-graphics#features)
+//! is supported by this driver.
+//!
 //! There is also [mode::TerminalMode] which allows drawing of characters to the display without
 //! using a display buffer:
 //!
@@ -26,6 +30,9 @@
 //!
 //! disp.print_char('A');
 //! ```
+//!
+//! See the [example](https://github.com/jamwaffles/ssd1306/blob/master/examples/terminal_i2c.rs)
+//! for more usage.
 //!
 //! It's possible to customise the driver to suit your display/application. Take a look at the
 //! [Builder] for available options.

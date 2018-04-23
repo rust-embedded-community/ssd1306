@@ -37,7 +37,7 @@
 //! let spi = /* SPI interface from your HAL of choice */;
 //! let dc = /* GPIO data/command select pin */;
 //!
-//! let display: TerminalMode<_> = Builder::new().connect_spi(spi, dc);
+//! let display: TerminalMode<_> = Builder::new().connect_spi(spi, dc).into();
 //! ```
 
 use hal;

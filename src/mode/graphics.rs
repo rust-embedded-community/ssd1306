@@ -1,4 +1,19 @@
 //! Buffered display module for use with the [embedded_graphics] crate
+//!
+//! ```rust,ignore
+//! let i2c = /* I2C interface from your HAL of choice */;
+//! let display: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
+//! let image = include_bytes!("image_16x16.raw");
+//!
+//! display.init().unwrap();
+//! display.flush().unwrap();
+//! display.draw(Line::new((0, 0), (16, 16), 1).into_iter());
+//! display.draw(Rect::new((24, 0), (40, 16), 1u8).into_iter());
+//! display.draw(Circle::new((64, 8), 8, 1u8).into_iter());
+//! display.draw(Image1BPP::new(image, 0, 24));
+//! display.draw(Font6x8::render_str("Hello Rust!").translate((24, 24)).into_iter());
+//! display.flush().unwrap();
+//! ```
 
 use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;

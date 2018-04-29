@@ -143,6 +143,7 @@ where
 /// Terminal mode handler
 pub struct TerminalMode<DI> {
     properties: DisplayProperties<DI>,
+    pos: u32,
 }
 
 impl<DI> DisplayModeTrait<DI> for TerminalMode<DI>
@@ -151,7 +152,7 @@ where
 {
     /// Create new TerminalMode instance
     fn new(properties: DisplayProperties<DI>) -> Self {
-        TerminalMode { properties }
+        TerminalMode { properties, pos: 0 }
     }
 
     /// Release all resources used by TerminalMode
@@ -209,8 +210,42 @@ where
     where
         TerminalMode<DI>: CharacterBitmap<T>,
     {
-        // Send the pixel data to the display
-        self.properties.draw(&Self::to_bitmap(c))?;
+        match self.properties.get_rotation() {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                self.properties.draw(&Self::to_bitmap(c))?
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                let cols = Self::to_bitmap(c);
+
+                let mut transmuted: [u8; 8] = [0; 8];
+
+                // Transmute the char data (rows to columns)
+                for col in 0..8 {
+                    for (row_idx, byte) in cols.iter().enumerate() {
+                        transmuted[col] |= ((*byte & (1 << col as u8)) >> col) << row_idx;
+                    }
+                }
+
+                let (w, h) = self.properties.get_dimensions();
+                let chars_per_row = w as u32 / 8;
+                let chars_per_screen = chars_per_row * (h as u32 / 8);
+                let row = (self.pos / chars_per_row) as u8 * 8;
+                let col = (self.pos % chars_per_row) as u8 * 8;
+
+                self.properties
+                    .set_draw_area((row, col), (row + 8, col + 8))?;
+
+                self.properties.draw(&transmuted)?;
+
+                self.pos += 1;
+
+                // Reset back to top left if the next char to draw would overflow the screen
+                if self.pos >= chars_per_screen {
+                    self.pos = 0;
+                }
+            }
+        };
+
         Ok(())
     }
 

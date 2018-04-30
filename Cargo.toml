@@ -1,5 +1,6 @@
 [package]
 categories = ["embedded", "no-std"]
+description = "I2C/SPI driver for the SSD1306 OLED display controller"
 name = "ssd1306"
 version = "0.1.0"
 authors = ["James Waples <jamwaffles@gmail.com>"]

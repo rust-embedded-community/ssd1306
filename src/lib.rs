@@ -174,7 +174,7 @@ pub mod displayrotation;
 mod displaysize;
 pub mod interface;
 pub mod mode;
+pub mod prelude;
 pub mod properties;
 
 pub use builder::Builder;
-pub use displaysize::DisplaySize;

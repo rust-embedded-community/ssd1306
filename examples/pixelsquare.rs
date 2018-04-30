@@ -30,7 +30,8 @@ use blue_pill::delay::Delay;
 use blue_pill::prelude::*;
 use blue_pill::spi::Spi;
 use hal::spi::{Mode, Phase, Polarity};
-use ssd1306::{mode::GraphicsMode, Builder};
+use ssd1306::prelude::*;
+use ssd1306::Builder;
 
 fn main() {
     let cp = cortex_m::Peripherals::take().unwrap();

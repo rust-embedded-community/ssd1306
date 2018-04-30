@@ -33,8 +33,8 @@ use blue_pill::i2c::{DutyCycle, I2c, Mode};
 use blue_pill::prelude::*;
 use embedded_graphics::image::Image1BPP;
 use embedded_graphics::prelude::*;
-use ssd1306::displayrotation::DisplayRotation;
-use ssd1306::{mode::GraphicsMode, Builder};
+use ssd1306::prelude::*;
+use ssd1306::Builder;
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();

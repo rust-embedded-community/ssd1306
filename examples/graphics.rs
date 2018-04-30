@@ -32,7 +32,8 @@ use blue_pill::spi::Spi;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rect};
 use hal::spi::{Mode, Phase, Polarity};
-use ssd1306::{mode::GraphicsMode, Builder};
+use ssd1306::prelude::*;
+use ssd1306::Builder;
 
 fn main() {
     let cp = cortex_m::Peripherals::take().unwrap();

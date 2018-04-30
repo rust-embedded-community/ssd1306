@@ -35,8 +35,8 @@ use blue_pill::prelude::*;
 use blue_pill::stm32f103xx::I2C1;
 use cortex_m_rtfm_macros::app;
 use rtfm::Threshold;
-use ssd1306::interface::I2cInterface;
-use ssd1306::{mode::GraphicsMode, Builder};
+use ssd1306::prelude::*;
+use ssd1306::Builder;
 
 pub type OledDisplay =
     GraphicsMode<I2cInterface<I2c<I2C1, (PB8<Alternate<OpenDrain>>, PB9<Alternate<OpenDrain>>)>>>;

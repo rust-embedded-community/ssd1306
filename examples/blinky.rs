@@ -40,8 +40,8 @@ use blue_pill::stm32f103xx::SPI1;
 use cortex_m_rtfm_macros::app;
 use hal::spi::{Mode, Phase, Polarity};
 use rtfm::Threshold;
-use ssd1306::interface::SpiInterface;
-use ssd1306::{mode::GraphicsMode, Builder};
+use ssd1306::prelude::*;
+use ssd1306::Builder;
 
 pub type OledDisplay = GraphicsMode<
     SpiInterface<

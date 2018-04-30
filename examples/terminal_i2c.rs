@@ -25,7 +25,8 @@ extern crate stm32f103xx_hal as blue_pill;
 use blue_pill::i2c::{DutyCycle, I2c, Mode};
 use blue_pill::prelude::*;
 use core::fmt::Write;
-use ssd1306::{mode::TerminalMode, Builder};
+use ssd1306::prelude::*;
+use ssd1306::Builder;
 
 fn main() {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();

@@ -14,7 +14,7 @@ extern crate panic_abort;
 extern crate ssd1306;
 extern crate stm32f103xx_hal as blue_pill;
 
-use blue_pill::i2c::{DutyCycle, I2c, Mode};
+use blue_pill::i2c::{DutyCycle, BlockingI2c, Mode};
 use blue_pill::prelude::*;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rect};
@@ -36,16 +36,20 @@ fn main() {
     let scl = gpiob.pb8.into_alternate_open_drain(&mut gpiob.crh);
     let sda = gpiob.pb9.into_alternate_open_drain(&mut gpiob.crh);
 
-    let i2c = I2c::i2c1(
+    let i2c = BlockingI2c::i2c1(
         dp.I2C1,
         (scl, sda),
         &mut afio.mapr,
         Mode::Fast {
             frequency: 400_000,
-            duty_cycle: DutyCycle::Ratio1to1,
+            duty_cycle: DutyCycle::Ratio2to1
         },
         clocks,
         &mut rcc.apb1,
+        10000,
+        3,
+        10000,
+        20000
     );
 
     let mut disp: GraphicsMode<_> = Builder::new()

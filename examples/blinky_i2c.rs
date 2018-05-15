@@ -30,7 +30,7 @@ extern crate stm32f103xx_hal as blue_pill;
 
 use blue_pill::gpio::gpiob::{PB8, PB9};
 use blue_pill::gpio::{Alternate, OpenDrain};
-use blue_pill::i2c::{DutyCycle, I2c, Mode};
+use blue_pill::i2c::{DutyCycle, BlockingI2c, Mode};
 use blue_pill::prelude::*;
 use blue_pill::stm32f103xx::I2C1;
 use cortex_m_rtfm_macros::app;
@@ -39,7 +39,7 @@ use ssd1306::prelude::*;
 use ssd1306::Builder;
 
 pub type OledDisplay =
-    GraphicsMode<I2cInterface<I2c<I2C1, (PB8<Alternate<OpenDrain>>, PB9<Alternate<OpenDrain>>)>>>;
+    GraphicsMode<I2cInterface<BlockingI2c<I2C1, (PB8<Alternate<OpenDrain>>, PB9<Alternate<OpenDrain>>)>>>;
 
 // Tasks and resources
 app! {
@@ -71,16 +71,20 @@ fn init(p: init::Peripherals) -> init::LateResources {
     let scl = gpiob.pb8.into_alternate_open_drain(&mut gpiob.crh);
     let sda = gpiob.pb9.into_alternate_open_drain(&mut gpiob.crh);
 
-    let i2c = I2c::i2c1(
+    let i2c = BlockingI2c::i2c1(
         p.device.I2C1,
         (scl, sda),
         &mut afio.mapr,
         Mode::Fast {
             frequency: 400_000,
-            duty_cycle: DutyCycle::Ratio1to1,
+            duty_cycle: DutyCycle::Ratio2to1
         },
         clocks,
         &mut rcc.apb1,
+        10000,
+        3,
+        10000,
+        20000
     );
 
     let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();

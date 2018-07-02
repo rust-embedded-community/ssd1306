@@ -18,19 +18,19 @@ exclude = [
 travis-ci = { repository = "jamwaffles/ssd1306", branch = "master" }
 
 [dependencies]
-embedded-hal = "0.1.2"
+embedded-hal = "0.2.1"
 
 [dependencies.embedded-graphics]
 version = "0.1.1"
 optional = true
 
 [dev-dependencies]
-cortex-m = "0.4.3"
+cortex-m = "0.5.2"
 aligned = "0.1.1"
 cortex-m-rtfm = "0.3.2"
 cortex-m-rtfm-macros = "0.3.1"
-cortex-m-rt = "0.4.0"
-panic-abort = "0.1.0"
+cortex-m-rt = "0.5.1"
+panic-abort = "0.2.0"
 
 # Must be installed from Git currently, not sure why it's not on crates.io
 # TODO: Replace this with a "normal" dependency in the future
@@ -41,13 +41,12 @@ rev = "7bd945727d381aedfec5761c1463001e8966f85e"
 features = ["rt"]
 version = "*"
 
-# disable both incremental compilation and parallel codegen to reduce the chances of running into
-# rust-lang/rust#47074
 [profile.dev]
-codegen-units = 1
 incremental = false
+codegen-units = 1
 
 [profile.release]
+codegen-units = 1
 debug = true
 lto = true
 

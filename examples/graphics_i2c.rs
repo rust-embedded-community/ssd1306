@@ -62,13 +62,13 @@ fn main() {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    disp.draw(Line::new((8, 16 + 16), (8 + 16, 16 + 16), 1).into_iter());
-    disp.draw(Line::new((8, 16 + 16), (8 + 8, 16), 1).into_iter());
-    disp.draw(Line::new((8 + 16, 16 + 16), (8 + 8, 16), 1).into_iter());
+    disp.draw(Line::new(Coord::new(8, 16 + 16), Coord::new(8 + 16, 16 + 16), 1.into()).into_iter());
+    disp.draw(Line::new(Coord::new(8, 16 + 16), Coord::new(8 + 8, 16), 1.into()).into_iter());
+    disp.draw(Line::new(Coord::new(8 + 16, 16 + 16), Coord::new(8 + 8, 16), 1.into()).into_iter());
 
-    disp.draw(Rect::new((48, 16), (48 + 16, 16 + 16), 1u8).into_iter());
+    disp.draw(Rect::new(Coord::new(48, 16), Coord::new(48 + 16, 16 + 16), 1u8.into()).into_iter());
 
-    disp.draw(Circle::new((96, 16 + 8), 8, 1u8).into_iter());
+    disp.draw(Circle::new(Coord::new(96, 16 + 8), 8, 1u8.into()).into_iter());
 
     disp.flush().unwrap();
 }

@@ -7,11 +7,11 @@
 //!
 //! display.init().unwrap();
 //! display.flush().unwrap();
-//! display.draw(Line::new((0, 0), (16, 16), 1).into_iter());
-//! display.draw(Rect::new((24, 0), (40, 16), 1u8).into_iter());
-//! display.draw(Circle::new((64, 8), 8, 1u8).into_iter());
+//! display.draw(Line::new(Coord::new(0, 0), (16, 16), 1.into()).into_iter());
+//! display.draw(Rect::new(Coord::new(24, 0), (40, 16), 1u8.into()).into_iter());
+//! display.draw(Circle::new(Coord::new(64, 8), 8, 1u8.into()).into_iter());
 //! display.draw(Image1BPP::new(image, 0, 24));
-//! display.draw(Font6x8::render_str("Hello Rust!").translate((24, 24)).into_iter());
+//! display.draw(Font6x8::render_str("Hello Rust!", 1u8.into()).translate(Coord::new(24, 24)).into_iter());
 //! display.flush().unwrap();
 //! ```
 
@@ -158,21 +158,19 @@ where
 #[cfg(feature = "graphics")]
 extern crate embedded_graphics;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::drawable;
-#[cfg(feature = "graphics")]
-use self::embedded_graphics::Drawing;
+use self::embedded_graphics::{drawable, Drawing, pixelcolor::PixelColorU8};
 
 #[cfg(feature = "graphics")]
-impl<DI> Drawing for GraphicsMode<DI>
+impl<DI> Drawing<PixelColorU8> for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: Iterator<Item = drawable::Pixel>,
+        T: Iterator<Item = drawable::Pixel<PixelColorU8>>,
     {
-        for (pos, color) in item_pixels {
-            self.set_pixel(pos.0, pos.1, color);
+        for pixel in item_pixels {
+            self.set_pixel((pixel.0).0, (pixel.0).1, pixel.1.into_inner());
         }
     }
 }

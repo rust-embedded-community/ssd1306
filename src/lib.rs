@@ -143,10 +143,10 @@
 //!
 //!     disp.init().unwrap();
 //!     disp.flush().unwrap();
-//!     disp.draw(Font6x8::render_str("Hello world!").into_iter());
+//!     disp.draw(Font6x8::render_str("Hello world!", 1u8.into()).into_iter());
 //!     disp.draw(
 //!         Font6x8::render_str("Hello Rust!")
-//!             .translate((0, 16))
+//!             .translate(Coord::new(0, 16))
 //!             .into_iter(),
 //!     );
 //!     disp.flush().unwrap();

@@ -37,7 +37,7 @@ panic-abort = "0.2.0"
 # TODO: Replace with @japaric's HAL once I2C support has landed
 [dev-dependencies.stm32f103xx-hal]
 git = "https://github.com/ilya-epifanov/stm32f103xx-hal.git"
-rev = "7bd945727d381aedfec5761c1463001e8966f85e"
+rev = "d195a5d01789239477f21ff3e8d05659cfc7467a"
 features = ["rt"]
 version = "*"
 

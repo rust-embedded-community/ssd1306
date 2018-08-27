@@ -25,7 +25,7 @@
 extern crate cortex_m;
 extern crate embedded_graphics;
 extern crate embedded_hal as hal;
-extern crate panic_abort;
+extern crate panic_semihosting;
 extern crate ssd1306;
 extern crate stm32f103xx_hal as blue_pill;
 

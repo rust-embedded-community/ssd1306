@@ -25,19 +25,19 @@ version = "0.3.0"
 optional = true
 
 [dev-dependencies]
-cortex-m = "0.5.2"
-aligned = "0.1.1"
-cortex-m-rtfm = "0.3.2"
-cortex-m-rtfm-macros = "0.3.1"
-cortex-m-rt = "0.5.1"
+cortex-m = "0.5.6"
+aligned = "0.2.0"
+cortex-m-rtfm = "0.3.4"
+cortex-m-rtfm-macros = "0.3.2"
+cortex-m-rt = "0.5.2"
 panic-abort = "0.2.0"
 
 # Must be installed from Git currently, not sure why it's not on crates.io
 # TODO: Replace this with a "normal" dependency in the future
 # TODO: Replace with @japaric's HAL once I2C support has landed
-[dev-dependencies.stm32f103xx-hal]
+[dependencies.stm32f103xx-hal]
 git = "https://github.com/ilya-epifanov/stm32f103xx-hal.git"
-rev = "d195a5d01789239477f21ff3e8d05659cfc7467a"
+rev = "3a8d64d3605b5eac9fd15eea0ba25319fbb8375c"
 features = ["rt"]
 version = "*"
 

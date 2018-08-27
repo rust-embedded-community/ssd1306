@@ -1,23 +1,24 @@
 //! Graphical OLED version of Hello World. Blinks two 4px wide squares on and off in the top left
 //! corner of the display.
 //!
-//! This example is for the STM32F103 "Blue Pill" board using I2C1.
+//! This example is for the STM32F103 "Blue Pill" board using a 4 wire interface to the display on
+//! SPI1.
 //!
-//! Wiring connections are as follows for a CRIUS-branded display:
+//! Wiring connections are as follows
 //!
 //! ```
-//!      Display -> Blue Pill
-//! (black)  GND -> GND
-//! (red)    +5V -> VCC
-//! (yellow) SDA -> PB9
-//! (green)  SCL -> PB8
+//! GND -> GND
+//! 3V3 -> VCC
+//! PA5 -> SCL
+//! PA7 -> SDA
+//! PB0 -> RST
+//! PB1 -> D/C
 //! ```
 //!
-//! Run on a Blue Pill with `cargo run --example blinky_i2c`, currently only works on nightly.
+//! Run on a Blue Pill with `cargo run --example blinky`
 
 #![no_std]
 #![feature(const_fn)]
-#![feature(proc_macro)]
 #![feature(used)]
 
 extern crate cortex_m;
@@ -28,18 +29,32 @@ extern crate panic_abort;
 extern crate ssd1306;
 extern crate stm32f103xx_hal as blue_pill;
 
-use blue_pill::gpio::gpiob::{PB8, PB9};
-use blue_pill::gpio::{Alternate, OpenDrain};
-use blue_pill::i2c::{DutyCycle, I2c, Mode};
+use blue_pill::delay::Delay;
+use blue_pill::gpio::gpioa::{PA5, PA6, PA7};
+use blue_pill::gpio::gpiob::PB1;
+use blue_pill::gpio::{Alternate, Floating, Input, Output, PushPull};
 use blue_pill::prelude::*;
-use blue_pill::stm32f103xx::I2C1;
+use blue_pill::spi::Spi;
+use blue_pill::stm32f103xx::SPI1;
 use cortex_m_rtfm_macros::app;
+use hal::spi::{Mode, Phase, Polarity};
 use rtfm::Threshold;
 use ssd1306::prelude::*;
 use ssd1306::Builder;
 
-pub type OledDisplay =
-    GraphicsMode<I2cInterface<I2c<I2C1, (PB8<Alternate<OpenDrain>>, PB9<Alternate<OpenDrain>>)>>>;
+pub type OledDisplay = GraphicsMode<
+    SpiInterface<
+        Spi<
+            SPI1,
+            (
+                PA5<Alternate<PushPull>>,
+                PA6<Input<Floating>>,
+                PA7<Alternate<PushPull>>,
+            ),
+        >,
+        PB1<Output<PushPull>>, // B1 -> DC
+    >,
+>;
 
 // Tasks and resources
 app! {
@@ -66,25 +81,35 @@ fn init(p: init::Peripherals) -> init::LateResources {
 
     let mut afio = p.device.AFIO.constrain(&mut rcc.apb2);
 
+    let mut gpioa = p.device.GPIOA.split(&mut rcc.apb2);
     let mut gpiob = p.device.GPIOB.split(&mut rcc.apb2);
 
-    let scl = gpiob.pb8.into_alternate_open_drain(&mut gpiob.crh);
-    let sda = gpiob.pb9.into_alternate_open_drain(&mut gpiob.crh);
+    let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
+    let miso = gpioa.pa6;
+    let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
 
-    let i2c = I2c::i2c1(
-        p.device.I2C1,
-        (scl, sda),
+    let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
+    let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
+
+    let mut delay = Delay::new(p.core.SYST, clocks);
+
+    // SPI1
+    let spi = Spi::spi1(
+        p.device.SPI1,
+        (sck, miso, mosi),
         &mut afio.mapr,
-        Mode::Fast {
-            frequency: 400_000,
-            duty_cycle: DutyCycle::Ratio1to1,
+        Mode {
+            polarity: Polarity::IdleLow,
+            phase: Phase::CaptureOnFirstTransition,
         },
+        8.mhz(),
         clocks,
-        &mut rcc.apb1,
+        &mut rcc.apb2,
     );
 
-    let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
+    let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
 
+    disp.reset(&mut rst, &mut delay);
     disp.init().unwrap();
     disp.flush().unwrap();
 

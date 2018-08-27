@@ -1,33 +1,7 @@
-[target.thumbv6m-none-eabi]
-rustflags = [
-  "-C", "link-arg=-Tlink.x",
-  "-C", "linker=lld",
-  "-Z", "linker-flavor=ld.lld",
-  "-Z", "thinlto=no",
-]
-
 [target.thumbv7m-none-eabi]
+runner = 'arm-none-eabi-gdb'
 rustflags = [
   "-C", "link-arg=-Tlink.x",
-  "-C", "linker=lld",
-  "-Z", "linker-flavor=ld.lld",
-  "-Z", "thinlto=no",
-]
-
-[target.thumbv7em-none-eabi]
-rustflags = [
-  "-C", "link-arg=-Tlink.x",
-  "-C", "linker=lld",
-  "-Z", "linker-flavor=ld.lld",
-  "-Z", "thinlto=no",
-]
-
-[target.thumbv7em-none-eabihf]
-rustflags = [
-  "-C", "link-arg=-Tlink.x",
-  "-C", "linker=lld",
-  "-Z", "linker-flavor=ld.lld",
-  "-Z", "thinlto=no",
 ]
 
 [build]

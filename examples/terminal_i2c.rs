@@ -49,7 +49,7 @@ fn main() {
         &mut afio.mapr,
         Mode::Fast {
             frequency: 400_000,
-            duty_cycle: DutyCycle::Ratio1to1,
+            duty_cycle: DutyCycle::Ratio2to1,
         },
         clocks,
         &mut rcc.apb1,

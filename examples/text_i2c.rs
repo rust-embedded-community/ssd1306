@@ -73,9 +73,14 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    disp.draw(Font6x8::render_str("Hello world!", 1u8.into()).into_iter());
     disp.draw(
-        Font6x8::render_str("Hello Rust!", 1u8.into())
+        Font6x8::render_str("Hello world!")
+            .with_stroke(Some(1u8.into()))
+            .into_iter(),
+    );
+    disp.draw(
+        Font6x8::render_str("Hello Rust!")
+            .with_stroke(Some(1u8.into()))
             .translate(Coord::new(0, 16))
             .into_iter(),
     );

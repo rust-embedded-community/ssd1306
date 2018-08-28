@@ -18,7 +18,10 @@
 //! Run on a Blue Pill with `cargo run --example graphics`
 
 #![no_std]
+#![no_main]
 
+#[macro_use]
+extern crate cortex_m_rt as rt;
 extern crate cortex_m;
 extern crate embedded_graphics;
 extern crate embedded_hal as hal;
@@ -32,10 +35,13 @@ use blue_pill::spi::Spi;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rect};
 use hal::spi::{Mode, Phase, Polarity};
+use rt::ExceptionFrame;
 use ssd1306::prelude::*;
 use ssd1306::Builder;
 
-fn main() {
+entry!(main);
+
+fn main() -> ! {
     let cp = cortex_m::Peripherals::take().unwrap();
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
 
@@ -93,4 +99,18 @@ fn main() {
     disp.draw(Circle::new(Coord::new(96, 16 + 8), 8, 1u8.into()).into_iter());
 
     disp.flush().unwrap();
+
+    loop {}
+}
+
+exception!(HardFault, hard_fault);
+
+fn hard_fault(ef: &ExceptionFrame) -> ! {
+    panic!("{:#?}", ef);
+}
+
+exception!(*, default_handler);
+
+fn default_handler(irqn: i16) {
+    panic!("Unhandled exception (IRQn = {})", irqn);
 }

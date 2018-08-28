@@ -16,7 +16,10 @@
 //! Run on a Blue Pill with `cargo run --example text_i2c`, currently only works on nightly.
 
 #![no_std]
+#![no_main]
 
+#[macro_use]
+extern crate cortex_m_rt as rt;
 extern crate cortex_m;
 extern crate embedded_graphics;
 extern crate embedded_hal as hal;
@@ -24,14 +27,17 @@ extern crate panic_semihosting;
 extern crate ssd1306;
 extern crate stm32f103xx_hal as blue_pill;
 
-use blue_pill::i2c::{DutyCycle, I2c, Mode};
+use blue_pill::i2c::{BlockingI2c, DutyCycle, Mode};
 use blue_pill::prelude::*;
 use embedded_graphics::fonts::Font6x8;
 use embedded_graphics::prelude::*;
+use rt::ExceptionFrame;
 use ssd1306::prelude::*;
 use ssd1306::Builder;
 
-fn main() {
+entry!(main);
+
+fn main() -> ! {
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
 
     let mut flash = dp.FLASH.constrain();
@@ -46,7 +52,7 @@ fn main() {
     let scl = gpiob.pb8.into_alternate_open_drain(&mut gpiob.crh);
     let sda = gpiob.pb9.into_alternate_open_drain(&mut gpiob.crh);
 
-    let i2c = I2c::i2c1(
+    let i2c = BlockingI2c::i2c1(
         dp.I2C1,
         (scl, sda),
         &mut afio.mapr,
@@ -56,6 +62,10 @@ fn main() {
         },
         clocks,
         &mut rcc.apb1,
+        1000,
+        10,
+        1000,
+        1000,
     );
 
     let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
@@ -71,4 +81,18 @@ fn main() {
     );
 
     disp.flush().unwrap();
+
+    loop {}
+}
+
+exception!(HardFault, hard_fault);
+
+fn hard_fault(ef: &ExceptionFrame) -> ! {
+    panic!("{:#?}", ef);
+}
+
+exception!(*, default_handler);
+
+fn default_handler(irqn: i16) {
+    panic!("Unhandled exception (IRQn = {})", irqn);
 }

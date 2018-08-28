@@ -19,8 +19,12 @@
 //! Run on a Blue Pill with `cargo run --example pixelsquare`
 
 #![no_std]
+#![no_main]
 
+#[macro_use]
+extern crate cortex_m_rt as rt;
 extern crate cortex_m;
+extern crate embedded_graphics;
 extern crate embedded_hal as hal;
 extern crate panic_semihosting;
 extern crate ssd1306;
@@ -30,10 +34,13 @@ use blue_pill::delay::Delay;
 use blue_pill::prelude::*;
 use blue_pill::spi::Spi;
 use hal::spi::{Mode, Phase, Polarity};
+use rt::ExceptionFrame;
 use ssd1306::prelude::*;
 use ssd1306::Builder;
 
-fn main() {
+entry!(main);
+
+fn main() -> ! {
     let cp = cortex_m::Peripherals::take().unwrap();
     let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
 
@@ -101,4 +108,18 @@ fn main() {
     disp.set_pixel(0, 3, 1);
 
     disp.flush().unwrap();
+
+    loop {}
+}
+
+exception!(HardFault, hard_fault);
+
+fn hard_fault(ef: &ExceptionFrame) -> ! {
+    panic!("{:#?}", ef);
+}
+
+exception!(*, default_handler);
+
+fn default_handler(irqn: i16) {
+    panic!("Unhandled exception (IRQn = {})", irqn);
 }

@@ -71,33 +71,31 @@ fn main() -> ! {
         Line::new(
             Coord::new(8, 16 + yoffset),
             Coord::new(8 + 16, 16 + yoffset),
-            1.into(),
-        ).into_iter(),
+        ).with_stroke(Some(1u8.into()))
+        .into_iter(),
     );
     disp.draw(
-        Line::new(
-            Coord::new(8, 16 + yoffset),
-            Coord::new(8 + 8, yoffset),
-            1.into(),
-        ).into_iter(),
+        Line::new(Coord::new(8, 16 + yoffset), Coord::new(8 + 8, yoffset))
+            .with_stroke(Some(1u8.into()))
+            .into_iter(),
     );
     disp.draw(
-        Line::new(
-            Coord::new(8 + 16, 16 + yoffset),
-            Coord::new(8 + 8, yoffset),
-            1.into(),
-        ).into_iter(),
+        Line::new(Coord::new(8 + 16, 16 + yoffset), Coord::new(8 + 8, yoffset))
+            .with_stroke(Some(1u8.into()))
+            .into_iter(),
     );
 
     disp.draw(
-        Rect::new(
-            Coord::new(48, yoffset),
-            Coord::new(48 + 16, 16 + yoffset),
-            1u8.into(),
-        ).into_iter(),
+        Rect::new(Coord::new(48, yoffset), Coord::new(48 + 16, 16 + yoffset))
+            .with_stroke(Some(1u8.into()))
+            .into_iter(),
     );
 
-    disp.draw(Circle::new(Coord::new(96, yoffset + 8), 8, 1u8.into()).into_iter());
+    disp.draw(
+        Circle::new(Coord::new(96, yoffset + 8), 8)
+            .with_stroke(Some(1u8.into()))
+            .into_iter(),
+    );
 
     disp.flush().unwrap();
 

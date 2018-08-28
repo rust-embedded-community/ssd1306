@@ -4,6 +4,8 @@
 
 [![CRIUS display showing the Rust logo](readme_banner.jpg?raw=true)](examples/image_i2c.rs)
 
+> Note: Requires requires nightly 2018-08-27 or later. Install with `rustup override set nightly-2018-08-27`.
+
 I2C and SPI (4 wire) driver for the SSD1306 OLED display for use with RTFM.
 
 See the [announcement blog post](https://wapl.es/electronics/rust/2018/04/30/ssd1306-driver.html) for more information.

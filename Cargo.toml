@@ -31,8 +31,8 @@ version = "*"
 aligned = "0.2.0"
 cortex-m = "0.5.6"
 cortex-m-rt = "0.5.3"
-cortex-m-rtfm = "0.3.4"
-cortex-m-rtfm-macros = "0.3.2"
+# cortex-m-rtfm = "0.3.4"
+# cortex-m-rtfm-macros = "0.3.2"
 panic-semihosting = "0.3.0"
 
 [features]

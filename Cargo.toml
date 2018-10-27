@@ -19,7 +19,7 @@ embedded-hal = "0.2.1"
 
 [dependencies.embedded-graphics]
 optional = true
-version = "0.4.0"
+version = "0.4.4"
 
 [dev-dependencies.stm32f103xx-hal]
 features = ["rt"]

@@ -31,8 +31,8 @@ panic-semihosting = "0.5.1"
 
 [dev-dependencies.stm32f103xx-hal]
 features = ["rt"]
-git = "https://github.com/ilya-epifanov/stm32f103xx-hal.git"
-rev = "3a8d64d3605b5eac9fd15eea0ba25319fbb8375c"
+git = "https://github.com/japaric/stm32f103xx-hal.git"
+rev = "d1bfbbf9148fc3b9d095fdb3f299aca4070531d8"
 version = "*"
 
 [features]

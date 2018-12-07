@@ -1,7 +1,7 @@
 //! Abstraction of different operating modes for the SSD1306
 
-use interface::DisplayInterface;
-use properties::DisplayProperties;
+use crate::interface::DisplayInterface;
+use crate::properties::DisplayProperties;
 
 /// Display mode abstraction
 pub struct DisplayMode<MODE>(pub MODE);

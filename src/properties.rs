@@ -1,11 +1,9 @@
 //! Container to store and set display properties
 
-use command::{AddrMode, Command, VcomhLevel};
-
-use displayrotation::DisplayRotation;
-use displaysize::DisplaySize;
-
-use interface::DisplayInterface;
+use crate::command::{AddrMode, Command, VcomhLevel};
+use crate::displayrotation::DisplayRotation;
+use crate::displaysize::DisplaySize;
+use crate::interface::DisplayInterface;
 
 /// Display properties struct
 pub struct DisplayProperties<DI> {

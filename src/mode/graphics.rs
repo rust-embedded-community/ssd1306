@@ -18,12 +18,11 @@
 use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
 
-use displayrotation::DisplayRotation;
-use displaysize::DisplaySize;
-use interface::DisplayInterface;
-use properties::DisplayProperties;
-
-use mode::displaymode::DisplayModeTrait;
+use crate::displayrotation::DisplayRotation;
+use crate::displaysize::DisplaySize;
+use crate::interface::DisplayInterface;
+use crate::mode::displaymode::DisplayModeTrait;
+use crate::properties::DisplayProperties;
 
 // TODO: Add to prelude
 /// Graphics mode handler
@@ -158,7 +157,7 @@ where
 #[cfg(feature = "graphics")]
 extern crate embedded_graphics;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::{drawable, Drawing, pixelcolor::PixelColorU8};
+use self::embedded_graphics::{drawable, pixelcolor::PixelColorU8, Drawing};
 
 #[cfg(feature = "graphics")]
 impl<DI> Drawing<PixelColorU8> for GraphicsMode<DI>

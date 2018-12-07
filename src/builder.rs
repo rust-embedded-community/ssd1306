@@ -43,12 +43,12 @@
 use hal;
 use hal::digital::OutputPin;
 
-use super::displayrotation::DisplayRotation;
-use super::displaysize::DisplaySize;
-use super::interface::{I2cInterface, SpiInterface};
-use super::properties::DisplayProperties;
-use mode::displaymode::DisplayMode;
-use mode::raw::RawMode;
+use crate::displayrotation::DisplayRotation;
+use crate::displaysize::DisplaySize;
+use crate::interface::{I2cInterface, SpiInterface};
+use crate::mode::displaymode::DisplayMode;
+use crate::mode::raw::RawMode;
+use crate::properties::DisplayProperties;
 
 /// Builder struct. Driver options and interface are set using its methods.
 #[derive(Clone, Copy)]

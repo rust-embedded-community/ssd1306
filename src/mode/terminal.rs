@@ -18,14 +18,14 @@
 //! }
 //! ```
 
+use crate::displayrotation::DisplayRotation;
+use crate::displaysize::DisplaySize;
+use crate::interface::DisplayInterface;
+use crate::mode::displaymode::DisplayModeTrait;
+use crate::properties::DisplayProperties;
 use core::fmt;
-use displayrotation::DisplayRotation;
-use displaysize::DisplaySize;
 use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
-use interface::DisplayInterface;
-use mode::displaymode::DisplayModeTrait;
-use properties::DisplayProperties;
 
 /// A trait to convert from a character to 8x8 bitmap
 pub trait CharacterBitmap<T> {

@@ -25,8 +25,6 @@ version = "0.4.4"
 [dev-dependencies]
 cortex-m = "0.5.8"
 cortex-m-rt = "0.6.6"
-cortex-m-rtfm = "0.3.4"
-cortex-m-rtfm-macros = "0.3.2"
 panic-semihosting = "0.5.1"
 
 [dev-dependencies.stm32f103xx-hal]

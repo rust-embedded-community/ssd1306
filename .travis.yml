@@ -4,65 +4,20 @@
 dist: trusty
 language: rust
 rust:
+  - stable
+  - beta
   - nightly
 sudo: required
 
 matrix:
-  # TODO These are all the build jobs. Adjust as necessary. Comment out what you
-  # don't need
   include:
-    # # Android
-    # - env: TARGET=aarch64-linux-android DISABLE_TESTS=1
-    # - env: TARGET=arm-linux-androideabi DISABLE_TESTS=1
-    # - env: TARGET=armv7-linux-androideabi DISABLE_TESTS=1
-    # - env: TARGET=i686-linux-android DISABLE_TESTS=1
-    # - env: TARGET=x86_64-linux-android DISABLE_TESTS=1
-
-    # # iOS
-    # - env: TARGET=aarch64-apple-ios DISABLE_TESTS=1
-    #   os: osx
-    # - env: TARGET=armv7-apple-ios DISABLE_TESTS=1
-    #   os: osx
-    # - env: TARGET=armv7s-apple-ios DISABLE_TESTS=1
-    #   os: osx
-    # - env: TARGET=i386-apple-ios DISABLE_TESTS=1
-    #   os: osx
-    # - env: TARGET=x86_64-apple-ios DISABLE_TESTS=1
-    #   os: osx
-
-    # # Linux
-    # - env: TARGET=aarch64-unknown-linux-gnu
-
     # Raspberry Pi 1
     - env: TARGET=arm-unknown-linux-gnueabi DISABLE_EXAMPLES=1
+
     # Raspberry Pi 2, 3, etc
     - env: TARGET=armv7-unknown-linux-gnueabihf DISABLE_EXAMPLES=1
-    # - env: TARGET=i686-unknown-linux-gnu
-    # - env: TARGET=i686-unknown-linux-musl
-    # - env: TARGET=mips-unknown-linux-gnu
-    # - env: TARGET=mips64-unknown-linux-gnuabi64
-    # - env: TARGET=mips64el-unknown-linux-gnuabi64
-    # - env: TARGET=mipsel-unknown-linux-gnu
-    # - env: TARGET=powerpc-unknown-linux-gnu
-    # - env: TARGET=powerpc64-unknown-linux-gnu
-    # - env: TARGET=powerpc64le-unknown-linux-gnu
-    # - env: TARGET=s390x-unknown-linux-gnu DISABLE_TESTS=1
     - env: TARGET=x86_64-unknown-linux-gnu DISABLE_EXAMPLES=1
     - env: TARGET=x86_64-unknown-linux-musl DISABLE_EXAMPLES=1
-
-    # # OSX
-    # - env: TARGET=i686-apple-darwin
-    #   os: osx
-    # - env: TARGET=x86_64-apple-darwin
-    #   os: osx
-
-    # # *BSD
-    # - env: TARGET=i686-unknown-freebsd DISABLE_TESTS=1
-    # - env: TARGET=x86_64-unknown-freebsd DISABLE_TESTS=1
-    # - env: TARGET=x86_64-unknown-netbsd DISABLE_TESTS=1
-
-    # # Windows
-    # - env: TARGET=x86_64-pc-windows-gnu
 
     # Bare metal
     - env: TARGET=thumbv6m-none-eabi DISABLE_EXAMPLES=1
@@ -70,16 +25,17 @@ matrix:
     - env: TARGET=thumbv7em-none-eabihf
     - env: TARGET=thumbv7m-none-eabi
 
-    # # Testing other channels
-    # - env: TARGET=x86_64-unknown-linux-gnu
-    #   rust: nightly
-    # - env: TARGET=x86_64-apple-darwin
-    #   os: osx
-    #   rust: nightly
+    - rust: nightly
+      env: TARGET=thumbv7m-none-eabi
 
-before_install:
-  - set -e
-  - rustup self update
+    - rust: beta
+      env: TARGET=thumbv7m-none-eabi
+
+  # Always supply a target
+  exclude:
+    - rust: stable
+    - rust: beta
+    - rust: nightly
 
 install:
   - rustup component add rust-src
@@ -92,17 +48,9 @@ install:
         echo "Target $TARGET is already installed"
       fi
   - source ~/.cargo/env || true
-  - mv .cargo ._cargo
-  - cargo install cargo-travis || true
-  - mv ._cargo .cargo
 
 script:
   - ./build.sh
-
-after_success:
-  - rm -rf .cargo
-  - cargo doc --lib --release
-  - cargo doc-upload || true
 
 cache: cargo
 before_cache:

@@ -10,30 +10,30 @@ name = "ssd1306"
 readme = "README.md"
 repository = "https://github.com/jamwaffles/ssd1306"
 version = "0.2.1"
+edition = "2018"
 [badges.travis-ci]
 branch = "master"
 repository = "jamwaffles/ssd1306"
 
 [dependencies]
-embedded-hal = "0.2.1"
+embedded-hal = "0.2.2"
 
 [dependencies.embedded-graphics]
 optional = true
 version = "0.4.4"
+
+[dev-dependencies]
+cortex-m = "0.5.8"
+cortex-m-rt = "0.6.6"
+cortex-m-rtfm = "0.3.4"
+cortex-m-rtfm-macros = "0.3.2"
+panic-semihosting = "0.5.1"
 
 [dev-dependencies.stm32f103xx-hal]
 features = ["rt"]
 git = "https://github.com/ilya-epifanov/stm32f103xx-hal.git"
 rev = "3a8d64d3605b5eac9fd15eea0ba25319fbb8375c"
 version = "*"
-
-[dev-dependencies]
-aligned = "0.2.0"
-cortex-m = "0.5.6"
-cortex-m-rt = "0.5.3"
-cortex-m-rtfm = "0.3.4"
-cortex-m-rtfm-macros = "0.3.2"
-panic-semihosting = "0.3.0"
 
 [features]
 default = ["graphics"]

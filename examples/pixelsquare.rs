@@ -21,28 +21,21 @@
 #![no_std]
 #![no_main]
 
-#[macro_use]
-extern crate cortex_m_rt as rt;
-extern crate cortex_m;
-extern crate embedded_graphics;
-extern crate embedded_hal as hal;
 extern crate panic_semihosting;
-extern crate ssd1306;
-extern crate stm32f103xx_hal as blue_pill;
 
-use blue_pill::delay::Delay;
-use blue_pill::prelude::*;
-use blue_pill::spi::Spi;
-use hal::spi::{Mode, Phase, Polarity};
-use rt::ExceptionFrame;
+use cortex_m_rt::ExceptionFrame;
+use cortex_m_rt::{entry, exception};
 use ssd1306::prelude::*;
 use ssd1306::Builder;
+use stm32f103xx_hal::delay::Delay;
+use stm32f103xx_hal::prelude::*;
+use stm32f103xx_hal::spi::{Mode, Phase, Polarity, Spi};
+use stm32f103xx_hal::stm32f103xx;
 
-entry!(main);
-
+#[entry]
 fn main() -> ! {
     let cp = cortex_m::Peripherals::take().unwrap();
-    let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
+    let dp = stm32f103xx::Peripherals::take().unwrap();
 
     let mut flash = dp.FLASH.constrain();
     let mut rcc = dp.RCC.constrain();
@@ -112,14 +105,7 @@ fn main() -> ! {
     loop {}
 }
 
-exception!(HardFault, hard_fault);
-
-fn hard_fault(ef: &ExceptionFrame) -> ! {
+#[exception]
+fn HardFault(ef: &ExceptionFrame) -> ! {
     panic!("{:#?}", ef);
-}
-
-exception!(*, default_handler);
-
-fn default_handler(irqn: i16) {
-    panic!("Unhandled exception (IRQn = {})", irqn);
 }

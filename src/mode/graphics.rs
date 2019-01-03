@@ -100,10 +100,16 @@ where
 
         let idx = match display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                if x >= display_width as u32 {
+                    return;
+                }
                 ((y as usize) / 8 * display_width as usize) + (x as usize)
             }
 
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                if y >= display_width as u32 {
+                    return;
+                }
                 ((x as usize) / 8 * display_width as usize) + (y as usize)
             }
         };

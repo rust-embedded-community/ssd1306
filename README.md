@@ -10,7 +10,7 @@ I2C and SPI (4 wire) driver for the SSD1306 OLED display for use with RTFM.
 
 See the [announcement blog post](https://wapl.es/electronics/rust/2018/04/30/ssd1306-driver.html) for more information.
 
-## [Documentation](https://jamwaffles.github.io/ssd1306)
+## [Documentation](https://docs.rs/ssd1306)
 
 ## [Examples](examples)
 

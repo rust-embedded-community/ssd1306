@@ -2,8 +2,7 @@
 //!
 //! This example is for the STM32F103 "Blue Pill" board using I2C1.
 //!
-//! Run on a Blue Pill with `cargo run --example graphics_i2c_128x32`, currently only works on
-//! nightly.
+//! Run on a Blue Pill with `cargo run --example graphics_i2c_128x32`.
 
 #![no_std]
 #![no_main]

@@ -16,7 +16,7 @@
 //! PB1 -> D/C
 //! ```
 //!
-//! Run on a Blue Pill with `cargo run --example pixelsquare`
+//! Run on a Blue Pill with `cargo run --example pixelsquare`.
 
 #![no_std]
 #![no_main]

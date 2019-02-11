@@ -13,7 +13,7 @@
 //! (green)  SCL -> PB8
 //! ```
 //!
-//! Run on a Blue Pill with `cargo run --example text_i2c`, currently only works on nightly.
+//! Run on a Blue Pill with `cargo run --example text_i2c`.
 
 #![no_std]
 #![no_main]

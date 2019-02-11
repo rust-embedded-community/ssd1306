@@ -4,9 +4,7 @@
 
 [![CRIUS display showing the Rust logo](readme_banner.jpg?raw=true)](examples/image_i2c.rs)
 
-> Note: Requires requires nightly 2018-08-27 or later. Install with `rustup override set nightly-2018-08-27`.
-
-I2C and SPI (4 wire) driver for the SSD1306 OLED display for use with RTFM.
+I2C and SPI (4 wire) driver for the SSD1306 OLED display.
 
 See the [announcement blog post](https://wapl.es/electronics/rust/2018/04/30/ssd1306-driver.html) for more information.
 
@@ -18,40 +16,49 @@ From [`examples/image_i2c.rs`](examples/image_i2c.rs):
 
 ```rust
 #![no_std]
+#![no_main]
 
 extern crate cortex_m;
-extern crate embedded_graphics;
-extern crate embedded_hal as hal;
-extern crate ssd1306;
-extern crate stm32f103xx_hal as blue_pill;
+extern crate cortex_m_rt as rt;
+extern crate panic_semihosting;
+extern crate stm32f1xx_hal as hal;
 
-use blue_pill::i2c::{DutyCycle, I2c, Mode};
-use blue_pill::prelude::*;
-use embedded_graphics::Drawing;
-use embedded_graphics::image::{Image, Image1BPP};
-use embedded_graphics::transform::Transform;
-use ssd1306::{Builder, mode::GraphicsMode};
+use cortex_m_rt::ExceptionFrame;
+use cortex_m_rt::{entry, exception};
+use embedded_graphics::image::Image1BPP;
+use embedded_graphics::prelude::*;
+use hal::i2c::{BlockingI2c, DutyCycle, Mode};
+use hal::prelude::*;
+use hal::stm32;
+use ssd1306::prelude::*;
+use ssd1306::Builder;
 
-fn main() {
-    let dp = blue_pill::stm32f103xx::Peripherals::take().unwrap();
+#[entry]
+fn main() -> ! {
+    let dp = stm32::Peripherals::take().unwrap();
     let mut flash = dp.FLASH.constrain();
     let mut rcc = dp.RCC.constrain();
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
     let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
     let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
+
     let scl = gpiob.pb8.into_alternate_open_drain(&mut gpiob.crh);
     let sda = gpiob.pb9.into_alternate_open_drain(&mut gpiob.crh);
 
-    let i2c = I2c::i2c1(
+    let i2c = BlockingI2c::i2c1(
         dp.I2C1,
         (scl, sda),
         &mut afio.mapr,
         Mode::Fast {
             frequency: 400_000,
-            duty_cycle: DutyCycle::Ratio1to1,
+            duty_cycle: DutyCycle::Ratio2to1,
         },
         clocks,
         &mut rcc.apb1,
+        1000,
+        10,
+        1000,
+        1000,
     );
 
     let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
@@ -62,9 +69,16 @@ fn main() {
     let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64).translate(Coord::new(32, 0));
 
     disp.draw(im.into_iter());
-
     disp.flush().unwrap();
+
+    loop {}
 }
+
+#[exception]
+fn HardFault(ef: &ExceptionFrame) -> ! {
+    panic!("{:#?}", ef);
+}
+
 ```
 
 ## License

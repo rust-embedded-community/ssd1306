@@ -18,6 +18,10 @@ repository = "jamwaffles/ssd1306"
 [dependencies]
 embedded-hal = "0.2.2"
 
+[dependencies.stm32f1xx-hal]
+version = "0.2.0"
+features = [ "rt", "stm32f103" ]
+
 [dependencies.embedded-graphics]
 optional = true
 version = "0.4.4"
@@ -26,12 +30,6 @@ version = "0.4.4"
 cortex-m = "0.5.8"
 cortex-m-rt = "0.6.6"
 panic-semihosting = "0.5.1"
-
-[dev-dependencies.stm32f103xx-hal]
-features = ["rt"]
-git = "https://github.com/japaric/stm32f103xx-hal.git"
-rev = "d1bfbbf9148fc3b9d095fdb3f299aca4070531d8"
-version = "*"
 
 [features]
 default = ["graphics"]

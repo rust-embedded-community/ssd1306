@@ -18,7 +18,7 @@ repository = "jamwaffles/ssd1306"
 [dependencies]
 embedded-hal = "0.2.2"
 
-[dependencies.stm32f1xx-hal]
+[dev-dependencies.stm32f1xx-hal]
 version = "0.2.0"
 features = [ "rt", "stm32f103" ]
 

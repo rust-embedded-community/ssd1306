@@ -17,19 +17,23 @@
 #![no_std]
 #![no_main]
 
+extern crate cortex_m;
+extern crate cortex_m_rt as rt;
 extern crate panic_semihosting;
+extern crate stm32f1xx_hal as hal;
 
 use core::fmt::Write;
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
+use hal::i2c::{BlockingI2c, DutyCycle, Mode};
+use hal::prelude::*;
+use hal::stm32;
 use ssd1306::prelude::*;
 use ssd1306::Builder;
-use stm32f103xx_hal::i2c::{BlockingI2c, DutyCycle, Mode};
-use stm32f103xx_hal::prelude::*;
 
 #[entry]
 fn main() -> ! {
-    let dp = stm32f103xx_hal::stm32f103xx::Peripherals::take().unwrap();
+    let dp = stm32::Peripherals::take().unwrap();
 
     let mut flash = dp.FLASH.constrain();
     let mut rcc = dp.RCC.constrain();

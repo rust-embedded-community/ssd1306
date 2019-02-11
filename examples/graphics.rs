@@ -20,22 +20,26 @@
 #![no_std]
 #![no_main]
 
+extern crate cortex_m;
+extern crate cortex_m_rt as rt;
 extern crate panic_semihosting;
+extern crate stm32f1xx_hal as hal;
 
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rect};
+use hal::delay::Delay;
+use hal::prelude::*;
+use hal::spi::{Mode, Phase, Polarity, Spi};
+use hal::stm32;
 use ssd1306::prelude::*;
 use ssd1306::Builder;
-use stm32f103xx_hal::delay::Delay;
-use stm32f103xx_hal::prelude::*;
-use stm32f103xx_hal::spi::{Mode, Phase, Polarity, Spi};
 
 #[entry]
 fn main() -> ! {
     let cp = cortex_m::Peripherals::take().unwrap();
-    let dp = stm32f103xx_hal::stm32f103xx::Peripherals::take().unwrap();
+    let dp = stm32::Peripherals::take().unwrap();
 
     let mut flash = dp.FLASH.constrain();
     let mut rcc = dp.RCC.constrain();

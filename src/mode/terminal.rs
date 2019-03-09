@@ -170,6 +170,7 @@ where
 
         let numchars = match display_size {
             DisplaySize::Display128x64 => 128,
+            DisplaySize::Display132x64 => 64,
             DisplaySize::Display128x32 => 64,
             DisplaySize::Display96x16 => 24,
         };
@@ -177,7 +178,7 @@ where
         // Reset position so we don't end up in some random place of our cleared screen
         let (display_width, display_height) = self.properties.get_size().dimensions();
         self.properties
-            .set_draw_area((0, 0), (display_width, display_height))?;
+            .set_draw_area((6, 32), (display_width, display_height))?;
 
         for _ in 0..numchars {
             self.properties.draw(&[0; 8])?;

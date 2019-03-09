@@ -85,8 +85,11 @@ where
         self.properties
             .set_draw_area((0, 0), (display_width, display_height))?;
 
+        // XXX Might need to change the draw area on 132x64?
+
         match display_size {
             DisplaySize::Display128x64 => self.properties.draw(&self.buffer),
+            DisplaySize::Display132x64 => self.properties.draw(&self.buffer[0..1056]),
             DisplaySize::Display128x32 => self.properties.draw(&self.buffer[0..512]),
             DisplaySize::Display96x16 => self.properties.draw(&self.buffer[0..192]),
         }

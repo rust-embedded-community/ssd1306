@@ -6,6 +6,8 @@
 pub enum DisplaySize {
     /// 128 by 64 pixels
     Display128x64,
+    /// 132 by 64 pixels, try this for ssd1305 chips that are 128x64.
+    Display132x64,
     /// 128 by 32 pixels
     Display128x32,
     /// 96 by 16 pixels
@@ -18,6 +20,7 @@ impl DisplaySize {
     pub fn dimensions(&self) -> (u8, u8) {
         match *self {
             DisplaySize::Display128x64 => (128, 64),
+            DisplaySize::Display132x64 => (134, 64),
             DisplaySize::Display128x32 => (128, 32),
             DisplaySize::Display96x16 => (96, 16),
         }

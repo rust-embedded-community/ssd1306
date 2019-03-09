@@ -19,7 +19,6 @@
 //! ```
 
 use crate::displayrotation::DisplayRotation;
-use crate::displaysize::DisplaySize;
 use crate::interface::DisplayInterface;
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayProperties;
@@ -168,18 +167,10 @@ where
     pub fn clear(&mut self) -> Result<(), ()> {
         let display_size = self.properties.get_size();
 
-        let numchars = match display_size {
-            DisplaySize::Display128x64 => 128,
-            DisplaySize::Display132x64 => 64,
-            DisplaySize::Display128x32 => 64,
-            DisplaySize::Display96x16 => 24,
-        };
+        let (start, end) = display_size.draw_area();
+        self.properties.set_draw_area(start, end)?;
 
-        // Reset position so we don't end up in some random place of our cleared screen
-        let (display_width, display_height) = self.properties.get_size().dimensions();
-        self.properties
-            .set_draw_area((6, 32), (display_width, display_height))?;
-
+        let numchars = display_size.numchars();
         for _ in 0..numchars {
             self.properties.draw(&[0; 8])?;
         }

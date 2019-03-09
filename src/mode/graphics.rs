@@ -19,7 +19,6 @@ use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
 
 use crate::displayrotation::DisplayRotation;
-use crate::displaysize::DisplaySize;
 use crate::interface::DisplayInterface;
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayProperties;
@@ -82,17 +81,11 @@ where
         // Ensure the display buffer is at the origin of the display before we send the full frame
         // to prevent accidental offsets
         let (display_width, display_height) = display_size.dimensions();
-        self.properties
-            .set_draw_area((0, 0), (display_width, display_height))?;
+        let (start, end) = display_size.draw_area(); 
+        self.properties.set_draw_area(start, end)?;
 
-        // XXX Might need to change the draw area on 132x64?
-
-        match display_size {
-            DisplaySize::Display128x64 => self.properties.draw(&self.buffer),
-            DisplaySize::Display132x64 => self.properties.draw(&self.buffer[0..1056]),
-            DisplaySize::Display128x32 => self.properties.draw(&self.buffer[0..512]),
-            DisplaySize::Display96x16 => self.properties.draw(&self.buffer[0..192]),
-        }
+        let size = (display_width * display_height / 8u8) as usize;
+        self.properties.draw(&self.buffer[0..size])
     }
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y

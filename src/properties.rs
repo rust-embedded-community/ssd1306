@@ -10,6 +10,7 @@ pub struct DisplayProperties<DI> {
     iface: DI,
     display_size: DisplaySize,
     display_rotation: DisplayRotation,
+    addr_mode: AddrMode,
 }
 
 impl<DI> DisplayProperties<DI>
@@ -26,12 +27,18 @@ where
             iface,
             display_size,
             display_rotation,
+            addr_mode: AddrMode::Page, // reset value
         }
     }
 
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right.
     pub fn init_column_mode(&mut self) -> Result<(), DI::Error> {
+        self.init_with_mode(AddrMode::Horizontal)
+    }
+
+    /// Initialise the display in one of the available addressing modes
+    pub fn init_with_mode(&mut self, mode: AddrMode) -> Result<(), DI::Error> {
         // TODO: Break up into nice bits so display modes can pick whathever they need
         let (_, display_height) = self.display_size.dimensions();
 
@@ -44,7 +51,7 @@ where
         Command::StartLine(0).send(&mut self.iface)?;
         // TODO: Ability to turn charge pump on/off
         Command::ChargePump(true).send(&mut self.iface)?;
-        Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface)?;
+        Command::AddressMode(mode).send(&mut self.iface)?;
 
         self.set_rotation(display_rotation)?;
 
@@ -60,20 +67,60 @@ where
         Command::AllOn(false).send(&mut self.iface)?;
         Command::Invert(false).send(&mut self.iface)?;
         Command::EnableScroll(false).send(&mut self.iface)?;
-        Command::DisplayOn(true).send(&mut self.iface)
+        Command::DisplayOn(true).send(&mut self.iface)?;
+
+        self.addr_mode = mode;
+
+        Ok(())
     }
 
-    /// Set the position in the framebuffer of the display where any sent data should be
+    /// Change the addressing mode
+    pub fn change_mode(&mut self, mode: AddrMode) -> Result<(), DI::Error> {
+        Command::AddressMode(mode).send(&mut self.iface)?;
+        self.addr_mode = mode;
+        Ok(())
+    }
+
+    /// Set the position in the framebuffer of the display limiting where any sent data should be
     /// drawn. This method can be used for changing the affected area on the screen as well
     /// as (re-)setting the start point of the next `draw` call.
+    /// Only works in Horizontal or Vertical addressing mode
     pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), DI::Error> {
-        Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.iface)?;
-        Command::PageAddress(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)
+        match self.addr_mode {
+            AddrMode::Page => Err(()),
+            _ => {
+                Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.iface)?;
+                Command::PageAddress(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
+                Ok(())
+            }
+        }
+    }
+
+    /// Set the column address in the framebuffer of the display where any sent data should be
+    /// drawn.
+    /// Only works in Page addressing mode.
+    pub fn set_column(&mut self, column: u8) -> Result<(), DI::Error> {
+        match self.addr_mode {
+            AddrMode::Page => Command::ColStart(column).send(&mut self.iface),
+            _ => Err(()), // TODO
+        }
+    }
+
+    /// Set the page address (row 8px high) in the framebuffer of the display where any sent data
+    /// should be drawn.
+    /// Note that the parameter is in pixels, but the page will be set to the start of the 8px
+    /// row which contains the passed-in row.
+    /// Only works in Page addressing mode.
+    pub fn set_row(&mut self, row: u8) -> Result<(), DI::Error> {
+        match self.addr_mode {
+            AddrMode::Page => Command::PageStart(row.into()).send(&mut self.iface),
+            _ => Err(()), // TODO
+        }
     }
 
     /// Send the data to the display for drawing at the current position in the framebuffer
-    /// and advance the position accordingly. Cf. `set_draw_area` to modify the affected area by
-    /// this method.
+    /// and advance the position accordingly. Cf. `set_draw_area` to modify the area affected by
+    /// this method in horizontal / vertical mode.
     pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DI::Error> {
         self.iface.send_data(&buffer)
     }
@@ -126,26 +173,27 @@ where
         match display_rotation {
             DisplayRotation::Rotate0 => {
                 Command::SegmentRemap(true).send(&mut self.iface)?;
-                Command::ReverseComDir(true).send(&mut self.iface)
+                Command::ReverseComDir(true).send(&mut self.iface)?;
             }
             DisplayRotation::Rotate90 => {
                 Command::SegmentRemap(false).send(&mut self.iface)?;
-                Command::ReverseComDir(true).send(&mut self.iface)
+                Command::ReverseComDir(true).send(&mut self.iface)?;
             }
             DisplayRotation::Rotate180 => {
                 Command::SegmentRemap(false).send(&mut self.iface)?;
-                Command::ReverseComDir(false).send(&mut self.iface)
+                Command::ReverseComDir(false).send(&mut self.iface)?;
             }
             DisplayRotation::Rotate270 => {
                 Command::SegmentRemap(true).send(&mut self.iface)?;
-                Command::ReverseComDir(false).send(&mut self.iface)
+                Command::ReverseComDir(false).send(&mut self.iface)?;
             }
-        }
+        };
+
+    Ok(())
     }
 
     /// Turn the display on or off. The display can be drawn to and retains all
     /// of its memory even while off.
     pub fn display_on(&mut self, on: bool) -> Result<(), DI::Error> {
         Command::DisplayOn(on).send(&mut self.iface)
-    }
 }

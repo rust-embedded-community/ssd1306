@@ -22,28 +22,237 @@
 //! }
 //! ```
 
+use crate::command::AddrMode;
 use crate::displayrotation::DisplayRotation;
 use crate::displaysize::DisplaySize;
 use crate::interface::DisplayInterface;
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayProperties;
 use crate::Error;
+use core::cmp::min;
 use core::fmt;
 use hal::blocking::delay::DelayMs;
 use hal::digital::v2::OutputPin;
 
-/// A trait to convert from a character to 8x8 bitmap
-pub trait CharacterBitmap<T> {
-    /// Turn input of type T into a displayable 8x8 bitmap
-    fn to_bitmap(input: T) -> [u8; 8];
+/// Contains the new row that the cursor has wrapped around to
+struct CursorWrapEvent(u8);
+
+struct Cursor {
+    col: u8,
+    row: u8,
+    width: u8,
+    height: u8,
 }
 
-/// A 7x7 font shamelessly borrowed from https://github.com/techninja/MarioChron/
-impl<DI> CharacterBitmap<char> for TerminalMode<DI>
+impl Cursor {
+    pub fn new(width_pixels: u8, height_pixels: u8) -> Self {
+        let width = width_pixels / 8;
+        let height = height_pixels / 8;
+        Cursor {
+            col: 0,
+            row: 0,
+            width,
+            height,
+        }
+    }
+
+    /// Advances the logical cursor by one character.
+    /// Returns a value indicating if this caused the cursor to wrap to the next line or the next screen.
+    pub fn advance(&mut self) -> Option<CursorWrapEvent> {
+        self.col = (self.col + 1) % self.width;
+        if self.col == 0 {
+            self.row = (self.row + 1) % self.height;
+            Some(CursorWrapEvent(self.row))
+        } else {
+            None
+        }
+    }
+
+    /// Advances the logical cursor to the start of the next line
+    /// Returns a value indicating the now active line
+    pub fn advance_line(&mut self) -> CursorWrapEvent {
+        self.row = (self.row + 1) % self.height;
+        self.col = 0;
+        CursorWrapEvent(self.row)
+    }
+
+    /// Sets the position of the logical cursor arbitrarily.
+    /// The position will be capped at the maximal possible position.
+    pub fn set_position(&mut self, col: u8, row: u8) {
+        self.col = min(col, self.width - 1);
+        self.row = min(row, self.height - 1);
+    }
+
+    /// Gets the position of the logical cursor on screen in (col, row) order
+    pub fn get_position(&self) -> (u8, u8) {
+        (self.col, self.row)
+    }
+
+    /// Gets the logical dimensions of the screen in terms of characters, as (width, height)
+    pub fn get_dimensions(&self) -> (u8, u8) {
+        (self.width, self.height)
+    }
+}
+
+// TODO: Add to prelude
+/// Terminal mode handler
+pub struct TerminalMode<DI> {
+    properties: DisplayProperties<DI>,
+    cursor: Option<Cursor>,
+}
+
+impl<DI> DisplayModeTrait<DI> for TerminalMode<DI>
 where
     DI: DisplayInterface,
 {
-    fn to_bitmap(input: char) -> [u8; 8] {
+    /// Create new TerminalMode instance
+    fn new(properties: DisplayProperties<DI>) -> Self {
+        TerminalMode {
+            properties,
+            cursor: None,
+        }
+    }
+
+    /// Release all resources used by TerminalMode
+    fn release(self) -> DisplayProperties<DI> {
+        self.properties
+    }
+}
+
+impl<DI> TerminalMode<DI>
+where
+    DI: DisplayInterface,
+{
+    /// Clear the display and reset the cursor to the top left corner
+    pub fn clear(&mut self) -> Result<(), ()> {
+        let display_size = self.properties.get_size();
+
+        let numchars = match display_size {
+            DisplaySize::Display128x64 => 128,
+            DisplaySize::Display128x32 => 64,
+            DisplaySize::Display96x16 => 24,
+        };
+
+        // Let the chip handle line wrapping so we can fill the screen with blanks faster
+        self.properties.change_mode(AddrMode::Horizontal)?;
+        let (display_width, display_height) = self.properties.get_dimensions();
+        self.properties
+            .set_draw_area((0, 0), (display_width, display_height))?;
+
+        for _ in 0..numchars {
+            self.properties.draw(&[0; 8])?;
+        }
+
+        // But for normal operation we manage the line wrapping
+        self.properties.change_mode(AddrMode::Page)?;
+        self.reset_pos()?;
+
+        Ok(())
+    }
+
+    /// Reset display
+    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY)
+    where
+        RST: OutputPin,
+        DELAY: DelayMs<u8>,
+    {
+        rst.set_high();
+        delay.delay_ms(1);
+        rst.set_low();
+        delay.delay_ms(10);
+        rst.set_high();
+    }
+
+    /// Write out data to display. This is a noop in terminal mode.
+    pub fn flush(&mut self) -> Result<(), ()> {
+        Ok(())
+    }
+
+    /// Print a character to the display
+    pub fn print_char(&mut self, c: char) -> Result<(), ()> {
+        match c {
+            '\n' => {
+                let CursorWrapEvent(new_line) = self.ensure_cursor()?.advance_line();
+                self.properties.set_column(0)?;
+                self.properties.set_row(new_line * 8)?;
+            }
+            '\r' => {
+                self.properties.set_column(0)?;
+                let (_, cur_line) = self.ensure_cursor()?.get_position();
+                self.ensure_cursor()?.set_position(0, cur_line);
+            }
+            _ => {
+                // Send the pixel data to the display
+                self.properties.draw(&Self::char_to_bitmap(c))?;
+                // Increment character counter and potentially wrap line
+                self.advance_cursor()?;
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Initialise the display in page mode (i.e. a byte walks down a column of 8 pixels) with
+    /// column 0 on the left and column _(display_width - 1)_ on the right, but no automatic line
+    /// wrapping.
+    pub fn init(&mut self) -> Result<(), ()> {
+        self.properties.init_with_mode(AddrMode::Page)?;
+        self.reset_pos()?;
+        Ok(())
+    }
+
+    /// Set the display rotation
+    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), ()> {
+        // we don't need to touch the cursor because rotating 90º or 270º currently just flips
+        self.properties.set_rotation(rot)
+    }
+
+    /// Get the current cursor position, in character coordinates.
+    /// This is the (column, row) that the next character will be written to.
+    pub fn get_position(&self) -> Result<(u8, u8), ()> {
+        self.cursor.as_ref().map(|c| c.get_position()).ok_or(())
+    }
+
+    /// Set the cursor position, in character coordinates.
+    /// This is the (column, row) that the next character will be written to.
+    /// If the position is out of bounds, an Err will be returned.
+    pub fn set_position(&mut self, column: u8, row: u8) -> Result<(), ()> {
+        let (width, height) = self.ensure_cursor()?.get_dimensions();
+        if column >= width || row >= height {
+            Err(())
+        } else {
+            self.properties.set_column(column * 8)?;
+            self.properties.set_row(row * 8)?;
+            self.ensure_cursor()?.set_position(column, row);
+            Ok(())
+        }
+    }
+
+    /// Reset the draw area and move pointer to the top left corner
+    fn reset_pos(&mut self) -> Result<(), ()> {
+        self.properties.set_column(0)?;
+        self.properties.set_row(0)?;
+        // Initialise the counter when we know it's valid
+        let (display_width, display_height) = self.properties.get_dimensions();
+        self.cursor = Some(Cursor::new(display_width, display_height));
+
+        Ok(())
+    }
+
+    /// Advance the cursor, automatically wrapping lines and/or screens if necessary
+    /// Takes in an already-unwrapped cursor to avoid re-unwrapping
+    fn advance_cursor(&mut self) -> Result<(), ()> {
+        if let Some(CursorWrapEvent(new_row)) = self.ensure_cursor()?.advance() {
+            self.properties.set_row(new_row * 8)?;
+        }
+        Ok(())
+    }
+
+    fn ensure_cursor(&mut self) -> Result<&mut Cursor, ()> {
+        self.cursor.as_mut().ok_or(())
+    }
+
+    fn char_to_bitmap(input: char) -> [u8; 8] {
         // Populate the array with the data from the character array at the right index
         match input {
             '!' => [0x00, 0x00, 0x5F, 0x00, 0x00, 0x00, 0x00, 0x00],
@@ -141,102 +350,6 @@ where
             '}' => [0x00, 0x41, 0x36, 0x08, 0x00, 0x00, 0x00, 0x00],
             _ => [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
         }
-    }
-}
-
-// TODO: Add to prelude
-/// Terminal mode handler
-pub struct TerminalMode<DI> {
-    properties: DisplayProperties<DI>,
-}
-
-impl<DI> DisplayModeTrait<DI> for TerminalMode<DI>
-where
-    DI: DisplayInterface,
-{
-    /// Create new TerminalMode instance
-    fn new(properties: DisplayProperties<DI>) -> Self {
-        TerminalMode { properties }
-    }
-
-    /// Release all resources used by TerminalMode
-    fn release(self) -> DisplayProperties<DI> {
-        self.properties
-    }
-}
-
-impl<DI> TerminalMode<DI>
-where
-    DI: DisplayInterface,
-{
-    /// Clear the display
-    pub fn clear(&mut self) -> Result<(), DI::Error> {
-        let display_size = self.properties.get_size();
-
-        let numchars = match display_size {
-            DisplaySize::Display128x64 => 128,
-            DisplaySize::Display128x32 => 64,
-            DisplaySize::Display96x16 => 24,
-        };
-
-        // Reset position so we don't end up in some random place of our cleared screen
-        let (display_width, display_height) = self.properties.get_size().dimensions();
-        self.properties
-            .set_draw_area((0, 0), (display_width, display_height))?;
-
-        for _ in 0..numchars {
-            self.properties.draw(&[0; 8])?;
-        }
-
-        Ok(())
-    }
-
-    /// Reset display
-    pub fn reset<RST, DELAY, PinE>(
-        &mut self,
-        rst: &mut RST,
-        delay: &mut DELAY,
-    ) -> Result<(), Error<(), PinE>>
-    where
-        RST: OutputPin<Error = PinE>,
-        DELAY: DelayMs<u8>,
-    {
-        rst.set_high().map_err(Error::Pin)?;
-        delay.delay_ms(1);
-        rst.set_low().map_err(Error::Pin)?;
-        delay.delay_ms(10);
-        rst.set_high().map_err(Error::Pin)
-    }
-
-    /// Write out data to display. This is a noop in terminal mode.
-    pub fn flush(&mut self) -> Result<(), ()> {
-        Ok(())
-    }
-
-    /// Print a character to the display
-    pub fn print_char<T>(&mut self, c: T) -> Result<(), DI::Error>
-    where
-        TerminalMode<DI>: CharacterBitmap<T>,
-    {
-        // Send the pixel data to the display
-        self.properties.draw(&Self::to_bitmap(c))
-    }
-
-    /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
-    /// column 0 on the left and column _(display_width - 1)_ on the right.
-    pub fn init(&mut self) -> Result<(), DI::Error> {
-        self.properties.init_column_mode()
-    }
-
-    /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DI::Error> {
-        self.properties.set_rotation(rot)
-    }
-
-    /// Turn the display on or off. The display can be drawn to and retains all
-    /// of its memory even while off.
-    pub fn display_on(&mut self, on: bool) -> Result<(), DI::Error> {
-        self.properties.display_on(on)
     }
 }
 

@@ -42,6 +42,10 @@ pub enum Command {
     /// 4 bits given.
     /// This is only for page addressing mode
     UpperColStart(u8),
+    /// Set the column start address register for Page addressing mode.
+    /// Combines LowerColStart and UpperColStart
+    /// This is only for page addressing mode
+    ColStart(u8),
     /// Set addressing mode
     AddressMode(AddrMode),
     /// Setup column start and end address
@@ -121,7 +125,8 @@ impl Command {
             Command::EnableScroll(en) => ([0x2E | (en as u8), 0, 0, 0, 0, 0, 0], 1),
             Command::VScrollArea(above, lines) => ([0xA3, above, lines, 0, 0, 0, 0], 3),
             Command::LowerColStart(addr) => ([0xF & addr, 0, 0, 0, 0, 0, 0], 1),
-            Command::UpperColStart(addr) => ([0x1F & addr, 0, 0, 0, 0, 0, 0], 1),
+            Command::UpperColStart(addr) => ([0x10 | (0xF & addr), 0, 0, 0, 0, 0, 0], 1),
+            Command::ColStart(addr) => ([0xF & addr, 0x10 | (0xF & (addr >> 4)), 0, 0, 0, 0, 0], 2),
             Command::AddressMode(mode) => ([0x20, mode as u8, 0, 0, 0, 0, 0], 2),
             Command::ColumnAddress(start, end) => ([0x21, start, end, 0, 0, 0, 0], 3),
             Command::PageAddress(start, end) => ([0x22, start as u8, end as u8, 0, 0, 0, 0], 3),

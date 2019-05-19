@@ -25,7 +25,7 @@ use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayProperties;
 use core::fmt;
 use hal::blocking::delay::DelayMs;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
 /// A trait to convert from a character to 8x8 bitmap
 pub trait CharacterBitmap<T> {
@@ -192,11 +192,11 @@ where
         RST: OutputPin,
         DELAY: DelayMs<u8>,
     {
-        rst.set_high();
+        let _ = rst.set_high();
         delay.delay_ms(1);
-        rst.set_low();
+        let _ = rst.set_low();
         delay.delay_ms(10);
-        rst.set_high();
+        let _ = rst.set_high();
     }
 
     /// Write out data to display. This is a noop in terminal mode.

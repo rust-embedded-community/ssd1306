@@ -1,7 +1,7 @@
 //! SSD1306 SPI interface
 
 use hal;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
 use super::DisplayInterface;
 
@@ -31,18 +31,18 @@ where
     DC: OutputPin,
 {
     fn send_commands(&mut self, cmds: &[u8]) -> Result<(), ()> {
-        self.dc.set_low();
+        let _ = self.dc.set_low();
 
         self.spi.write(&cmds).map_err(|_| ())?;
 
-        self.dc.set_high();
+        let _ = self.dc.set_high();
 
         Ok(())
     }
 
     fn send_data(&mut self, buf: &[u8]) -> Result<(), ()> {
         // 1 = data, 0 = command
-        self.dc.set_high();
+        let _ = self.dc.set_high();
 
         self.spi.write(&buf).map_err(|_| ())?;
 

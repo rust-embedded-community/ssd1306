@@ -41,7 +41,7 @@
 //! ```
 
 use hal;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
 use crate::displayrotation::DisplayRotation;
 use crate::displaysize::DisplaySize;

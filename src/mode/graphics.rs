@@ -16,7 +16,7 @@
 //! ```
 
 use hal::blocking::delay::DelayMs;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
 use crate::displayrotation::DisplayRotation;
 use crate::displaysize::DisplaySize;
@@ -68,11 +68,11 @@ where
         RST: OutputPin,
         DELAY: DelayMs<u8>,
     {
-        rst.set_high();
+        let _ = rst.set_high();
         delay.delay_ms(1);
-        rst.set_low();
+        let _ = rst.set_low();
         delay.delay_ms(10);
-        rst.set_high();
+        let _ = rst.set_high();
     }
 
     /// Write out data to display

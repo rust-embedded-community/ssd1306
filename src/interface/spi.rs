@@ -1,7 +1,7 @@
 //! SSD1306 SPI interface
 
 use hal;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
 use super::DisplayInterface;
 use crate::Error;
@@ -15,10 +15,10 @@ pub struct SpiInterface<SPI, DC> {
     dc: DC,
 }
 
-impl<SPI, DC, CommE> SpiInterface<SPI, DC>
+impl<SPI, DC, CommE, PinE> SpiInterface<SPI, DC>
 where
     SPI: hal::blocking::spi::Write<u8, Error = CommE>,
-    DC: OutputPin,
+    DC: OutputPin<Error = PinE>,
 {
     /// Create new SPI interface for communciation with SSD1306
     pub fn new(spi: SPI, dc: DC) -> Self {
@@ -26,27 +26,24 @@ where
     }
 }
 
-impl<SPI, DC, CommE> DisplayInterface for SpiInterface<SPI, DC>
+impl<SPI, DC, CommE, PinE> DisplayInterface for SpiInterface<SPI, DC>
 where
     SPI: hal::blocking::spi::Write<u8, Error = CommE>,
-    DC: OutputPin,
+    DC: OutputPin<Error = PinE>,
 {
-    type Error = Error<CommE>;
+    type Error = Error<CommE, PinE>;
 
     fn send_commands(&mut self, cmds: &[u8]) -> Result<(), Self::Error> {
-        self.dc.set_low();
+        self.dc.set_low().map_err(Error::Pin)?;
 
         self.spi.write(&cmds).map_err(Error::Comm)?;
 
-        self.dc.set_high();
-
-        Ok(())
+        self.dc.set_high().map_err(Error::Pin)
     }
 
     fn send_data(&mut self, buf: &[u8]) -> Result<(), Self::Error> {
         // 1 = data, 0 = command
-        self.dc.set_high();
-
+        self.dc.set_high().map_err(Error::Pin)?;
 
         self.spi.write(&buf).map_err(Error::Comm)
     }

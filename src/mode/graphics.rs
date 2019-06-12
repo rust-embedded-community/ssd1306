@@ -16,13 +16,14 @@
 //! ```
 
 use hal::blocking::delay::DelayMs;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
 use crate::displayrotation::DisplayRotation;
 use crate::displaysize::DisplaySize;
 use crate::interface::DisplayInterface;
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayProperties;
+use crate::Error;
 
 // TODO: Add to prelude
 /// Graphics mode handler
@@ -63,16 +64,20 @@ where
 
     /// Reset display
     // TODO: Move to a more appropriate place
-    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY)
+    pub fn reset<RST, DELAY, PinE>(
+        &mut self,
+        rst: &mut RST,
+        delay: &mut DELAY,
+    ) -> Result<(), Error<(), PinE>>
     where
-        RST: OutputPin,
+        RST: OutputPin<Error = PinE>,
         DELAY: DelayMs<u8>,
     {
-        rst.set_high();
+        rst.set_high().map_err(Error::Pin)?;
         delay.delay_ms(1);
-        rst.set_low();
+        rst.set_low().map_err(Error::Pin)?;
         delay.delay_ms(10);
-        rst.set_high();
+        rst.set_high().map_err(Error::Pin)
     }
 
     /// Write out data to display

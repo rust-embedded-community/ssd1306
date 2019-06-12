@@ -84,7 +84,7 @@ pub enum Command {
 
 impl Command {
     /// Send command to SSD1306
-    pub fn send<DI>(self, iface: &mut DI) -> Result<(), ()>
+    pub fn send<DI>(self, iface: &mut DI) -> Result<(), DI::Error>
     where
         DI: DisplayInterface,
     {
@@ -156,9 +156,7 @@ impl Command {
         };
 
         // Send command over the interface
-        iface.send_commands(&data[0..len])?;
-
-        Ok(())
+        iface.send_commands(&data[0..len])
     }
 }
 

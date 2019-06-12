@@ -96,9 +96,9 @@ impl Builder {
     }
 
     /// Finish the builder and use I2C to communicate with the display
-    pub fn connect_i2c<I2C>(&self, i2c: I2C) -> DisplayMode<RawMode<I2cInterface<I2C>>>
+    pub fn connect_i2c<I2C, CommE>(&self, i2c: I2C) -> DisplayMode<RawMode<I2cInterface<I2C>>>
     where
-        I2C: hal::blocking::i2c::Write,
+        I2C: hal::blocking::i2c::Write<Error = CommE>,
     {
         let properties = DisplayProperties::new(
             I2cInterface::new(i2c, self.i2c_addr),
@@ -109,13 +109,14 @@ impl Builder {
     }
 
     /// Finish the builder and use SPI to communicate with the display
-    pub fn connect_spi<SPI, DC>(
+    pub fn connect_spi<SPI, DC, CommE>(
         &self,
         spi: SPI,
         dc: DC,
     ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
     where
-        SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+        SPI: hal::blocking::spi::Transfer<u8, Error = CommE>
+            + hal::blocking::spi::Write<u8, Error = CommE>,
         DC: OutputPin,
     {
         let properties =

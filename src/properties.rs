@@ -31,7 +31,7 @@ where
 
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right.
-    pub fn init_column_mode(&mut self) -> Result<(), ()> {
+    pub fn init_column_mode(&mut self) -> Result<(), DI::Error> {
         // TODO: Break up into nice bits so display modes can pick whathever they need
         let (_, display_height) = self.display_size.dimensions();
 
@@ -60,26 +60,22 @@ where
         Command::AllOn(false).send(&mut self.iface)?;
         Command::Invert(false).send(&mut self.iface)?;
         Command::EnableScroll(false).send(&mut self.iface)?;
-        Command::DisplayOn(true).send(&mut self.iface)?;
-
-        Ok(())
+        Command::DisplayOn(true).send(&mut self.iface)
     }
 
     /// Set the position in the framebuffer of the display where any sent data should be
     /// drawn. This method can be used for changing the affected area on the screen as well
     /// as (re-)setting the start point of the next `draw` call.
-    pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), ()> {
+    pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), DI::Error> {
         Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.iface)?;
-        Command::PageAddress(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
-        Ok(())
+        Command::PageAddress(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)
     }
 
     /// Send the data to the display for drawing at the current position in the framebuffer
     /// and advance the position accordingly. Cf. `set_draw_area` to modify the affected area by
     /// this method.
-    pub fn draw(&mut self, buffer: &[u8]) -> Result<(), ()> {
-        self.iface.send_data(&buffer)?;
-        Ok(())
+    pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DI::Error> {
+        self.iface.send_data(&buffer)
     }
 
     /// Get the configured display size
@@ -131,28 +127,26 @@ where
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), ()> {
+    pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), DI::Error> {
         self.display_rotation = display_rotation;
 
         match display_rotation {
             DisplayRotation::Rotate0 => {
                 Command::SegmentRemap(true).send(&mut self.iface)?;
-                Command::ReverseComDir(true).send(&mut self.iface)?;
+                Command::ReverseComDir(true).send(&mut self.iface)
             }
             DisplayRotation::Rotate90 => {
                 Command::SegmentRemap(false).send(&mut self.iface)?;
-                Command::ReverseComDir(true).send(&mut self.iface)?;
+                Command::ReverseComDir(true).send(&mut self.iface)
             }
             DisplayRotation::Rotate180 => {
                 Command::SegmentRemap(false).send(&mut self.iface)?;
-                Command::ReverseComDir(false).send(&mut self.iface)?;
+                Command::ReverseComDir(false).send(&mut self.iface)
             }
             DisplayRotation::Rotate270 => {
                 Command::SegmentRemap(true).send(&mut self.iface)?;
-                Command::ReverseComDir(false).send(&mut self.iface)?;
+                Command::ReverseComDir(false).send(&mut self.iface)
             }
-        };
-
-        Ok(())
+        }
     }
 }

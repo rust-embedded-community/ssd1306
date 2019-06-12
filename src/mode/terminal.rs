@@ -23,9 +23,10 @@ use crate::displaysize::DisplaySize;
 use crate::interface::DisplayInterface;
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayProperties;
+use crate::Error;
 use core::fmt;
 use hal::blocking::delay::DelayMs;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
 /// A trait to convert from a character to 8x8 bitmap
 pub trait CharacterBitmap<T> {
@@ -187,16 +188,20 @@ where
     }
 
     /// Reset display
-    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY)
+    pub fn reset<RST, DELAY, PinE>(
+        &mut self,
+        rst: &mut RST,
+        delay: &mut DELAY,
+    ) -> Result<(), Error<(), PinE>>
     where
-        RST: OutputPin,
+        RST: OutputPin<Error = PinE>,
         DELAY: DelayMs<u8>,
     {
-        rst.set_high();
+        rst.set_high().map_err(Error::Pin)?;
         delay.delay_ms(1);
-        rst.set_low();
+        rst.set_low().map_err(Error::Pin)?;
         delay.delay_ms(10);
-        rst.set_high();
+        rst.set_high().map_err(Error::Pin)
     }
 
     /// Write out data to display. This is a noop in terminal mode.

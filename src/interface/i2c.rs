@@ -26,7 +26,7 @@ impl<I2C, CommE> DisplayInterface for I2cInterface<I2C>
 where
     I2C: hal::blocking::i2c::Write<Error = CommE>,
 {
-    type Error = Error<CommE>;
+    type Error = Error<CommE, ()>;
 
     fn send_commands(&mut self, cmds: &[u8]) -> Result<(), Self::Error> {
         // Copy over given commands to new aray to prefix with command identifier

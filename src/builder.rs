@@ -41,7 +41,7 @@
 //! ```
 
 use hal;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
 use crate::displayrotation::DisplayRotation;
 use crate::displaysize::DisplaySize;
@@ -109,7 +109,7 @@ impl Builder {
     }
 
     /// Finish the builder and use SPI to communicate with the display
-    pub fn connect_spi<SPI, DC, CommE>(
+    pub fn connect_spi<SPI, DC, CommE, PinE>(
         &self,
         spi: SPI,
         dc: DC,
@@ -117,7 +117,7 @@ impl Builder {
     where
         SPI: hal::blocking::spi::Transfer<u8, Error = CommE>
             + hal::blocking::spi::Write<u8, Error = CommE>,
-        DC: OutputPin,
+        DC: OutputPin<Error = PinE>,
     {
         let properties =
             DisplayProperties::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);

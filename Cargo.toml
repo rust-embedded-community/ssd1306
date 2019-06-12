@@ -16,7 +16,7 @@ branch = "master"
 repository = "jamwaffles/ssd1306"
 
 [dependencies]
-embedded-hal = "0.2.2"
+embedded-hal = "0.2.3"
 
 [dev-dependencies.stm32f1xx-hal]
 version = "0.2.0"

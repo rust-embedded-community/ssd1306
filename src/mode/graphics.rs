@@ -76,7 +76,7 @@ where
     }
 
     /// Write out data to display
-    pub fn flush(&mut self) -> Result<(), ()> {
+    pub fn flush(&mut self) -> Result<(), DI::Error> {
         let display_size = self.properties.get_size();
 
         // Ensure the display buffer is at the origin of the display before we send the full frame
@@ -144,9 +144,8 @@ where
 
     /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
     /// column 0 on the left, to column _n_ on the right
-    pub fn init(&mut self) -> Result<(), ()> {
-        self.properties.init_column_mode()?;
-        Ok(())
+    pub fn init(&mut self) -> Result<(), DI::Error> {
+        self.properties.init_column_mode()
     }
 
     /// Get display dimensions, taking into account the current rotation of the display
@@ -155,7 +154,7 @@ where
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), ()> {
+    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DI::Error> {
         self.properties.set_rotation(rot)
     }
 }

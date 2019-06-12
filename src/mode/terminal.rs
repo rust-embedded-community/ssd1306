@@ -165,7 +165,7 @@ where
     DI: DisplayInterface,
 {
     /// Clear the display
-    pub fn clear(&mut self) -> Result<(), ()> {
+    pub fn clear(&mut self) -> Result<(), DI::Error> {
         let display_size = self.properties.get_size();
 
         let numchars = match display_size {
@@ -205,24 +205,22 @@ where
     }
 
     /// Print a character to the display
-    pub fn print_char<T>(&mut self, c: T) -> Result<(), ()>
+    pub fn print_char<T>(&mut self, c: T) -> Result<(), DI::Error>
     where
         TerminalMode<DI>: CharacterBitmap<T>,
     {
         // Send the pixel data to the display
-        self.properties.draw(&Self::to_bitmap(c))?;
-        Ok(())
+        self.properties.draw(&Self::to_bitmap(c))
     }
 
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right.
-    pub fn init(&mut self) -> Result<(), ()> {
-        self.properties.init_column_mode()?;
-        Ok(())
+    pub fn init(&mut self) -> Result<(), DI::Error> {
+        self.properties.init_column_mode()
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), ()> {
+    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DI::Error> {
         self.properties.set_rotation(rot)
     }
 }

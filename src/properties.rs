@@ -149,4 +149,9 @@ where
             }
         }
     }
+
+    /// Turn the display on or off
+    pub fn set_power(&mut self, turn_on: bool) -> Result<(), DI::Error> {
+        Command::DisplayOn(turn_on).send(&mut self.iface)
+    }
 }

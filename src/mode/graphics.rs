@@ -162,6 +162,11 @@ where
     pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DI::Error> {
         self.properties.set_rotation(rot)
     }
+
+    /// Turn the display on or off
+    pub fn set_power(&mut self, turn_on: bool) -> Result<(), DI::Error> {
+        self.properties.set_power(turn_on)
+    }
 }
 
 #[cfg(feature = "graphics")]

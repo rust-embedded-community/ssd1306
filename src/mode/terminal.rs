@@ -229,9 +229,10 @@ where
         self.properties.set_rotation(rot)
     }
 
-    /// Turn the display on or off
-    pub fn set_power(&mut self, turn_on: bool) -> Result<(), DI::Error> {
-        self.properties.set_power(turn_on)
+    /// Turn the display on or off. The display can be drawn to and retains all
+    /// of its memory even while off.
+    pub fn display_on(&mut self, on: bool) -> Result<(), DI::Error> {
+        self.properties.display_on(on)
     }
 }
 

@@ -149,4 +149,10 @@ where
             }
         }
     }
+
+    /// Turn the display on or off. The display can be drawn to and retains all
+    /// of its memory even while off.
+    pub fn display_on(&mut self, on: bool) -> Result<(), DI::Error> {
+        Command::DisplayOn(on).send(&mut self.iface)
+    }
 }

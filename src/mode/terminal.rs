@@ -228,6 +228,12 @@ where
     pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DI::Error> {
         self.properties.set_rotation(rot)
     }
+
+    /// Turn the display on or off. The display can be drawn to and retains all
+    /// of its memory even while off.
+    pub fn display_on(&mut self, on: bool) -> Result<(), DI::Error> {
+        self.properties.display_on(on)
+    }
 }
 
 impl<DI> fmt::Write for TerminalMode<DI>

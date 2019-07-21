@@ -1,9 +1,11 @@
 //! Interface factory
 //!
-//! This is the easiest way to create a driver instance. You can set various parameters of the
-//! driver and give it an interface to use. The builder will return a
-//! [`mode::RawMode`](../mode/raw/struct.RawMode.html) object which you should coerce to a richer
-//! display mode, like [mode::Graphics](../mode/graphics/struct.GraphicsMode.html) for drawing
+//! This is the easiest way to create a driver instance, with the ability to set various parameters of the driver.
+//!
+//! To finish the builder and produce a connected display interface, call `.connect_i2c(i2c)` or
+//! `.connect_spi(spi, dc)`. The builder will be consumed into a
+//! [`mode::RawMode`](../mode/raw/struct.RawMode.html) object which can be coerced into a richer
+//! display mode like [mode::Graphics](../mode/graphics/struct.GraphicsMode.html) for drawing
 //! primitives and text.
 //!
 //! # Examples

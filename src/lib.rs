@@ -107,8 +107,8 @@
 //!
 //! [`Builder`]: ./builder/struct.Builder.html
 //! [`GraphicsMode`]: ./mode/graphics/struct.GraphicsMode.html
-//! [`TerminalMode`]: ./mode/graphics/struct.TerminalMode.html
-//! [`RawMode`]: ./mode/graphics/struct.RawMode.html
+//! [`TerminalMode`]: ./mode/terminal/struct.TerminalMode.html
+//! [`RawMode`]: ./mode/raw/struct.RawMode.html
 
 #![no_std]
 // #![deny(missing_debug_implementations)]

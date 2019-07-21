@@ -37,6 +37,9 @@ matrix:
     - rust: beta
     - rust: nightly
 
+before_install:
+  - pip install linkchecker --user
+
 install:
   - rustup component add rust-src
   - |
@@ -51,6 +54,8 @@ install:
 
 script:
   - ./build.sh
+  - cargo doc --all-features --target $TARGET
+  - linkchecker target/$TARGET/doc/ssd1306/index.html
 
 cache: cargo
 before_cache:

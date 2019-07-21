@@ -12,17 +12,21 @@
 //!
 //! Connect over SPI with default rotation (0 deg) and size (128x64):
 //!
-//! ```rust,ignore
-//! let spi = /* SPI interface from your HAL of choice */;
-//! let dc = /* GPIO data/command select pin */;
+//! ```rust
+//! # use ssd1306::test_helpers::{PinStub, SpiStub};
+//! # let spi = SpiStub;
+//! # let dc = PinStub;
+//! use ssd1306::Builder;
 //!
 //! Builder::new().connect_spi(spi, dc);
 //! ```
 //!
 //! Connect over I2C, changing lots of options
 //!
-//! ```rust,ignore
-//! let i2c = /* I2C interface from your HAL of choice */;
+//! ```rust
+//! # use ssd1306::test_helpers::{PinStub, I2cStub};
+//! # let i2c = I2cStub;
+//! use ssd1306::{prelude::*, Builder};
 //!
 //! Builder::new()
 //!     .with_rotation(DisplayRotation::Rotate180)
@@ -35,9 +39,11 @@
 //! by default. You need to coerce them into a mode by specifying a type on assignment. For
 //! example, to use [`TerminalMode` mode](../mode/terminal/struct.TerminalMode.html):
 //!
-//! ```rust,ignore
-//! let spi = /* SPI interface from your HAL of choice */;
-//! let dc = /* GPIO data/command select pin */;
+//! ```rust
+//! # use ssd1306::test_helpers::{PinStub, SpiStub};
+//! # let spi = SpiStub;
+//! # let dc = PinStub;
+//! use ssd1306::{prelude::*, Builder};
 //!
 //! let display: TerminalMode<_> = Builder::new().connect_spi(spi, dc).into();
 //! ```

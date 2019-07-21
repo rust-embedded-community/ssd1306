@@ -96,6 +96,8 @@ impl Builder {
     }
 
     /// Finish the builder and use I2C to communicate with the display
+    ///
+    /// This method consumes the builder and must come last in the method call chain
     pub fn connect_i2c<I2C, CommE>(&self, i2c: I2C) -> DisplayMode<RawMode<I2cInterface<I2C>>>
     where
         I2C: hal::blocking::i2c::Write<Error = CommE>,
@@ -109,6 +111,8 @@ impl Builder {
     }
 
     /// Finish the builder and use SPI to communicate with the display
+    ///
+    /// This method consumes the builder and must come last in the method call chain
     pub fn connect_spi<SPI, DC, CommE, PinE>(
         &self,
         spi: SPI,

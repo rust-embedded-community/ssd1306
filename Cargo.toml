@@ -9,7 +9,7 @@ license = "MIT OR Apache-2.0"
 name = "ssd1306"
 readme = "README.md"
 repository = "https://github.com/jamwaffles/ssd1306"
-version = "0.2.6-alpha.0"
+version = "0.2.6"
 edition = "2018"
 [badges.travis-ci]
 branch = "master"
@@ -17,10 +17,6 @@ repository = "jamwaffles/ssd1306"
 
 [dependencies]
 embedded-hal = "0.2.3"
-
-[dev-dependencies.stm32f1xx-hal]
-version = "0.2.0"
-features = [ "rt", "stm32f103" ]
 
 [dependencies.embedded-graphics]
 optional = true
@@ -30,6 +26,10 @@ version = "0.4.5"
 cortex-m = "0.5.8"
 cortex-m-rt = "0.6.7"
 panic-semihosting = "0.5.1"
+
+[dev-dependencies.stm32f1xx-hal]
+version = "0.2.0"
+features = [ "rt", "stm32f103" ]
 
 [features]
 default = ["graphics"]

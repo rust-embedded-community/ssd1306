@@ -1,26 +1,32 @@
 //! Interface factory
 //!
-//! This is the easiest way to create a driver instance. You can set various parameters of the
-//! driver and give it an interface to use. The builder will return a
-//! [`mode::RawMode`](../mode/raw/struct.RawMode.html) object which you should coerce to a richer
-//! display mode, like [mode::Graphics](../mode/graphics/struct.GraphicsMode.html) for drawing
+//! This is the easiest way to create a driver instance, with the ability to set various parameters of the driver.
+//!
+//! To finish the builder and produce a connected display interface, call `.connect_i2c(i2c)` or
+//! `.connect_spi(spi, dc)`. The builder will be consumed into a
+//! [`mode::RawMode`](../mode/raw/struct.RawMode.html) object which can be coerced into a richer
+//! display mode like [mode::Graphics](../mode/graphics/struct.GraphicsMode.html) for drawing
 //! primitives and text.
 //!
 //! # Examples
 //!
 //! Connect over SPI with default rotation (0 deg) and size (128x64):
 //!
-//! ```rust,ignore
-//! let spi = /* SPI interface from your HAL of choice */;
-//! let dc = /* GPIO data/command select pin */;
+//! ```rust
+//! # use ssd1306::test_helpers::{PinStub, SpiStub};
+//! # let spi = SpiStub;
+//! # let dc = PinStub;
+//! use ssd1306::Builder;
 //!
 //! Builder::new().connect_spi(spi, dc);
 //! ```
 //!
 //! Connect over I2C, changing lots of options
 //!
-//! ```rust,ignore
-//! let i2c = /* I2C interface from your HAL of choice */;
+//! ```rust
+//! # use ssd1306::test_helpers::{PinStub, I2cStub};
+//! # let i2c = I2cStub;
+//! use ssd1306::{prelude::*, Builder};
 //!
 //! Builder::new()
 //!     .with_rotation(DisplayRotation::Rotate180)
@@ -33,9 +39,11 @@
 //! by default. You need to coerce them into a mode by specifying a type on assignment. For
 //! example, to use [`TerminalMode` mode](../mode/terminal/struct.TerminalMode.html):
 //!
-//! ```rust,ignore
-//! let spi = /* SPI interface from your HAL of choice */;
-//! let dc = /* GPIO data/command select pin */;
+//! ```rust
+//! # use ssd1306::test_helpers::{PinStub, SpiStub};
+//! # let spi = SpiStub;
+//! # let dc = PinStub;
+//! use ssd1306::{prelude::*, Builder};
 //!
 //! let display: TerminalMode<_> = Builder::new().connect_spi(spi, dc).into();
 //! ```
@@ -96,6 +104,8 @@ impl Builder {
     }
 
     /// Finish the builder and use I2C to communicate with the display
+    ///
+    /// This method consumes the builder and must come last in the method call chain
     pub fn connect_i2c<I2C, CommE>(&self, i2c: I2C) -> DisplayMode<RawMode<I2cInterface<I2C>>>
     where
         I2C: hal::blocking::i2c::Write<Error = CommE>,
@@ -109,6 +119,8 @@ impl Builder {
     }
 
     /// Finish the builder and use SPI to communicate with the display
+    ///
+    /// This method consumes the builder and must come last in the method call chain
     pub fn connect_spi<SPI, DC, CommE, PinE>(
         &self,
         spi: SPI,

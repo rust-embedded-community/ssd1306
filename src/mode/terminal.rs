@@ -5,9 +5,13 @@
 //! left to bottom right in an 8x8 pixel grid, restarting at the top left of the display once full.
 //! The display itself takes care of wrapping lines.
 //!
-//! ```rust,ignore
-//! let i2c = /* I2C interface from your HAL of choice */;
-//! let display: TerminalMode<_> = Builder::new().connect_i2c(i2c).into();
+//! ```rust
+//! # use ssd1306::test_helpers::I2cStub;
+//! # let i2c = I2cStub;
+//! use core::fmt::Write;
+//! use ssd1306::{mode::TerminalMode, Builder};
+//!
+//! let mut display: TerminalMode<_> = Builder::new().connect_i2c(i2c).into();
 //!
 //! display.init().unwrap();
 //! display.clear().unwrap();

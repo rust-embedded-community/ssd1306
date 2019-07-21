@@ -83,19 +83,12 @@ where
         self.display_size
     }
 
-    // TODO: Replace (u8, u8) with a dimensioney type for consistency
-    // TOOD: Make doc tests work
     /// Get display dimensions, taking into account the current rotation of the display
     ///
     /// ```rust
-    /// # struct FakeInterface;
-    /// #
-    /// # impl DisplayInterface for FakeInterface {
-    /// #     fn send_command(&mut self, cmd: u8) -> Result<(), ()> { Ok(()) }
-    /// #     fn send_data(&mut self, buf: &[u8]) -> Result<(), ()> { Ok(()) }
-    /// # }
-    /// #
-    /// # let interface = FakeInterface {};
+    /// # use ssd1306::{properties::DisplayProperties, test_helpers::StubInterface};
+    /// # let interface = StubInterface;
+    /// use ssd1306::prelude::*;
     /// #
     /// let disp = DisplayProperties::new(
     ///     interface,
@@ -104,7 +97,7 @@ where
     /// );
     /// assert_eq!(disp.get_dimensions(), (128, 64));
     ///
-    /// # let interface = FakeInterface {};
+    /// # let interface = StubInterface;
     /// let rotated_disp = DisplayProperties::new(
     ///     interface,
     ///     DisplaySize::Display128x64,

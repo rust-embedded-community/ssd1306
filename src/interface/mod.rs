@@ -9,14 +9,12 @@
 //! a type alias. Here's an example for the I2C1 on an STM32F103xx:
 //!
 //! ```rust
-//! # extern crate ssd1306;
-//! # extern crate stm32f103xx_hal as hal;
-//! # use hal::gpio::gpiob::{PB8, PB9};
-//! # use hal::gpio::{Alternate, OpenDrain};
-//! # use hal::i2c::I2c;
-//! # use hal::prelude::*;
-//! # use hal::stm32f103xx::I2C1;
-//! # use ssd1306::interface::I2cInterface;
+//! # use stm32f1xx_hal::gpio::gpiob::{PB8, PB9};
+//! # use stm32f1xx_hal::gpio::{Alternate, OpenDrain};
+//! # use stm32f1xx_hal::i2c::I2c;
+//! # use stm32f1xx_hal::pac::I2C1;
+//! # use stm32f1xx_hal::prelude::*;
+//! use ssd1306::{interface::I2cInterface, prelude::*};
 //! type OledDisplay =
 //!   GraphicsMode<I2cInterface<I2c<I2C1, (PB8<Alternate<OpenDrain>>, PB9<Alternate<OpenDrain>>)>>>;
 //! ```
@@ -26,14 +24,13 @@
 //! Here's one for SPI1 on an STM32F103xx:
 //!
 //! ```rust
-//! # extern crate ssd1306;
-//! # extern crate stm32f103xx_hal as hal;
-//! # use hal::gpio::gpioa::{PA5, PA6, PA7};
-//! # use hal::gpio::gpiob::PB1;
-//! # use hal::gpio::{Alternate, Floating, Input, Output, PushPull};
-//! # use hal::spi::Spi;
-//! # use hal::stm32f103xx::SPI1;
-//! # use ssd1306::interface::SpiInterface;
+//! # use stm32f1xx_hal::gpio::gpioa::{PA5, PA6, PA7};
+//! # use stm32f1xx_hal::gpio::gpiob::PB1;
+//! # use stm32f1xx_hal::gpio::{Alternate, Floating, Input, Output, PushPull};
+//! # use stm32f1xx_hal::pac::SPI1;
+//! # use stm32f1xx_hal::prelude::*;
+//! # use stm32f1xx_hal::spi::Spi;
+//! use ssd1306::{interface::SpiInterface, prelude::*};
 //! pub type OledDisplay = GraphicsMode<
 //!     SpiInterface<
 //!         Spi<

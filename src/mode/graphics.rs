@@ -1,19 +1,40 @@
 //! Buffered display module for use with the [embedded_graphics] crate
 //!
-//! ```rust,ignore
-//! let i2c = /* I2C interface from your HAL of choice */;
-//! let display: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
-//! let image = include_bytes!("image_16x16.raw");
+//! ```rust
+//! # use ssd1306::test_helpers::I2cStub;
+//! # let i2c = I2cStub;
+//! use ssd1306::{prelude::*, mode::GraphicsMode, Builder};
+//! use embedded_graphics::{prelude::*, primitives::{Line, Rect, Circle}, fonts::Font6x8};
+//!
+//! let mut display: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //!
 //! display.init().unwrap();
 //! display.flush().unwrap();
-//! display.draw(Line::new(Coord::new(0, 0), (16, 16), 1.into()).into_iter());
-//! display.draw(Rect::new(Coord::new(24, 0), (40, 16), 1u8.into()).into_iter());
-//! display.draw(Circle::new(Coord::new(64, 8), 8, 1u8.into()).into_iter());
-//! display.draw(Image1BPP::new(image, 0, 24));
-//! display.draw(Font6x8::render_str("Hello Rust!", 1u8.into()).translate(Coord::new(24, 24)).into_iter());
+//! display.draw(
+//!     Line::new(Coord::new(0, 0), Coord::new(16, 16))
+//!         .with_stroke(Some(1u8.into()))
+//!         .into_iter(),
+//! );
+//! display.draw(
+//!     Rect::new(Coord::new(24, 0), Coord::new(40, 16))
+//!         .with_stroke(Some(1u8.into()))
+//!         .into_iter(),
+//! );
+//! display.draw(
+//!     Circle::new(Coord::new(64, 8), 8)
+//!         .with_stroke(Some(1u8.into()))
+//!         .into_iter(),
+//! );
+//! display.draw(
+//!     Font6x8::render_str("Hello Rust!")
+//!         .with_stroke(Some(1u8.into()))
+//!         .translate(Coord::new(24, 24))
+//!         .into_iter(),
+//! );
 //! display.flush().unwrap();
 //! ```
+//!
+//! [embedded_graphics]: https://crates.io/crates/embedded_graphics
 
 use hal::blocking::delay::DelayMs;
 use hal::digital::v2::OutputPin;

@@ -12,22 +12,22 @@
 //! display.flush().unwrap();
 //! display.draw(
 //!     Line::new(Coord::new(0, 0), Coord::new(16, 16))
-//!         .with_stroke(Some(1u8.into()))
+//!         .stroke(Some(1u8.into()))
 //!         .into_iter(),
 //! );
 //! display.draw(
 //!     Rect::new(Coord::new(24, 0), Coord::new(40, 16))
-//!         .with_stroke(Some(1u8.into()))
+//!         .stroke(Some(1u8.into()))
 //!         .into_iter(),
 //! );
 //! display.draw(
 //!     Circle::new(Coord::new(64, 8), 8)
-//!         .with_stroke(Some(1u8.into()))
+//!         .stroke(Some(1u8.into()))
 //!         .into_iter(),
 //! );
 //! display.draw(
 //!     Font6x8::render_str("Hello Rust!")
-//!         .with_stroke(Some(1u8.into()))
+//!         .stroke(Some(1u8.into()))
 //!         .translate(Coord::new(24, 24))
 //!         .into_iter(),
 //! );
@@ -194,19 +194,19 @@ where
 #[cfg(feature = "graphics")]
 extern crate embedded_graphics;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::{drawable, pixelcolor::PixelColorU8, Drawing};
+use self::embedded_graphics::{drawable, pixelcolor::BinaryColor, Drawing};
 
 #[cfg(feature = "graphics")]
-impl<DI> Drawing<PixelColorU8> for GraphicsMode<DI>
+impl<DI> Drawing<BinaryColor> for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: Iterator<Item = drawable::Pixel<PixelColorU8>>,
+        T: IntoIterator<Item = drawable::Pixel<BinaryColor>>,
     {
         for pixel in item_pixels {
-            self.set_pixel((pixel.0).0, (pixel.0).1, pixel.1.into_inner());
+            self.set_pixel((pixel.0).0, (pixel.0).1, pixel.1 as u8);
         }
     }
 }

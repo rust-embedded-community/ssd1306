@@ -56,8 +56,8 @@
 //! here](https://github.com/jamwaffles/ssd1306/blob/master/examples/terminal_i2c.rs).
 //!
 //! ```rust
-//!	# use ssd1306::test_helpers::I2cStub;
-//!	# let i2c = I2cStub;
+//! # use ssd1306::test_helpers::I2cStub;
+//! # let i2c = I2cStub;
 //! use core::fmt::Write;
 //! use ssd1306::{prelude::*, mode::TerminalMode, Builder};
 //!
@@ -80,8 +80,8 @@
 //! complete example here](https://github.com/jamwaffles/ssd1306/blob/master/examples/text_i2c.rs).
 //!
 //! ```rust
-//!	# use ssd1306::test_helpers::I2cStub;
-//!	# let i2c = I2cStub;
+//! # use ssd1306::test_helpers::I2cStub;
+//! # let i2c = I2cStub;
 //! use ssd1306::{prelude::*, mode::GraphicsMode, Builder};
 //! use embedded_graphics::{prelude::*, fonts::Font6x8};
 //!
@@ -92,12 +92,12 @@
 //!
 //! disp.draw(
 //!     Font6x8::render_str("Hello world!")
-//!         .with_stroke(Some(1u8.into()))
+//!         .stroke(Some(1u8.into()))
 //!         .into_iter(),
 //! );
 //! disp.draw(
 //!     Font6x8::render_str("Hello Rust!")
-//!         .with_stroke(Some(1u8.into()))
+//!         .stroke(Some(1u8.into()))
 //!         .translate(Coord::new(0, 16))
 //!         .into_iter(),
 //! );

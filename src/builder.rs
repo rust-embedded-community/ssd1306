@@ -31,7 +31,7 @@
 //! Builder::new()
 //!     .with_rotation(DisplayRotation::Rotate180)
 //!     .with_i2c_addr(0x3D)
-//!     .with_size(DisplaySize::Display128x32)
+//!     .size(DisplaySize::Display128x32)
 //!     .connect_i2c(i2c);
 //! ```
 //!
@@ -83,7 +83,7 @@ impl Builder {
     }
 
     /// Set the size of the display. Supported sizes are defined by [DisplaySize].
-    pub fn with_size(&self, display_size: DisplaySize) -> Self {
+    pub fn size(&self, display_size: DisplaySize) -> Self {
         Self {
             display_size,
             ..*self

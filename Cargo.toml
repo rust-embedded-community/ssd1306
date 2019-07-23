@@ -27,6 +27,11 @@ cortex-m = "0.6.0"
 cortex-m-rt = "0.6.9"
 panic-semihosting = "0.5.2"
 
+# Turn on `bmp` feature for examples
+[dev-dependencies.embedded-graphics]
+version = "0.6.0-alpha.1"
+features = ["bmp"]
+
 [dev-dependencies.stm32f1xx-hal]
 version = "0.3.0"
 features = [ "rt", "stm32f103" ]
@@ -34,6 +39,7 @@ features = [ "rt", "stm32f103" ]
 [features]
 default = ["graphics"]
 graphics = ["embedded-graphics"]
+
 [profile.dev]
 codegen-units = 1
 incremental = false

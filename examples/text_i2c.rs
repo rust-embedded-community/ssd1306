@@ -26,6 +26,7 @@ extern crate stm32f1xx_hal as hal;
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
 use embedded_graphics::fonts::Font6x8;
+use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use hal::i2c::{BlockingI2c, DutyCycle, Mode};
 use hal::prelude::*;
@@ -72,12 +73,12 @@ fn main() -> ! {
 
     disp.draw(
         Font6x8::render_str("Hello world!")
-            .stroke(Some(1u8.into()))
+            .stroke(Some(BinaryColor::On))
             .into_iter(),
     );
     disp.draw(
         Font6x8::render_str("Hello Rust!")
-            .stroke(Some(1u8.into()))
+            .stroke(Some(BinaryColor::On))
             .translate(Coord::new(0, 16))
             .into_iter(),
     );

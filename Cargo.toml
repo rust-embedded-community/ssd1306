@@ -20,15 +20,15 @@ embedded-hal = "0.2.3"
 
 [dependencies.embedded-graphics]
 optional = true
-version = "0.4.5"
+version = "0.6.0-alpha.1"
 
 [dev-dependencies]
-cortex-m = "0.5.8"
-cortex-m-rt = "0.6.7"
-panic-semihosting = "0.5.1"
+cortex-m = "0.6.0"
+cortex-m-rt = "0.6.9"
+panic-semihosting = "0.5.2"
 
 [dev-dependencies.stm32f1xx-hal]
-version = "0.2.0"
+version = "0.3.0"
 features = [ "rt", "stm32f103" ]
 
 [features]

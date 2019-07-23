@@ -83,7 +83,11 @@
 //! # use ssd1306::test_helpers::I2cStub;
 //! # let i2c = I2cStub;
 //! use ssd1306::{prelude::*, mode::GraphicsMode, Builder};
-//! use embedded_graphics::{prelude::*, fonts::Font6x8};
+//! use embedded_graphics::{
+//!     fonts::Font6x8,
+//!     pixelcolor::BinaryColor,
+//!     prelude::*,
+//! };
 //!
 //! let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //!
@@ -92,12 +96,12 @@
 //!
 //! disp.draw(
 //!     Font6x8::render_str("Hello world!")
-//!         .stroke(Some(1u8.into()))
+//!         .stroke(Some(BinaryColor::On))
 //!         .into_iter(),
 //! );
 //! disp.draw(
 //!     Font6x8::render_str("Hello Rust!")
-//!         .stroke(Some(1u8.into()))
+//!         .stroke(Some(BinaryColor::On))
 //!         .translate(Coord::new(0, 16))
 //!         .into_iter(),
 //! );

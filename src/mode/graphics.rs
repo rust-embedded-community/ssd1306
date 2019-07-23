@@ -4,7 +4,12 @@
 //! # use ssd1306::test_helpers::I2cStub;
 //! # let i2c = I2cStub;
 //! use ssd1306::{prelude::*, mode::GraphicsMode, Builder};
-//! use embedded_graphics::{prelude::*, primitives::{Line, Rect, Circle}, fonts::Font6x8};
+//! use embedded_graphics::{
+//!     fonts::Font6x8,
+//!     pixelcolor::BinaryColor,
+//!     prelude::*,
+//!     primitives::{Circle, Line, Rectangle},
+//! };
 //!
 //! let mut display: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //!
@@ -12,22 +17,22 @@
 //! display.flush().unwrap();
 //! display.draw(
 //!     Line::new(Coord::new(0, 0), Coord::new(16, 16))
-//!         .stroke(Some(1u8.into()))
+//!         .stroke(Some(BinaryColor::On))
 //!         .into_iter(),
 //! );
 //! display.draw(
-//!     Rect::new(Coord::new(24, 0), Coord::new(40, 16))
-//!         .stroke(Some(1u8.into()))
+//!     Rectangle::new(Coord::new(24, 0), Coord::new(40, 16))
+//!         .stroke(Some(BinaryColor::On))
 //!         .into_iter(),
 //! );
 //! display.draw(
 //!     Circle::new(Coord::new(64, 8), 8)
-//!         .stroke(Some(1u8.into()))
+//!         .stroke(Some(BinaryColor::On))
 //!         .into_iter(),
 //! );
 //! display.draw(
 //!     Font6x8::render_str("Hello Rust!")
-//!         .stroke(Some(1u8.into()))
+//!         .stroke(Some(BinaryColor::On))
 //!         .translate(Coord::new(24, 24))
 //!         .into_iter(),
 //! );

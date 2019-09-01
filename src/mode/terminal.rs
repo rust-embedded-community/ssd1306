@@ -27,6 +27,7 @@ use crate::displayrotation::DisplayRotation;
 use crate::displaysize::DisplaySize;
 use crate::interface::DisplayInterface;
 use crate::mode::displaymode::DisplayModeTrait;
+use crate::mode::terminal::TerminalModeError::{InterfaceError, OutOfBounds, Uninitialized};
 use crate::properties::DisplayProperties;
 use crate::Error;
 use core::cmp::min;
@@ -94,6 +95,36 @@ impl Cursor {
     }
 }
 
+/// Errors which can occur when interacting with the terminal mode
+pub enum TerminalModeError<DI>
+where
+    DI: DisplayInterface,
+{
+    /// An error occurred in the underlying interface layer
+    InterfaceError(DI::Error),
+    /// The mode was used before it was initialized
+    Uninitialized,
+    /// A location was specified outside the bounds of the screen
+    OutOfBounds,
+}
+
+// Cannot use From<_> due to coherence
+trait IntoTerminalModeResult<DI, T>
+where
+    DI: DisplayInterface,
+{
+    fn terminal_err(self) -> Result<T, TerminalModeError<DI>>;
+}
+
+impl<DI, T> IntoTerminalModeResult<DI, T> for Result<T, DI::Error>
+where
+    DI: DisplayInterface,
+{
+    fn terminal_err(self) -> Result<T, TerminalModeError<DI>> {
+        self.map_err(|err| InterfaceError(err))
+    }
+}
+
 // TODO: Add to prelude
 /// Terminal mode handler
 pub struct TerminalMode<DI> {
@@ -124,7 +155,7 @@ where
     DI: DisplayInterface,
 {
     /// Clear the display and reset the cursor to the top left corner
-    pub fn clear(&mut self) -> Result<(), DI::Error> {
+    pub fn clear(&mut self) -> Result<(), TerminalModeError<DI>> {
         let display_size = self.properties.get_size();
 
         let numchars = match display_size {
@@ -134,17 +165,20 @@ where
         };
 
         // Let the chip handle line wrapping so we can fill the screen with blanks faster
-        self.properties.change_mode(AddrMode::Horizontal)?;
+        self.properties
+            .change_mode(AddrMode::Horizontal)
+            .terminal_err()?;
         let (display_width, display_height) = self.properties.get_dimensions();
         self.properties
-            .set_draw_area((0, 0), (display_width, display_height))?;
+            .set_draw_area((0, 0), (display_width, display_height))
+            .terminal_err()?;
 
         for _ in 0..numchars {
-            self.properties.draw(&[0; 8])?;
+            self.properties.draw(&[0; 8]).terminal_err()?;
         }
 
         // But for normal operation we manage the line wrapping
-        self.properties.change_mode(AddrMode::Page)?;
+        self.properties.change_mode(AddrMode::Page).terminal_err()?;
         self.reset_pos()?;
 
         Ok(())
@@ -156,9 +190,9 @@ where
         rst: &mut RST,
         delay: &mut DELAY,
     ) -> Result<(), Error<(), PinE>>
-        where
-            RST: OutputPin<Error = PinE>,
-            DELAY: DelayMs<u8>,
+    where
+        RST: OutputPin<Error = PinE>,
+        DELAY: DelayMs<u8>,
     {
         rst.set_high().map_err(Error::Pin)?;
         delay.delay_ms(1);
@@ -168,26 +202,28 @@ where
     }
 
     /// Write out data to display. This is a noop in terminal mode.
-    pub fn flush(&mut self) -> Result<(), ()> {
+    pub fn flush(&mut self) -> Result<(), TerminalModeError<DI>> {
         Ok(())
     }
 
     /// Print a character to the display
-    pub fn print_char(&mut self, c: char) -> Result<(), DI::Error> {
+    pub fn print_char(&mut self, c: char) -> Result<(), TerminalModeError<DI>> {
         match c {
             '\n' => {
                 let CursorWrapEvent(new_line) = self.ensure_cursor()?.advance_line();
-                self.properties.set_column(0)?;
-                self.properties.set_row(new_line * 8)?;
+                self.properties.set_column(0).terminal_err()?;
+                self.properties.set_row(new_line * 8).terminal_err()?;
             }
             '\r' => {
-                self.properties.set_column(0)?;
+                self.properties.set_column(0).terminal_err()?;
                 let (_, cur_line) = self.ensure_cursor()?.get_position();
                 self.ensure_cursor()?.set_position(0, cur_line);
             }
             _ => {
                 // Send the pixel data to the display
-                self.properties.draw(&Self::char_to_bitmap(c))?;
+                self.properties
+                    .draw(&Self::char_to_bitmap(c))
+                    .terminal_err()?;
                 // Increment character counter and potentially wrap line
                 self.advance_cursor()?;
             }
@@ -199,49 +235,54 @@ where
     /// Initialise the display in page mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right, but no automatic line
     /// wrapping.
-    pub fn init(&mut self) -> Result<(), DI::Error> {
-        self.properties.init_with_mode(AddrMode::Page)?;
+    pub fn init(&mut self) -> Result<(), TerminalModeError<DI>> {
+        self.properties
+            .init_with_mode(AddrMode::Page)
+            .terminal_err()?;
         self.reset_pos()?;
         Ok(())
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DI::Error> {
+    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), TerminalModeError<DI>> {
         // we don't need to touch the cursor because rotating 90º or 270º currently just flips
-        self.properties.set_rotation(rot)
+        self.properties.set_rotation(rot).terminal_err()
     }
 
     /// Turn the display on or off. The display can be drawn to and retains all
     /// of its memory even while off.
-    pub fn display_on(&mut self, on: bool) -> Result<(), DI::Error> {
-        self.properties.display_on(on)
+    pub fn display_on(&mut self, on: bool) -> Result<(), TerminalModeError<DI>> {
+        self.properties.display_on(on).terminal_err()
     }
 
     /// Get the current cursor position, in character coordinates.
     /// This is the (column, row) that the next character will be written to.
-    pub fn get_position(&self) -> Result<(u8, u8), ()> {
-        self.cursor.as_ref().map(|c| c.get_position()).ok_or(())
+    pub fn get_position(&self) -> Result<(u8, u8), TerminalModeError<DI>> {
+        self.cursor
+            .as_ref()
+            .map(|c| c.get_position())
+            .ok_or(Uninitialized)
     }
 
     /// Set the cursor position, in character coordinates.
     /// This is the (column, row) that the next character will be written to.
     /// If the position is out of bounds, an Err will be returned.
-    pub fn set_position(&mut self, column: u8, row: u8) -> Result<(), ()> {
+    pub fn set_position(&mut self, column: u8, row: u8) -> Result<(), TerminalModeError<DI>> {
         let (width, height) = self.ensure_cursor()?.get_dimensions();
         if column >= width || row >= height {
-            Err(())
+            Err(OutOfBounds)
         } else {
-            self.properties.set_column(column * 8)?;
-            self.properties.set_row(row * 8)?;
+            self.properties.set_column(column * 8).terminal_err()?;
+            self.properties.set_row(row * 8).terminal_err()?;
             self.ensure_cursor()?.set_position(column, row);
             Ok(())
         }
     }
 
     /// Reset the draw area and move pointer to the top left corner
-    fn reset_pos(&mut self) -> Result<(), ()> {
-        self.properties.set_column(0)?;
-        self.properties.set_row(0)?;
+    fn reset_pos(&mut self) -> Result<(), TerminalModeError<DI>> {
+        self.properties.set_column(0).terminal_err()?;
+        self.properties.set_row(0).terminal_err()?;
         // Initialise the counter when we know it's valid
         let (display_width, display_height) = self.properties.get_dimensions();
         self.cursor = Some(Cursor::new(display_width, display_height));
@@ -251,15 +292,15 @@ where
 
     /// Advance the cursor, automatically wrapping lines and/or screens if necessary
     /// Takes in an already-unwrapped cursor to avoid re-unwrapping
-    fn advance_cursor(&mut self) -> Result<(), ()> {
+    fn advance_cursor(&mut self) -> Result<(), TerminalModeError<DI>> {
         if let Some(CursorWrapEvent(new_row)) = self.ensure_cursor()?.advance() {
-            self.properties.set_row(new_row * 8)?;
+            self.properties.set_row(new_row * 8).terminal_err()?;
         }
         Ok(())
     }
 
-    fn ensure_cursor(&mut self) -> Result<&mut Cursor, ()> {
-        self.cursor.as_mut().ok_or(())
+    fn ensure_cursor(&mut self) -> Result<&mut Cursor, TerminalModeError<DI>> {
+        self.cursor.as_mut().ok_or(Uninitialized)
     }
 
     fn char_to_bitmap(input: char) -> [u8; 8] {

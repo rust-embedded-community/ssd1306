@@ -87,7 +87,7 @@ where
     /// Only works in Horizontal or Vertical addressing mode
     pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), DI::Error> {
         match self.addr_mode {
-            AddrMode::Page => Err(()),
+            AddrMode::Page => panic!("Device cannot be in Page mode to set draw area"),
             _ => {
                 Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.iface)?;
                 Command::PageAddress(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
@@ -99,10 +99,10 @@ where
     /// Set the column address in the framebuffer of the display where any sent data should be
     /// drawn.
     /// Only works in Page addressing mode.
-    pub fn set_column(&mut self, column: u8) -> Result<(), ()> {
+    pub fn set_column(&mut self, column: u8) -> Result<(), DI::Error> {
         match self.addr_mode {
             AddrMode::Page => Command::ColStart(column).send(&mut self.iface),
-            _ => Err(()),
+            _ => panic!("Device must be in Page mode to set column"),
         }
     }
 
@@ -111,10 +111,10 @@ where
     /// Note that the parameter is in pixels, but the page will be set to the start of the 8px
     /// row which contains the passed-in row.
     /// Only works in Page addressing mode.
-    pub fn set_row(&mut self, row: u8) -> Result<(), ()> {
+    pub fn set_row(&mut self, row: u8) -> Result<(), DI::Error> {
         match self.addr_mode {
             AddrMode::Page => Command::PageStart(row.into()).send(&mut self.iface),
-            _ => Err(()),
+            _ => panic!("Device must be in Page mode to set row"),
         }
     }
 

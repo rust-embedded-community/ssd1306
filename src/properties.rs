@@ -99,10 +99,10 @@ where
     /// Set the column address in the framebuffer of the display where any sent data should be
     /// drawn.
     /// Only works in Page addressing mode.
-    pub fn set_column(&mut self, column: u8) -> Result<(), DI::Error> {
+    pub fn set_column(&mut self, column: u8) -> Result<(), ()> {
         match self.addr_mode {
             AddrMode::Page => Command::ColStart(column).send(&mut self.iface),
-            _ => Err(()), // TODO
+            _ => Err(()),
         }
     }
 
@@ -111,10 +111,10 @@ where
     /// Note that the parameter is in pixels, but the page will be set to the start of the 8px
     /// row which contains the passed-in row.
     /// Only works in Page addressing mode.
-    pub fn set_row(&mut self, row: u8) -> Result<(), DI::Error> {
+    pub fn set_row(&mut self, row: u8) -> Result<(), ()> {
         match self.addr_mode {
             AddrMode::Page => Command::PageStart(row.into()).send(&mut self.iface),
-            _ => Err(()), // TODO
+            _ => Err(()),
         }
     }
 
@@ -189,11 +189,12 @@ where
             }
         };
 
-    Ok(())
+        Ok(())
     }
 
     /// Turn the display on or off. The display can be drawn to and retains all
     /// of its memory even while off.
     pub fn display_on(&mut self, on: bool) -> Result<(), DI::Error> {
         Command::DisplayOn(on).send(&mut self.iface)
+    }
 }

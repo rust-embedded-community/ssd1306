@@ -124,7 +124,7 @@ where
     DI: DisplayInterface,
 {
     /// Clear the display and reset the cursor to the top left corner
-    pub fn clear(&mut self) -> Result<(), ()> {
+    pub fn clear(&mut self) -> Result<(), DI::Error> {
         let display_size = self.properties.get_size();
 
         let numchars = match display_size {
@@ -151,16 +151,20 @@ where
     }
 
     /// Reset display
-    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY)
-    where
-        RST: OutputPin,
-        DELAY: DelayMs<u8>,
+    pub fn reset<RST, DELAY, PinE>(
+        &mut self,
+        rst: &mut RST,
+        delay: &mut DELAY,
+    ) -> Result<(), Error<(), PinE>>
+        where
+            RST: OutputPin<Error = PinE>,
+            DELAY: DelayMs<u8>,
     {
-        rst.set_high();
+        rst.set_high().map_err(Error::Pin)?;
         delay.delay_ms(1);
-        rst.set_low();
+        rst.set_low().map_err(Error::Pin)?;
         delay.delay_ms(10);
-        rst.set_high();
+        rst.set_high().map_err(Error::Pin)
     }
 
     /// Write out data to display. This is a noop in terminal mode.
@@ -169,7 +173,7 @@ where
     }
 
     /// Print a character to the display
-    pub fn print_char(&mut self, c: char) -> Result<(), ()> {
+    pub fn print_char(&mut self, c: char) -> Result<(), DI::Error> {
         match c {
             '\n' => {
                 let CursorWrapEvent(new_line) = self.ensure_cursor()?.advance_line();
@@ -195,16 +199,22 @@ where
     /// Initialise the display in page mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right, but no automatic line
     /// wrapping.
-    pub fn init(&mut self) -> Result<(), ()> {
+    pub fn init(&mut self) -> Result<(), DI::Error> {
         self.properties.init_with_mode(AddrMode::Page)?;
         self.reset_pos()?;
         Ok(())
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), ()> {
+    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DI::Error> {
         // we don't need to touch the cursor because rotating 90º or 270º currently just flips
         self.properties.set_rotation(rot)
+    }
+
+    /// Turn the display on or off. The display can be drawn to and retains all
+    /// of its memory even while off.
+    pub fn display_on(&mut self, on: bool) -> Result<(), DI::Error> {
+        self.properties.display_on(on)
     }
 
     /// Get the current cursor position, in character coordinates.

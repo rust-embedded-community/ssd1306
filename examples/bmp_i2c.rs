@@ -1,4 +1,4 @@
-//! Draw an RGB565 BMP image onto the display by converting the `Rgb565` pixel colour type to
+//! Draw an RGB565 BMP image onto the display by converting the `Rgb565` pixel color type to
 //! `BinaryColor` using a simple threshold where any pixel with a value greater than zero is treated
 //! as "on".
 //!
@@ -81,14 +81,12 @@ fn main() -> ! {
         .translate(Point::new(32, 0));
 
     // The display uses `BinaryColor` pixels (on/off only). Here, we `map()` over every pixel
-    // and naively convert the colour to an on/off value. The logic below simply converts any
-    // colour that's not black into an "on" pixel.
-    let im = im.into_iter().map(|Pixel(position, colour)| {
-        let grey = (colour.r() as u16 + colour.g() as u16 + colour.b() as u16) / 3;
-
+    // and naively convert the color to an on/off value. The logic below simply converts any
+    // color that's not black into an "on" pixel.
+    let im = im.into_iter().map(|Pixel(position, color)| {
         Pixel(
             position,
-            if grey > 0 {
+            if color != Rgb565::BLACK {
                 BinaryColor::On
             } else {
                 BinaryColor::Off

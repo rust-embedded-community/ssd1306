@@ -30,8 +30,7 @@ extern crate stm32f1xx_hal as hal;
 
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
-use embedded_graphics::image::Image1BPP;
-use embedded_graphics::prelude::*;
+use embedded_graphics::{image::ImageLE, prelude::*};
 use hal::i2c::{BlockingI2c, DutyCycle, Mode};
 use hal::prelude::*;
 use hal::stm32;
@@ -85,7 +84,7 @@ fn main() -> ! {
 
     let (w, h) = disp.get_dimensions();
 
-    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64)
+    let im = ImageLE::new(include_bytes!("./rust.raw"), 64, 64)
         .translate(Point::new(w as i32 / 2 - 64 / 2, h as i32 / 2 - 64 / 2));
 
     disp.draw(im.into_iter());

@@ -199,9 +199,14 @@ where
 #[cfg(feature = "graphics")]
 extern crate embedded_graphics;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::{drawable, pixelcolor::BinaryColor, Drawing};
-#[cfg(feature = "graphics")]
-use core::convert::TryInto;
+use self::embedded_graphics::{
+    drawable,
+    pixelcolor::{
+        raw::{RawData, RawU1},
+        BinaryColor,
+    },
+    Drawing,
+};
 
 #[cfg(feature = "graphics")]
 impl<DI> Drawing<BinaryColor> for GraphicsMode<DI>
@@ -220,9 +225,9 @@ where
         for drawable::Pixel(point, color) in on_screen_pixels {
             // NOTE: The filter above means the coordinate conversions should never panic
             self.set_pixel(
-                point.x.try_into().expect("Point X coordinate is negative"),
-                point.y.try_into().expect("Point Y coordinate is negative"),
-                color as u8,
+                point.x as u32,
+                point.y as u32,
+                RawU1::from(color).into_inner(),
             );
         }
     }

@@ -86,7 +86,7 @@ fn main() -> ! {
     let (w, h) = disp.get_dimensions();
 
     let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64)
-        .translate(Coord::new(w as i32 / 2 - 64 / 2, h as i32 / 2 - 64 / 2));
+        .translate(Point::new(w as i32 / 2 - 64 / 2, h as i32 / 2 - 64 / 2));
 
     disp.draw(im.into_iter());
 

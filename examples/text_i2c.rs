@@ -79,7 +79,7 @@ fn main() -> ! {
     disp.draw(
         Font6x8::render_str("Hello Rust!")
             .stroke(Some(BinaryColor::On))
-            .translate(Coord::new(0, 16))
+            .translate(Point::new(0, 16))
             .into_iter(),
     );
 

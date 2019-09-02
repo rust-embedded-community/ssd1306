@@ -66,31 +66,31 @@ fn main() -> ! {
 
     disp.draw(
         Line::new(
-            Coord::new(8, 16 + yoffset),
-            Coord::new(8 + 16, 16 + yoffset),
+            Point::new(8, 16 + yoffset),
+            Point::new(8 + 16, 16 + yoffset),
         )
         .stroke(Some(BinaryColor::On))
         .into_iter(),
     );
     disp.draw(
-        Line::new(Coord::new(8, 16 + yoffset), Coord::new(8 + 8, yoffset))
+        Line::new(Point::new(8, 16 + yoffset), Point::new(8 + 8, yoffset))
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );
     disp.draw(
-        Line::new(Coord::new(8 + 16, 16 + yoffset), Coord::new(8 + 8, yoffset))
-            .stroke(Some(BinaryColor::On))
-            .into_iter(),
-    );
-
-    disp.draw(
-        Rectangle::new(Coord::new(48, yoffset), Coord::new(48 + 16, 16 + yoffset))
+        Line::new(Point::new(8 + 16, 16 + yoffset), Point::new(8 + 8, yoffset))
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );
 
     disp.draw(
-        Circle::new(Coord::new(96, yoffset + 8), 8)
+        Rectangle::new(Point::new(48, yoffset), Point::new(48 + 16, 16 + yoffset))
+            .stroke(Some(BinaryColor::On))
+            .into_iter(),
+    );
+
+    disp.draw(
+        Circle::new(Point::new(96, yoffset + 8), 8)
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );

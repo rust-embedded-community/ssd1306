@@ -16,24 +16,24 @@
 //! display.init().unwrap();
 //! display.flush().unwrap();
 //! display.draw(
-//!     Line::new(Coord::new(0, 0), Coord::new(16, 16))
+//!     Line::new(Point::new(0, 0), Point::new(16, 16))
 //!         .stroke(Some(BinaryColor::On))
 //!         .into_iter(),
 //! );
 //! display.draw(
-//!     Rectangle::new(Coord::new(24, 0), Coord::new(40, 16))
+//!     Rectangle::new(Point::new(24, 0), Point::new(40, 16))
 //!         .stroke(Some(BinaryColor::On))
 //!         .into_iter(),
 //! );
 //! display.draw(
-//!     Circle::new(Coord::new(64, 8), 8)
+//!     Circle::new(Point::new(64, 8), 8)
 //!         .stroke(Some(BinaryColor::On))
 //!         .into_iter(),
 //! );
 //! display.draw(
 //!     Font6x8::render_str("Hello Rust!")
 //!         .stroke(Some(BinaryColor::On))
-//!         .translate(Coord::new(24, 24))
+//!         .translate(Point::new(24, 24))
 //!         .into_iter(),
 //! );
 //! display.flush().unwrap();

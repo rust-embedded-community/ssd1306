@@ -71,29 +71,29 @@ fn main() -> ! {
     disp.flush().unwrap();
 
     disp.draw(
-        Line::new(Coord::new(8, 16 + 16), Coord::new(8 + 16, 16 + 16))
+        Line::new(Point::new(8, 16 + 16), Point::new(8 + 16, 16 + 16))
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );
     disp.draw(
-        Line::new(Coord::new(8, 16 + 16), Coord::new(8 + 8, 16))
+        Line::new(Point::new(8, 16 + 16), Point::new(8 + 8, 16))
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );
     disp.draw(
-        Line::new(Coord::new(8 + 16, 16 + 16), Coord::new(8 + 8, 16))
-            .stroke(Some(BinaryColor::On))
-            .into_iter(),
-    );
-
-    disp.draw(
-        Rectangle::new(Coord::new(48, 16), Coord::new(48 + 16, 16 + 16))
+        Line::new(Point::new(8 + 16, 16 + 16), Point::new(8 + 8, 16))
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );
 
     disp.draw(
-        Circle::new(Coord::new(96, 16 + 8), 8)
+        Rectangle::new(Point::new(48, 16), Point::new(48 + 16, 16 + 16))
+            .stroke(Some(BinaryColor::On))
+            .into_iter(),
+    );
+
+    disp.draw(
+        Circle::new(Point::new(96, 16 + 8), 8)
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );

@@ -78,7 +78,7 @@ fn main() -> ! {
     // the pixels correctly
     let im: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!("./rust-pride.bmp"))
         .expect("Failed to load BMP image")
-        .translate(Coord::new(32, 0));
+        .translate(Point::new(32, 0));
 
     // The display uses `BinaryColor` pixels (on/off only). Here, we `map()` over every pixel
     // and naively convert the colour to an on/off value. The logic below simply converts any

@@ -75,7 +75,7 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64).translate(Coord::new(32, 0));
+    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64).translate(Point::new(32, 0));
 
     disp.draw(im.into_iter());
 

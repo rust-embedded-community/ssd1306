@@ -200,6 +200,8 @@ where
 extern crate embedded_graphics;
 #[cfg(feature = "graphics")]
 use self::embedded_graphics::{drawable, pixelcolor::BinaryColor, Drawing};
+#[cfg(feature = "graphics")]
+use core::convert::TryInto;
 
 #[cfg(feature = "graphics")]
 impl<DI> Drawing<BinaryColor> for GraphicsMode<DI>
@@ -210,8 +212,18 @@ where
     where
         T: IntoIterator<Item = drawable::Pixel<BinaryColor>>,
     {
-        for pixel in item_pixels {
-            self.set_pixel((pixel.0).0, (pixel.0).1, pixel.1 as u8);
+        // Filter out pixels that are off the top left of the screen
+        let on_screen_pixels = item_pixels
+            .into_iter()
+            .filter(|drawable::Pixel(point, _)| point.x >= 0 && point.y >= 0);
+
+        for drawable::Pixel(point, color) in on_screen_pixels {
+            // NOTE: The filter above means the coordinate conversions should never panic
+            self.set_pixel(
+                point.x.try_into().expect("Point X coordinate is negative"),
+                point.y.try_into().expect("Point Y coordinate is negative"),
+                color as u8,
+            );
         }
     }
 }

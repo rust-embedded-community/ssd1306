@@ -30,7 +30,7 @@ extern crate stm32f1xx_hal as hal;
 
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
-use embedded_graphics::{image::ImageLE, prelude::*};
+use embedded_graphics::{image::Image, pixelcolor::BinaryColor, prelude::*};
 use hal::i2c::{BlockingI2c, DutyCycle, Mode};
 use hal::prelude::*;
 use hal::stm32;
@@ -74,7 +74,8 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    let im = ImageLE::new(include_bytes!("./rust.raw"), 64, 64).translate(Point::new(32, 0));
+    let im: Image<BinaryColor> =
+        Image::new(include_bytes!("./rust.raw"), 64, 64).translate(Point::new(32, 0));
 
     disp.draw(im.into_iter());
 

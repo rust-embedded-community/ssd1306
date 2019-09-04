@@ -1,10 +1,8 @@
-//! Draw the Rust logo centered on a 90 degree rotated 128x64px display
+//! Draw an RGB565 BMP image onto the display by converting the `Rgb565` pixel color type to
+//! `BinaryColor` using a simple threshold where any pixel with a value greater than zero is treated
+//! as "on".
 //!
-//! Image was created with ImageMagick:
-//!
-//! ```bash
-//! convert rust.png -depth 1 gray:rust.raw
-//! ```
+//! Note that the `bmp` feature for `embedded-graphics` must be turned on.
 //!
 //! This example is for the STM32F103 "Blue Pill" board using I2C1.
 //!
@@ -18,7 +16,7 @@
 //! (green)  SCL -> PB8
 //! ```
 //!
-//! Run on a Blue Pill with `cargo run --example rotation_i2c`.
+//! Run on a Blue Pill with `cargo run --example image_i2c`.
 
 #![no_std]
 #![no_main]
@@ -30,7 +28,9 @@ extern crate stm32f1xx_hal as hal;
 
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
-use embedded_graphics::{image::Image, pixelcolor::BinaryColor, prelude::*};
+use embedded_graphics::image::ImageBmp;
+use embedded_graphics::pixelcolor::{BinaryColor, Rgb565};
+use embedded_graphics::prelude::*;
 use hal::i2c::{BlockingI2c, DutyCycle, Mode};
 use hal::prelude::*;
 use hal::stm32;
@@ -69,25 +69,32 @@ fn main() -> ! {
         1000,
     );
 
-    let mut disp: GraphicsMode<_> = Builder::new()
-        // Set initial rotation at 90 degrees clockwise
-        .with_rotation(DisplayRotation::Rotate90)
-        .connect_i2c(i2c)
-        .into();
+    let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    // Contrived example to test builder and instance methods. Sets rotation to 270 degress
-    // or 90 degress counterclockwise
-    disp.set_rotation(DisplayRotation::Rotate270).unwrap();
+    // The image is an RGB565 encoded BMP, so specifying the type as `ImageBmp<Rgb565>` will read
+    // the pixels correctly
+    let im: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!("./rust-pride.bmp"))
+        .expect("Failed to load BMP image")
+        .translate(Point::new(32, 0));
 
-    let (w, h) = disp.get_dimensions();
+    // The display uses `BinaryColor` pixels (on/off only). Here, we `map()` over every pixel
+    // and naively convert the color to an on/off value. The logic below simply converts any
+    // color that's not black into an "on" pixel.
+    let im = im.into_iter().map(|Pixel(position, color)| {
+        Pixel(
+            position,
+            if color != Rgb565::BLACK {
+                BinaryColor::On
+            } else {
+                BinaryColor::Off
+            },
+        )
+    });
 
-    let im: Image<BinaryColor> = Image::new(include_bytes!("./rust.raw"), 64, 64)
-        .translate(Point::new(w as i32 / 2 - 64 / 2, h as i32 / 2 - 64 / 2));
-
-    disp.draw(im.into_iter());
+    disp.draw(im);
 
     disp.flush().unwrap();
 

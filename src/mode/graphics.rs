@@ -4,31 +4,36 @@
 //! # use ssd1306::test_helpers::I2cStub;
 //! # let i2c = I2cStub;
 //! use ssd1306::{prelude::*, mode::GraphicsMode, Builder};
-//! use embedded_graphics::{prelude::*, primitives::{Line, Rect, Circle}, fonts::Font6x8};
+//! use embedded_graphics::{
+//!     fonts::Font6x8,
+//!     pixelcolor::BinaryColor,
+//!     prelude::*,
+//!     primitives::{Circle, Line, Rectangle},
+//! };
 //!
 //! let mut display: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //!
 //! display.init().unwrap();
 //! display.flush().unwrap();
 //! display.draw(
-//!     Line::new(Coord::new(0, 0), Coord::new(16, 16))
-//!         .with_stroke(Some(1u8.into()))
+//!     Line::new(Point::new(0, 0), Point::new(16, 16))
+//!         .stroke(Some(BinaryColor::On))
 //!         .into_iter(),
 //! );
 //! display.draw(
-//!     Rect::new(Coord::new(24, 0), Coord::new(40, 16))
-//!         .with_stroke(Some(1u8.into()))
+//!     Rectangle::new(Point::new(24, 0), Point::new(40, 16))
+//!         .stroke(Some(BinaryColor::On))
 //!         .into_iter(),
 //! );
 //! display.draw(
-//!     Circle::new(Coord::new(64, 8), 8)
-//!         .with_stroke(Some(1u8.into()))
+//!     Circle::new(Point::new(64, 8), 8)
+//!         .stroke(Some(BinaryColor::On))
 //!         .into_iter(),
 //! );
 //! display.draw(
 //!     Font6x8::render_str("Hello Rust!")
-//!         .with_stroke(Some(1u8.into()))
-//!         .translate(Coord::new(24, 24))
+//!         .stroke(Some(BinaryColor::On))
+//!         .translate(Point::new(24, 24))
 //!         .into_iter(),
 //! );
 //! display.flush().unwrap();
@@ -194,19 +199,36 @@ where
 #[cfg(feature = "graphics")]
 extern crate embedded_graphics;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::{drawable, pixelcolor::PixelColorU8, Drawing};
+use self::embedded_graphics::{
+    drawable,
+    pixelcolor::{
+        raw::{RawData, RawU1},
+        BinaryColor,
+    },
+    Drawing,
+};
 
 #[cfg(feature = "graphics")]
-impl<DI> Drawing<PixelColorU8> for GraphicsMode<DI>
+impl<DI> Drawing<BinaryColor> for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: Iterator<Item = drawable::Pixel<PixelColorU8>>,
+        T: IntoIterator<Item = drawable::Pixel<BinaryColor>>,
     {
-        for pixel in item_pixels {
-            self.set_pixel((pixel.0).0, (pixel.0).1, pixel.1.into_inner());
+        // Filter out pixels that are off the top left of the screen
+        let on_screen_pixels = item_pixels
+            .into_iter()
+            .filter(|drawable::Pixel(point, _)| point.x >= 0 && point.y >= 0);
+
+        for drawable::Pixel(point, color) in on_screen_pixels {
+            // NOTE: The filter above means the coordinate conversions should never panic
+            self.set_pixel(
+                point.x as u32,
+                point.y as u32,
+                RawU1::from(color).into_inner(),
+            );
         }
     }
 }

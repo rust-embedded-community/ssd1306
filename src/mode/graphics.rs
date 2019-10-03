@@ -59,7 +59,6 @@ where
 {
     properties: DisplayProperties<DI>,
     buffer: [u8; 1024],
-    fast_buffer: [u8; 1024],
     min_x: u8,
     max_x: u8,
     min_y: u8,
@@ -75,7 +74,6 @@ where
         GraphicsMode {
             properties,
             buffer: [0; 1024],
-            fast_buffer: [0; 1024],
             min_x: 255,
             max_x: 0,
             min_y: 255,
@@ -176,16 +174,6 @@ where
             self.max_y | 7
         };
 
-        // fast_flush is slower than a regular flush when the area to update
-        // approaches the full size of the display.
-        // To save time, when the area to update is greater than ~3/4 of the
-        // display area, fall back on a full display update.
-        if disp_max_x - disp_min_x > width as u8 * 7 / 8
-            && disp_max_y - disp_min_y > height * 7 / 8
-        {
-            return self.flush();
-        }
-
         // Ensure the display buffer is at the origin of the display before we send the full frame
         // to prevent accidental offsets
         self.properties.set_draw_area(
@@ -193,35 +181,12 @@ where
             (disp_max_x, disp_max_y)
         )?;
 
-        // Create fast buffer from the correct lines of the full buffer
-        // It works by copying the relevant bytes from the buffer into
-        // the fast_buffer. This is accomplished by filtering the
-        // indices according to the max and min changed values
-        let mut index = 0usize;
-        let min_y_page = disp_min_y as usize / 8;
-        let max_y_page = disp_max_y as usize / 8;
-
-        for (place, data) in self.fast_buffer.iter_mut().zip(
-            self.buffer.iter()
-                .enumerate()
-                .filter(|&(i,_)| 
-                    (i%width) >= disp_min_x as usize
-                    && (i%width) < disp_max_x as usize
-                    && (i/width) >= min_y_page
-                    && (i/width) <= max_y_page
-                )
-                .map(|(_,e)| e)
-        ) {
-            *place = *data;
-            index += 1;
-        }
-
         self.min_x = 255;
         self.max_x = 0;
         self.min_y = 255;
         self.max_y = 0;
 
-        self.properties.draw(&self.fast_buffer[0..index])
+        self.properties.bounded_draw(&self.buffer, width, (disp_min_x, disp_min_y), (disp_max_x, disp_max_y))
     }
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y

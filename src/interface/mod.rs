@@ -59,6 +59,11 @@ pub trait DisplayInterface {
     fn send_commands(&mut self, cmd: &[u8]) -> Result<(), Self::Error>;
     /// Send data to display.
     fn send_data(&mut self, buf: &[u8]) -> Result<(), Self::Error>;
+    /// Send data to display, taking advantage of bounded data.
+    /// 
+    /// upper_left and lower_right should contain the x and y coordinates of the
+    /// minimum bounding rectangle of the modified pixels.
+    fn send_bounded_data(&mut self, buf: &[u8], disp_width: usize, upper_left: (u8, u8), lower_right: (u8, u8)) -> Result<(), Self::Error>;
 }
 
 pub use self::i2c::I2cInterface;

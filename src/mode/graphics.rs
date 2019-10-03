@@ -59,6 +59,11 @@ where
 {
     properties: DisplayProperties<DI>,
     buffer: [u8; 1024],
+    fast_buffer: [u8; 1024],
+    min_x: u8,
+    max_x: u8,
+    min_y: u8,
+    max_y: u8,
 }
 
 impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
@@ -70,6 +75,11 @@ where
         GraphicsMode {
             properties,
             buffer: [0; 1024],
+            fast_buffer: [0; 1024],
+            min_x: 255,
+            max_x: 0,
+            min_y: 255,
+            max_y: 0,
         }
     }
 
@@ -86,6 +96,12 @@ where
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
         self.buffer = [0; 1024];
+
+        let (width, height) = self.get_dimensions();
+        self.min_x = 0;
+        self.max_x = width - 1;
+        self.min_y = 0;
+        self.max_y = height - 1;
     }
 
     /// Reset display
@@ -116,11 +132,96 @@ where
         self.properties
             .set_draw_area((0, 0), (display_width, display_height))?;
 
+        self.min_x = 255;
+        self.max_x = 0;
+        self.min_y = 255;
+        self.max_y = 0;
+
         match display_size {
             DisplaySize::Display128x64 => self.properties.draw(&self.buffer),
             DisplaySize::Display128x32 => self.properties.draw(&self.buffer[0..512]),
             DisplaySize::Display96x16 => self.properties.draw(&self.buffer[0..192]),
         }
+    }
+
+    /// Write out data to a display.
+    /// 
+    /// This is typically faster than a regular flush since it only updates the parts of the
+    /// display that have changed since the last flush. 
+    /// 
+    /// This is slower than a regular flush when the size of the updated area approaches the full
+    /// size of the display, so in that case this function simply calls flush.
+    pub fn fast_flush(&mut self) -> Result<(), DI::Error> {
+        if self.max_x < self.min_x || self.max_y < self.min_y {
+            return self.flush();
+        }
+
+        let display_size = self.properties.get_size();
+        let (width, height) = display_size.dimensions();
+        let width = width as usize;
+
+        // Determine which bytes need to be sent
+        let disp_min_x = self.min_x;
+        let disp_min_y = self.min_y;
+
+        let disp_max_x = if self.max_x + 1 > width as u8 {
+            width as u8
+        } else {
+            self.max_x + 1
+        };
+
+        let disp_max_y = if self.max_y | 7 > height {
+            height
+        } else {
+            self.max_y | 7
+        };
+
+        // fast_flush is slower than a regular flush when the area to update
+        // approaches the full size of the display.
+        // To save time, when the area to update is greater than ~3/4 of the
+        // display area, fall back on a full display update.
+        if disp_max_x - disp_min_x > width as u8 * 7 / 8
+            && disp_max_y - disp_min_y > height * 7 / 8
+        {
+            return self.flush();
+        }
+
+        // Ensure the display buffer is at the origin of the display before we send the full frame
+        // to prevent accidental offsets
+        self.properties.set_draw_area(
+            (disp_min_x, disp_min_y),
+            (disp_max_x, disp_max_y)
+        )?;
+
+        // Create fast buffer from the correct lines of the full buffer
+        // It works by copying the relevant bytes from the buffer into
+        // the fast_buffer. This is accomplished by filtering the
+        // indices according to the max and min changed values
+        let mut index = 0usize;
+        let min_y_page = disp_min_y as usize / 8;
+        let max_y_page = disp_max_y as usize / 8;
+
+        for (place, data) in self.fast_buffer.iter_mut().zip(
+            self.buffer.iter()
+                .enumerate()
+                .filter(|&(i,_)| 
+                    (i%width) >= disp_min_x as usize
+                    && (i%width) < disp_max_x as usize
+                    && (i/width) >= min_y_page
+                    && (i/width) <= max_y_page
+                )
+                .map(|(_,e)| e)
+        ) {
+            *place = *data;
+            index += 1;
+        }
+
+        self.min_x = 255;
+        self.max_x = 0;
+        self.min_y = 255;
+        self.max_y = 0;
+
+        self.properties.draw(&self.fast_buffer[0..index])
     }
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
@@ -147,6 +248,21 @@ where
 
         if idx >= self.buffer.len() {
             return;
+        }
+
+        // Keep track of max and min values
+        if (x as u8) < self.min_x {
+            self.min_x = x as u8;
+        }
+        if (x as u8) > self.max_x {
+            self.max_x = x as u8;
+        }
+
+        if (y as u8) < self.min_y {
+            self.min_y = y as u8;
+        }
+        if (y as u8) > self.max_y {
+            self.max_y = y as u8;
         }
 
         let (byte, bit) = match display_rotation {

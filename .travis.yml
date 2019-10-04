@@ -42,14 +42,15 @@ before_install:
 
 install:
   - rustup component add rust-src
+  - rustup component add rustfmt
   - |
-      SYSROOT=$(rustc --print sysroot)
+    SYSROOT=$(rustc --print sysroot)
 
-      if [[ ! "$SYSROOT" =~ "$TARGET" ]]; then
-        rustup target add $TARGET
-      else
-        echo "Target $TARGET is already installed"
-      fi
+    if [[ ! "$SYSROOT" =~ "$TARGET" ]]; then
+      rustup target add $TARGET
+    else
+      echo "Target $TARGET is already installed"
+    fi
   - source ~/.cargo/env || true
 
 script:

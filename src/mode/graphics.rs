@@ -130,9 +130,9 @@ where
         self.properties
             .set_draw_area((0, 0), (display_width, display_height))?;
 
-        self.min_x = 255;
+        self.min_x = display_width - 1;
         self.max_x = 0;
-        self.min_y = 255;
+        self.min_y = display_height - 1;
         self.max_y = 0;
 
         match display_size {
@@ -143,50 +143,43 @@ where
     }
 
     /// Write out data to a display.
-    /// 
+    ///
     /// This is typically faster than a regular flush since it only updates the parts of the
-    /// display that have changed since the last flush. 
-    /// 
+    /// display that have changed since the last flush.
+    ///
     /// This is slower than a regular flush when the size of the updated area approaches the full
     /// size of the display, so in that case this function simply calls flush.
     pub fn fast_flush(&mut self) -> Result<(), DI::Error> {
+        // Nothing to do if no pixels have changed since the last update
         if self.max_x < self.min_x || self.max_y < self.min_y {
-            return self.flush();
+            return Ok(());
         }
 
         let display_size = self.properties.get_size();
         let (width, height) = display_size.dimensions();
-        let width = width as usize;
 
         // Determine which bytes need to be sent
         let disp_min_x = self.min_x;
         let disp_min_y = self.min_y;
 
-        let disp_max_x = if self.max_x + 1 > width as u8 {
-            width as u8
-        } else {
-            self.max_x + 1
-        };
+        let disp_max_x = (self.max_x + 1).min(width);
+        let disp_max_y = (self.max_y | 7).min(height);
 
-        let disp_max_y = if self.max_y | 7 > height {
-            height
-        } else {
-            self.max_y | 7
-        };
+        // Tell the display to update only the part that has changed
+        self.properties
+            .set_draw_area((disp_min_x, disp_min_y), (disp_max_x, disp_max_y))?;
 
-        // Ensure the display buffer is at the origin of the display before we send the full frame
-        // to prevent accidental offsets
-        self.properties.set_draw_area(
-            (disp_min_x, disp_min_y),
-            (disp_max_x, disp_max_y)
-        )?;
-
-        self.min_x = 255;
+        self.min_x = width - 1;
         self.max_x = 0;
-        self.min_y = 255;
+        self.min_y = width - 1;
         self.max_y = 0;
 
-        self.properties.bounded_draw(&self.buffer, width, (disp_min_x, disp_min_y), (disp_max_x, disp_max_y))
+        self.properties.bounded_draw(
+            &self.buffer,
+            width as usize,
+            (disp_min_x, disp_min_y),
+            (disp_max_x, disp_max_y),
+        )
     }
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
@@ -216,19 +209,11 @@ where
         }
 
         // Keep track of max and min values
-        if (x as u8) < self.min_x {
-            self.min_x = x as u8;
-        }
-        if (x as u8) > self.max_x {
-            self.max_x = x as u8;
-        }
+        self.min_x = self.min_x.min(x as u8);
+        self.max_x = self.max_x.max(x as u8);
 
-        if (y as u8) < self.min_y {
-            self.min_y = y as u8;
-        }
-        if (y as u8) > self.max_y {
-            self.max_y = y as u8;
-        }
+        self.min_y = self.min_y.min(y as u8);
+        self.max_y = self.max_y.max(y as u8);
 
         let (byte, bit) = match display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {

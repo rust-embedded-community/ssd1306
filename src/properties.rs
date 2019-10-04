@@ -81,10 +81,17 @@ where
     /// Send the data to the display for drawing at the current position in the framebuffer
     /// and advance the position accordingly. Cf. `set_draw_area` to modify the affected area by
     /// this method.
-    /// 
+    ///
     /// This method takes advantage of a bounding box for faster writes.
-    pub fn bounded_draw(&mut self, buffer: &[u8], disp_width: usize, upper_left: (u8, u8), lower_right: (u8, u8)) -> Result<(), DI::Error> {
-        self.iface.send_bounded_data(&buffer, disp_width, upper_left, lower_right)
+    pub fn bounded_draw(
+        &mut self,
+        buffer: &[u8],
+        disp_width: usize,
+        upper_left: (u8, u8),
+        lower_right: (u8, u8),
+    ) -> Result<(), DI::Error> {
+        self.iface
+            .send_bounded_data(&buffer, disp_width, upper_left, lower_right)
     }
 
     /// Get the configured display size

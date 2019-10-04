@@ -64,7 +64,13 @@ where
         Ok(())
     }
 
-    fn send_bounded_data(&mut self, buf: &[u8], disp_width: usize, upper_left: (u8, u8), lower_right: (u8, u8)) -> Result<(), Self::Error> {
+    fn send_bounded_data(
+        &mut self,
+        buf: &[u8],
+        disp_width: usize,
+        upper_left: (u8, u8),
+        lower_right: (u8, u8),
+    ) -> Result<(), Self::Error> {
         // Noop if the data buffer is empty
         if buf.is_empty() {
             return Ok(());
@@ -81,7 +87,7 @@ where
         // 8.1.5.2 5) b) in the datasheet
         writebuf[0] = 0x40;
 
-        let mut page_offset = starting_page*disp_width;
+        let mut page_offset = starting_page * disp_width;
 
         for _ in 0..=height {
             let start_index = page_offset + upper_left.0 as usize;
@@ -89,7 +95,7 @@ where
 
             page_offset += disp_width;
 
-            let sub_buf = &buf[start_index .. end_index];
+            let sub_buf = &buf[start_index..end_index];
 
             for chunk in sub_buf.chunks(16) {
                 let chunklen = chunk.len();

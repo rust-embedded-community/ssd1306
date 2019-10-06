@@ -37,6 +37,10 @@ matrix:
     - rust: beta
     - rust: nightly
 
+  allow_failures:
+    - rust: nightly
+      env: TARGET=thumbv7m-none-eabi
+
 before_install:
   - pip install linkchecker --user
 

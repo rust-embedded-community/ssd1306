@@ -155,31 +155,51 @@ where
             return Ok(());
         }
 
-        let display_size = self.properties.get_size();
-        let (width, height) = display_size.dimensions();
+        let (width, height) = self.get_dimensions();
 
         // Determine which bytes need to be sent
         let disp_min_x = self.min_x;
         let disp_min_y = self.min_y;
 
-        let disp_max_x = (self.max_x + 1).min(width);
-        let disp_max_y = (self.max_y | 7).min(height);
-
-        // Tell the display to update only the part that has changed
-        self.properties
-            .set_draw_area((disp_min_x, disp_min_y), (disp_max_x, disp_max_y))?;
+        let (disp_max_x, disp_max_y) = match self.properties.get_rotation() {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                ((self.max_x + 1).min(width), (self.max_y | 7).min(height))
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                ((self.max_x | 7).min(width), (self.max_y + 1).min(height))
+            }
+        };
 
         self.min_x = width - 1;
         self.max_x = 0;
         self.min_y = width - 1;
         self.max_y = 0;
 
-        self.properties.bounded_draw(
-            &self.buffer,
-            width as usize,
-            (disp_min_x, disp_min_y),
-            (disp_max_x, disp_max_y),
-        )
+        // Tell the display to update only the part that has changed
+        match self.properties.get_rotation() {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                self.properties
+                    .set_draw_area((disp_min_x, disp_min_y), (disp_max_x, disp_max_y))?;
+
+                self.properties.bounded_draw(
+                    &self.buffer,
+                    width as usize,
+                    (disp_min_x, disp_min_y),
+                    (disp_max_x, disp_max_y),
+                )
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                self.properties
+                    .set_draw_area((disp_min_y, disp_min_x), (disp_max_y, disp_max_x))?;
+
+                self.properties.bounded_draw(
+                    &self.buffer,
+                    height as usize,
+                    (disp_min_y, disp_min_x),
+                    (disp_max_y, disp_max_x),
+                )
+            }
+        }
     }
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y

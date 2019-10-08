@@ -67,7 +67,7 @@ where
         for _ in 0..=height {
             let start_index = page_offset + upper_left.0 as usize;
             let end_index = page_offset + lower_right.0 as usize;
-            let sub_buf = &buf[start_index..=end_index];
+            let sub_buf = &buf[start_index..end_index];
 
             page_offset += disp_width;
 

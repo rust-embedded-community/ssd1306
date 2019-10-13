@@ -14,7 +14,6 @@
 //! let mut display: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //!
 //! display.init().unwrap();
-//! display.flush().unwrap();
 //! display.draw(
 //!     Line::new(Point::new(0, 0), Point::new(16, 16))
 //!         .stroke(Some(BinaryColor::On))
@@ -45,7 +44,6 @@ use hal::blocking::delay::DelayMs;
 use hal::digital::v2::OutputPin;
 
 use crate::displayrotation::DisplayRotation;
-use crate::displaysize::DisplaySize;
 use crate::interface::DisplayInterface;
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayProperties;
@@ -120,36 +118,10 @@ where
         rst.set_high().map_err(Error::Pin)
     }
 
-    /// Write out data to display
-    pub fn flush(&mut self) -> Result<(), DI::Error> {
-        let display_size = self.properties.get_size();
-
-        // Ensure the display buffer is at the origin of the display before we send the full frame
-        // to prevent accidental offsets
-        let (display_width, display_height) = display_size.dimensions();
-        self.properties
-            .set_draw_area((0, 0), (display_width, display_height))?;
-
-        self.min_x = display_width - 1;
-        self.max_x = 0;
-        self.min_y = display_height - 1;
-        self.max_y = 0;
-
-        match display_size {
-            DisplaySize::Display128x64 => self.properties.draw(&self.buffer),
-            DisplaySize::Display128x32 => self.properties.draw(&self.buffer[0..512]),
-            DisplaySize::Display96x16 => self.properties.draw(&self.buffer[0..192]),
-        }
-    }
-
     /// Write out data to a display.
     ///
-    /// This is typically faster than a regular flush since it only updates the parts of the
-    /// display that have changed since the last flush.
-    ///
-    /// This is slower than a regular flush when the size of the updated area approaches the full
-    /// size of the display, so in that case this function simply calls flush.
-    pub fn fast_flush(&mut self) -> Result<(), DI::Error> {
+    /// This only updates the parts of the display that have changed since the last flush.
+    pub fn flush(&mut self) -> Result<(), DI::Error> {
         // Nothing to do if no pixels have changed since the last update
         if self.max_x < self.min_x || self.max_y < self.min_y {
             return Ok(());

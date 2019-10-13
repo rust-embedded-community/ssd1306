@@ -60,7 +60,6 @@ fn main() -> ! {
         .connect_i2c(i2c)
         .into();
     disp.init().unwrap();
-    disp.flush().unwrap();
 
     let yoffset = 8;
 

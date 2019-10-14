@@ -2,11 +2,15 @@
 
 [`ssd1306`](https://crates.io/crates/ssd1306) is a no-std driver written in Rust for the popular SSD1306 monochrome OLED display.
 
-## Unreleased
+## 0.3.0-alpha.2
 
 ### Fixed
 
-- `TerminalMode` now has a cursor. Newlines (`\n`) and carriage returns (`\r`) are now supported.
+- [#80](https://github.com/jamwaffles/ssd1306/pull/80) `TerminalMode` now has a cursor. Newlines (`\n`) and carriage returns (`\r`) are now supported.
+
+### Changed
+
+- [#94](https://github.com/jamwaffles/ssd1306/pull/94) Programs that only change some parts of the display should now run much faster. The driver keeps track of changed pixels and only sends a bounding box of updated pixels instead of updating the entire display every time.
 
 ## 0.3.0-alpha.1
 

@@ -79,7 +79,6 @@ fn main() -> ! {
 
     disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();
-    disp.flush().unwrap();
 
     disp.draw(
         Line::new(Point::new(8, 16 + 16), Point::new(8 + 16, 16 + 16))

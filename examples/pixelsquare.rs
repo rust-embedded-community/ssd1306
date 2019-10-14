@@ -77,7 +77,6 @@ fn main() -> ! {
 
     disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();
-    disp.flush().unwrap();
 
     // Top side
     disp.set_pixel(0, 0, 1);

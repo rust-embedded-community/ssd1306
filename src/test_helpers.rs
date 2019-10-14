@@ -68,4 +68,13 @@ impl DisplayInterface for StubInterface {
     fn send_data(&mut self, _buf: &[u8]) -> Result<(), ()> {
         Ok(())
     }
+    fn send_bounded_data(
+        &mut self,
+        _buf: &[u8],
+        _disp_width: usize,
+        _upper_left: (u8, u8),
+        _lower_right: (u8, u8),
+    ) -> Result<(), ()> {
+        Ok(())
+    }
 }

@@ -72,7 +72,6 @@ fn main() -> ! {
     let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 
     disp.init().unwrap();
-    disp.flush().unwrap();
 
     // The image is an RGB565 encoded BMP, so specifying the type as `ImageBmp<Rgb565>` will read
     // the pixels correctly

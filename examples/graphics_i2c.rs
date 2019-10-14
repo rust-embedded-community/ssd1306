@@ -68,7 +68,6 @@ fn main() -> ! {
     let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 
     disp.init().unwrap();
-    disp.flush().unwrap();
 
     disp.draw(
         Line::new(Point::new(8, 16 + 16), Point::new(8 + 16, 16 + 16))

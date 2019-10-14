@@ -92,7 +92,6 @@
 //! let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //!
 //! disp.init().unwrap();
-//! disp.flush().unwrap();
 //!
 //! disp.draw(
 //!     Font6x8::render_str("Hello world!")

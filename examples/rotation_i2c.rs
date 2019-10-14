@@ -76,7 +76,6 @@ fn main() -> ! {
         .into();
 
     disp.init().unwrap();
-    disp.flush().unwrap();
 
     // Contrived example to test builder and instance methods. Sets rotation to 270 degress
     // or 90 degress counterclockwise

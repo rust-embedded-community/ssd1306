@@ -72,7 +72,6 @@ fn main() -> ! {
     let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 
     disp.init().unwrap();
-    disp.flush().unwrap();
 
     let im: Image<BinaryColor> =
         Image::new(include_bytes!("./rust.raw"), 64, 64).translate(Point::new(32, 0));

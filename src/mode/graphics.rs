@@ -14,7 +14,6 @@
 //! let mut display: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //!
 //! display.init().unwrap();
-//! display.flush().unwrap();
 //! display.draw(
 //!     Line::new(Point::new(0, 0), Point::new(16, 16))
 //!         .stroke(Some(BinaryColor::On))
@@ -45,7 +44,6 @@ use hal::blocking::delay::DelayMs;
 use hal::digital::v2::OutputPin;
 
 use crate::displayrotation::DisplayRotation;
-use crate::displaysize::DisplaySize;
 use crate::interface::DisplayInterface;
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayProperties;
@@ -59,6 +57,10 @@ where
 {
     properties: DisplayProperties<DI>,
     buffer: [u8; 1024],
+    min_x: u8,
+    max_x: u8,
+    min_y: u8,
+    max_y: u8,
 }
 
 impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
@@ -70,6 +72,10 @@ where
         GraphicsMode {
             properties,
             buffer: [0; 1024],
+            min_x: 255,
+            max_x: 0,
+            min_y: 255,
+            max_y: 0,
         }
     }
 
@@ -86,6 +92,12 @@ where
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
         self.buffer = [0; 1024];
+
+        let (width, height) = self.get_dimensions();
+        self.min_x = 0;
+        self.max_x = width - 1;
+        self.min_y = 0;
+        self.max_y = height - 1;
     }
 
     /// Reset display
@@ -106,20 +118,59 @@ where
         rst.set_high().map_err(Error::Pin)
     }
 
-    /// Write out data to display
+    /// Write out data to a display.
+    ///
+    /// This only updates the parts of the display that have changed since the last flush.
     pub fn flush(&mut self) -> Result<(), DI::Error> {
-        let display_size = self.properties.get_size();
+        // Nothing to do if no pixels have changed since the last update
+        if self.max_x < self.min_x || self.max_y < self.min_y {
+            return Ok(());
+        }
 
-        // Ensure the display buffer is at the origin of the display before we send the full frame
-        // to prevent accidental offsets
-        let (display_width, display_height) = display_size.dimensions();
-        self.properties
-            .set_draw_area((0, 0), (display_width, display_height))?;
+        let (width, height) = self.get_dimensions();
 
-        match display_size {
-            DisplaySize::Display128x64 => self.properties.draw(&self.buffer),
-            DisplaySize::Display128x32 => self.properties.draw(&self.buffer[0..512]),
-            DisplaySize::Display96x16 => self.properties.draw(&self.buffer[0..192]),
+        // Determine which bytes need to be sent
+        let disp_min_x = self.min_x;
+        let disp_min_y = self.min_y;
+
+        let (disp_max_x, disp_max_y) = match self.properties.get_rotation() {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                ((self.max_x + 1).min(width), (self.max_y | 7).min(height))
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                ((self.max_x | 7).min(width), (self.max_y + 1).min(height))
+            }
+        };
+
+        self.min_x = width - 1;
+        self.max_x = 0;
+        self.min_y = width - 1;
+        self.max_y = 0;
+
+        // Tell the display to update only the part that has changed
+        match self.properties.get_rotation() {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                self.properties
+                    .set_draw_area((disp_min_x, disp_min_y), (disp_max_x, disp_max_y))?;
+
+                self.properties.bounded_draw(
+                    &self.buffer,
+                    width as usize,
+                    (disp_min_x, disp_min_y),
+                    (disp_max_x, disp_max_y),
+                )
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                self.properties
+                    .set_draw_area((disp_min_y, disp_min_x), (disp_max_y, disp_max_x))?;
+
+                self.properties.bounded_draw(
+                    &self.buffer,
+                    height as usize,
+                    (disp_min_y, disp_min_x),
+                    (disp_max_y, disp_max_x),
+                )
+            }
         }
     }
 
@@ -149,6 +200,13 @@ where
             return;
         }
 
+        // Keep track of max and min values
+        self.min_x = self.min_x.min(x as u8);
+        self.max_x = self.max_x.max(x as u8);
+
+        self.min_y = self.min_y.min(y as u8);
+        self.max_y = self.max_y.max(y as u8);
+
         let (byte, bit) = match display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
                 let byte =
@@ -176,6 +234,7 @@ where
     /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
     /// column 0 on the left, to column _n_ on the right
     pub fn init(&mut self) -> Result<(), DI::Error> {
+        self.clear();
         self.properties.init_column_mode()
     }
 

@@ -96,6 +96,7 @@ impl Cursor {
 }
 
 /// Errors which can occur when interacting with the terminal mode
+#[derive(Clone)]
 pub enum TerminalModeError<DI>
 where
     DI: DisplayInterface,
@@ -106,6 +107,19 @@ where
     Uninitialized,
     /// A location was specified outside the bounds of the screen
     OutOfBounds,
+}
+
+impl<DI> core::fmt::Debug for TerminalModeError<DI>
+where
+    DI: DisplayInterface,
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
+        match self {
+            InterfaceError(_) => "InterfaceError".fmt(f),
+            Uninitialized => "Uninitialized".fmt(f),
+            OutOfBounds => "OutOfBound".fmt(f),
+        }
+    }
 }
 
 // Cannot use From<_> due to coherence

@@ -2,6 +2,16 @@
 //!
 //! This example is for the STM32F103 "Blue Pill" board using I2C1.
 //!
+//! Wiring connections are as follows for a CRIUS-branded display:
+//!
+//! ```
+//!      Display -> Blue Pill
+//! (black)  GND -> GND
+//! (red)    +5V -> VCC
+//! (yellow) SDA -> PB9
+//! (green)  SCL -> PB8
+//! ```
+//!
 //! Run on a Blue Pill with `cargo run --example graphics_i2c_128x32`.
 
 #![no_std]
@@ -16,7 +26,7 @@ use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line, Rectangle};
+use embedded_graphics::primitives::{Circle, Rectangle, Triangle};
 use hal::i2c::{BlockingI2c, DutyCycle, Mode};
 use hal::prelude::*;
 use hal::stm32;
@@ -63,33 +73,38 @@ fn main() -> ! {
 
     let yoffset = 8;
 
+    // screen outline
+    // - hardcode the values for the lower-right 'Point' struct
     disp.draw(
-        Line::new(
-            Point::new(8, 16 + yoffset),
-            Point::new(8 + 16, 16 + yoffset),
+        Rectangle::new(Point::new(0, 0), Point::new(127, 31))
+            .stroke(Some(BinaryColor::On))
+            .into_iter(),
+    );
+
+    // triangle
+    disp.draw(
+        Triangle::new(
+            Point::new(12, 16 + yoffset),
+            Point::new(12 + 16, 16 + yoffset),
+            Point::new(12 + 8, yoffset)
         )
         .stroke(Some(BinaryColor::On))
         .into_iter(),
     );
+
+    // square
     disp.draw(
-        Line::new(Point::new(8, 16 + yoffset), Point::new(8 + 8, yoffset))
-            .stroke(Some(BinaryColor::On))
-            .into_iter(),
-    );
-    disp.draw(
-        Line::new(Point::new(8 + 16, 16 + yoffset), Point::new(8 + 8, yoffset))
+        Rectangle::new(
+            Point::new(54, yoffset),
+            Point::new(54 + 16, 16 + yoffset)
+            )
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );
 
+    // circle
     disp.draw(
-        Rectangle::new(Point::new(48, yoffset), Point::new(48 + 16, 16 + yoffset))
-            .stroke(Some(BinaryColor::On))
-            .into_iter(),
-    );
-
-    disp.draw(
-        Circle::new(Point::new(96, yoffset + 8), 8)
+        Circle::new(Point::new(104, yoffset + 8), 8)
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );

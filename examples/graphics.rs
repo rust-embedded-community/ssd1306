@@ -96,7 +96,7 @@ fn main() -> ! {
         Triangle::new(
             Point::new(16, 16 + yoffset),
             Point::new(16 + 16, 16 + yoffset),
-            Point::new(16 + 8, yoffset)
+            Point::new(16 + 8, yoffset),
         )
         .stroke(Some(BinaryColor::On))
         .into_iter(),
@@ -104,12 +104,9 @@ fn main() -> ! {
 
     // square
     disp.draw(
-        Rectangle::new(
-            Point::new(52, yoffset),
-            Point::new(52 + 16, 16 + yoffset)
-        )
-        .stroke(Some(BinaryColor::On))
-        .into_iter(),
+        Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
+            .stroke(Some(BinaryColor::On))
+            .into_iter(),
     );
 
     // circle

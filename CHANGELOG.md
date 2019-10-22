@@ -2,6 +2,12 @@
 
 [`ssd1306`](https://crates.io/crates/ssd1306) is a no-std driver written in Rust for the popular SSD1306 monochrome OLED display.
 
+## Unreleased
+
+### Changed
+
+- [#97](https://github.com/jamwaffles/ssd1306/pull/97) Use the new `Triangle` primitive from Embedded Graphics 0.6.0-alpha.2 in the three SSD1306 `graphics*.rs` examples
+
 ## 0.3.0-alpha.2
 
 ### Fixed

@@ -26,7 +26,7 @@ use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line, Rectangle};
+use embedded_graphics::primitives::{Circle, Rectangle, Triangle};
 use hal::i2c::{BlockingI2c, DutyCycle, Mode};
 use hal::prelude::*;
 use hal::stm32;
@@ -69,30 +69,38 @@ fn main() -> ! {
 
     disp.init().unwrap();
 
+    let yoffset = 20;
+
+    // screen outline
+    // default display size is 128x64 if you don't pass a _DisplaySize_
+    // enum to the _Builder_ struct
     disp.draw(
-        Line::new(Point::new(8, 16 + 16), Point::new(8 + 16, 16 + 16))
-            .stroke(Some(BinaryColor::On))
-            .into_iter(),
-    );
-    disp.draw(
-        Line::new(Point::new(8, 16 + 16), Point::new(8 + 8, 16))
-            .stroke(Some(BinaryColor::On))
-            .into_iter(),
-    );
-    disp.draw(
-        Line::new(Point::new(8 + 16, 16 + 16), Point::new(8 + 8, 16))
+        Rectangle::new(Point::new(0, 0), Point::new(127, 63))
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );
 
+    // triangle
     disp.draw(
-        Rectangle::new(Point::new(48, 16), Point::new(48 + 16, 16 + 16))
+        Triangle::new(
+            Point::new(16, 16 + yoffset),
+            Point::new(16 + 16, 16 + yoffset),
+            Point::new(16 + 8, yoffset),
+        )
+        .stroke(Some(BinaryColor::On))
+        .into_iter(),
+    );
+
+    // square
+    disp.draw(
+        Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );
 
+    // circle
     disp.draw(
-        Circle::new(Point::new(96, 16 + 8), 8)
+        Circle::new(Point::new(96, yoffset + 8), 8)
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );

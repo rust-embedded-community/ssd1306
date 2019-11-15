@@ -18,49 +18,54 @@ fn main() {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    disp.draw(
-        Line::new(Point::new(8, 16 + 16), Point::new(8 + 16, 16 + 16))
-            .stroke(Some(BinaryColor::On))
-            .into_iter(),
-    );
-    disp.draw(
-        Line::new(Point::new(8, 16 + 16), Point::new(8 + 8, 16))
-            .stroke(Some(BinaryColor::On))
-            .into_iter(),
-    );
-    disp.draw(
-        Line::new(Point::new(8 + 16, 16 + 16), Point::new(8 + 8, 16))
-            .stroke(Some(BinaryColor::On))
-            .into_iter(),
-    );
+    loop {
+        disp.draw(
+            Line::new(Point::new(8, 16 + 16), Point::new(8 + 16, 16 + 16))
+                .stroke(Some(BinaryColor::On))
+                .into_iter(),
+        );
+        disp.draw(
+            Line::new(Point::new(8, 16 + 16), Point::new(8 + 8, 16))
+                .stroke(Some(BinaryColor::On))
+                .into_iter(),
+        );
+        disp.draw(
+            Line::new(Point::new(8 + 16, 16 + 16), Point::new(8 + 8, 16))
+                .stroke(Some(BinaryColor::On))
+                .into_iter(),
+        );
 
-    disp.draw(
-        Rectangle::new(Point::new(48, 16), Point::new(48 + 16, 16 + 16))
-            .stroke(Some(BinaryColor::On))
-            .into_iter(),
-    );
+        disp.draw(
+            Rectangle::new(Point::new(48, 16), Point::new(48 + 16, 16 + 16))
+                .stroke(Some(BinaryColor::On))
+                .into_iter(),
+        );
 
-    disp.draw(
-        Circle::new(Point::new(96, 16 + 8), 8)
-            .stroke(Some(BinaryColor::On))
-            .into_iter(),
-    );
+        disp.draw(
+            Circle::new(Point::new(96, 16 + 8), 8)
+                .stroke(Some(BinaryColor::On))
+                .into_iter(),
+        );
 
-    let local_addr = machine_ip::get().unwrap();
+        let local_addr = machine_ip::get().unwrap();
 
-    disp.draw(
-        Font6x8::render_str(&format!("IP: {}", local_addr.to_string()))
-            .translate(Point::new(0, 56))
-            .into_iter(),
-    );
-    disp.flush().unwrap();
+        disp.draw(
+            Font6x8::render_str(&format!("IP: {}", local_addr.to_string()))
+                .translate(Point::new(0, 56))
+                .into_iter(),
+        );
+        disp.flush().unwrap();
 
-    sleep(Duration::from_secs(2));
+        sleep(Duration::from_secs(2));
 
-    disp.clear();
+        disp.clear();
 
-    let im: Image<BinaryColor> =
-        Image::new(include_bytes!("../rust.raw"), 64, 64).translate(Point::new(32, 0));
-    disp.draw(im.into_iter());
-    disp.flush().unwrap();
+        let im: Image<BinaryColor> =
+            Image::new(include_bytes!("../rust.raw"), 64, 64).translate(Point::new(32, 0));
+        disp.draw(im.into_iter());
+        disp.flush().unwrap();
+
+        sleep(Duration::from_secs(2));
+        disp.clear();
+    }
 }

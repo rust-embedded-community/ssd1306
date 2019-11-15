@@ -1,4 +1,5 @@
 use embedded_graphics::fonts::Font6x8;
+use embedded_graphics::image::Image;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
@@ -6,6 +7,8 @@ use embedded_graphics::Drawing;
 use linux_embedded_hal::I2cdev;
 use machine_ip;
 use ssd1306::{mode::GraphicsMode, Builder};
+use std::thread::sleep;
+use std::time::Duration;
 
 fn main() {
     let i2c = I2cdev::new("/dev/i2c-1").unwrap();
@@ -50,6 +53,14 @@ fn main() {
             .translate(Point::new(0, 56))
             .into_iter(),
     );
+    disp.flush().unwrap();
 
+    sleep(Duration::from_secs(2));
+
+    disp.clear();
+
+    let im: Image<BinaryColor> =
+        Image::new(include_bytes!("../rust.raw"), 64, 64).translate(Point::new(32, 0));
+    disp.draw(im.into_iter());
     disp.flush().unwrap();
 }

@@ -1,4 +1,5 @@
 use embedded_graphics::fonts::Font6x8;
+use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rectangle};
 use embedded_graphics::Drawing;
@@ -14,13 +15,33 @@ fn main() {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    disp.draw(Line::new(Point::new(8, 16 + 16), Point::new(8 + 16, 16 + 16)).into_iter());
-    disp.draw(Line::new(Point::new(8, 16 + 16), Point::new(8 + 8, 16)).into_iter());
-    disp.draw(Line::new(Point::new(8 + 16, 16 + 16), Point::new(8 + 8, 16)).into_iter());
+    disp.draw(
+        Line::new(Point::new(8, 16 + 16), Point::new(8 + 16, 16 + 16))
+            .stroke(Some(BinaryColor::On))
+            .into_iter(),
+    );
+    disp.draw(
+        Line::new(Point::new(8, 16 + 16), Point::new(8 + 8, 16))
+            .stroke(Some(BinaryColor::On))
+            .into_iter(),
+    );
+    disp.draw(
+        Line::new(Point::new(8 + 16, 16 + 16), Point::new(8 + 8, 16))
+            .stroke(Some(BinaryColor::On))
+            .into_iter(),
+    );
 
-    disp.draw(Rectangle::new(Point::new(48, 16), Point::new(48 + 16, 16 + 16)).into_iter());
+    disp.draw(
+        Rectangle::new(Point::new(48, 16), Point::new(48 + 16, 16 + 16))
+            .stroke(Some(BinaryColor::On))
+            .into_iter(),
+    );
 
-    disp.draw(Circle::new(Point::new(96, 16 + 8), 8).into_iter());
+    disp.draw(
+        Circle::new(Point::new(96, 16 + 8), 8)
+            .stroke(Some(BinaryColor::On))
+            .into_iter(),
+    );
 
     let local_addr = machine_ip::get().unwrap();
 

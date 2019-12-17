@@ -176,10 +176,13 @@ where
     pub fn clear(&mut self) -> Result<(), TerminalModeError<DI>> {
         let display_size = self.properties.get_size();
 
+        // The number of characters that can fit on the display at once (w * h / 8 * 8)
+        // TODO: Use `display_size.dimensions()`
         let numchars = match display_size {
             DisplaySize::Display128x64 => 128,
             DisplaySize::Display128x32 => 64,
             DisplaySize::Display96x16 => 24,
+            DisplaySize::Display72x40 => 45,
         };
 
         // Let the chip handle line wrapping so we can fill the screen with blanks faster
@@ -191,6 +194,7 @@ where
             .set_draw_area((0, 0), (display_width, display_height))
             .terminal_err()?;
 
+        // Clear the display
         for _ in 0..numchars {
             self.properties.draw(&[0; 8]).terminal_err()?;
         }

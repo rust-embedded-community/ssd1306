@@ -159,11 +159,17 @@ where
         self.min_y = width - 1;
         self.max_y = 0;
 
+        // Compensate for any offset in the physical display. For example, the 72x40 display has an
+        // offset of (28, 0) pixels.
+        let offs = self.properties.display_offset;
+
         // Tell the display to update only the part that has changed
         match self.properties.get_rotation() {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                self.properties
-                    .set_draw_area((disp_min_x, disp_min_y), (disp_max_x, disp_max_y))?;
+                self.properties.set_draw_area(
+                    (disp_min_x + offs.0, disp_min_y + offs.1),
+                    (disp_max_x + offs.0, disp_max_y + offs.1),
+                )?;
 
                 self.properties.bounded_draw(
                     &self.buffer,
@@ -173,8 +179,10 @@ where
                 )
             }
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                self.properties
-                    .set_draw_area((disp_min_y, disp_min_x), (disp_max_y, disp_max_x))?;
+                self.properties.set_draw_area(
+                    (disp_min_y + offs.1, disp_min_x + offs.0),
+                    (disp_max_y + offs.1, disp_max_x + offs.0),
+                )?;
 
                 self.properties.bounded_draw(
                     &self.buffer,

@@ -72,38 +72,49 @@ fn main() -> ! {
 
     disp.init().unwrap();
 
-    let yoffset = 20;
+    let size = 10;
+    let offset = Point::new(10, (42 / 2) - (size / 2) - 1);
+    let spacing = size + 10;
 
     // screen outline
     // default display size is 128x64 if you don't pass a _DisplaySize_
     // enum to the _Builder_ struct
     disp.draw(
-        Rectangle::new(Point::new(0, 0), Point::new(127, 63))
+        Rectangle::new(Point::new(0, 0), Point::new(71, 39))
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );
 
-    // triangle
+    // Triangle
     disp.draw(
         Triangle::new(
-            Point::new(16, 16 + yoffset),
-            Point::new(16 + 16, 16 + yoffset),
-            Point::new(16 + 8, yoffset),
+            Point::new(0, size),
+            Point::new(size / 2, 0),
+            Point::new(size, size),
         )
+        .translate(offset)
         .stroke(Some(BinaryColor::On))
         .into_iter(),
     );
 
-    // square
+    // Move over to next position
+    let offset = offset + Point::new(spacing, 0);
+
+    // Draw a square
     disp.draw(
-        Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
+        Rectangle::new(Point::new(0, 0), Point::new(size, size))
+            .translate(offset)
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );
 
-    // circle
+    // Move over a bit more
+    let offset = offset + Point::new(spacing, 0);
+
+    // Circle
     disp.draw(
-        Circle::new(Point::new(96, yoffset + 8), 8)
+        Circle::new(Point::new(size / 2, size / 2), size as u32 / 2)
+            .translate(offset)
             .stroke(Some(BinaryColor::On))
             .into_iter(),
     );

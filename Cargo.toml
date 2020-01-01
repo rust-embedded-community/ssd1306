@@ -23,9 +23,9 @@ optional = true
 version = "0.6.0-alpha.2"
 
 [dev-dependencies]
-cortex-m = "0.6.0"
-cortex-m-rt = "0.6.9"
-panic-semihosting = "0.5.2"
+cortex-m = "0.6.1"
+cortex-m-rt = "0.6.11"
+panic-semihosting = "0.5.3"
 
 # Turn on `bmp` feature for examples
 [dev-dependencies.embedded-graphics]
@@ -33,7 +33,7 @@ version = "0.6.0-alpha.2"
 features = ["bmp"]
 
 [dev-dependencies.stm32f1xx-hal]
-version = "0.3.0"
+version = "0.5.2"
 features = [ "rt", "stm32f103" ]
 
 [features]

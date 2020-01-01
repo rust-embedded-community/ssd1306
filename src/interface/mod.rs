@@ -29,12 +29,13 @@
 //! # use stm32f1xx_hal::gpio::{Alternate, Floating, Input, Output, PushPull};
 //! # use stm32f1xx_hal::pac::SPI1;
 //! # use stm32f1xx_hal::prelude::*;
-//! # use stm32f1xx_hal::spi::Spi;
+//! # use stm32f1xx_hal::spi::{Spi, Spi1NoRemap};
 //! use ssd1306::{interface::SpiInterface, prelude::*};
 //! pub type OledDisplay = GraphicsMode<
 //!     SpiInterface<
 //!         Spi<
 //!             SPI1,
+//!             Spi1NoRemap,
 //!             (
 //!                 PA5<Alternate<PushPull>>,
 //!                 PA6<Input<Floating>>,

@@ -7,6 +7,7 @@
 ### Changed
 
 - [#97](https://github.com/jamwaffles/ssd1306/pull/97) Use the new `Triangle` primitive from Embedded Graphics 0.6.0-alpha.2 in the three SSD1306 `graphics*.rs` examples
+- [#103](https://github.com/jamwaffles/ssd1306/pull/103) Pin embedded-graphics version to 0.6.0-alpha.2
 
 ## 0.3.0-alpha.2
 

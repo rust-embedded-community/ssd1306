@@ -45,8 +45,8 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.3...HEAD
 
-[0.3.0-alpha.3]: https://github.com/jamwaffles/ssd1306/compare/linuxcnc-hal-sys-v0.3.0-alpha.2...v0.3.0-alpha.3
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.3...HEAD
+[0.3.0-alpha.3]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.2...v0.3.0-alpha.3
 [0.3.0-alpha.2]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.1...v0.3.0-alpha.2
 [0.3.0-alpha.1]: https://github.com/jamwaffles/ssd1306/compare/0.2.5...v0.3.0-alpha.1

@@ -29,7 +29,7 @@ panic-semihosting = "0.5.3"
 
 # Turn on `bmp` feature for examples
 [dev-dependencies.embedded-graphics]
-version = "0.6.0-alpha.2"
+version = "=0.6.0-alpha.2"
 features = ["bmp"]
 
 [dev-dependencies.stm32f1xx-hal]

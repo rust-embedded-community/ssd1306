@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.3.0-alpha.3] - 2020-02-03
+
 ### Changed
 
 - [#97](https://github.com/jamwaffles/ssd1306/pull/97) Use the new `Triangle` primitive from Embedded Graphics 0.6.0-alpha.2 in the three SSD1306 `graphics*.rs` examples
@@ -43,7 +45,8 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.3...HEAD
 
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/linuxcnc-hal-sys-v0.3.0-alpha.2...HEAD
+[0.3.0-alpha.3]: https://github.com/jamwaffles/ssd1306/compare/linuxcnc-hal-sys-v0.3.0-alpha.2...v0.3.0-alpha.3
 [0.3.0-alpha.2]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.1...v0.3.0-alpha.2
 [0.3.0-alpha.1]: https://github.com/jamwaffles/ssd1306/compare/0.2.5...v0.3.0-alpha.1

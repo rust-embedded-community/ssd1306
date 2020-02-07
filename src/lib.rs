@@ -88,22 +88,24 @@
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
 //! };
+//! use embedded_graphics::style::TextStyleBuilder;
+//! use embedded_graphics::fonts::Text;
 //!
 //! let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //!
 //! disp.init().unwrap();
 //!
-//! disp.draw(
-//!     Font6x8::render_str("Hello world!")
-//!         .stroke(Some(BinaryColor::On))
-//!         .into_iter(),
-//! );
-//! disp.draw(
-//!     Font6x8::render_str("Hello Rust!")
-//!         .stroke(Some(BinaryColor::On))
-//!         .translate(Point::new(0, 16))
-//!         .into_iter(),
-//! );
+//! let text_style = TextStyleBuilder::new(Font6x8)
+//!     .text_color(BinaryColor::On)
+//!     .build();
+//!
+//! Text::new("Hello world!", Point::zero())
+//!     .into_styled(text_style)
+//!     .draw(&mut disp);
+//!
+//! Text::new("Hello Rust!", Point::new(0, 16))
+//!     .into_styled(text_style)
+//!     .draw(&mut disp);
 //!
 //! disp.flush().unwrap();
 //! ```

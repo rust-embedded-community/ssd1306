@@ -8,33 +8,47 @@
 //!     fonts::Font6x8,
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
-//!     primitives::{Circle, Line, Rectangle},
+//!     primitives::{Circle, Line, Rectangle, Triangle},
+//!     style::PrimitiveStyleBuilder
 //! };
 //!
 //! let mut display: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //!
 //! display.init().unwrap();
-//! display.draw(
-//!     Line::new(Point::new(0, 0), Point::new(16, 16))
-//!         .stroke(Some(BinaryColor::On))
-//!         .into_iter(),
-//! );
-//! display.draw(
-//!     Rectangle::new(Point::new(24, 0), Point::new(40, 16))
-//!         .stroke(Some(BinaryColor::On))
-//!         .into_iter(),
-//! );
-//! display.draw(
-//!     Circle::new(Point::new(64, 8), 8)
-//!         .stroke(Some(BinaryColor::On))
-//!         .into_iter(),
-//! );
-//! display.draw(
-//!     Font6x8::render_str("Hello Rust!")
-//!         .stroke(Some(BinaryColor::On))
-//!         .translate(Point::new(24, 24))
-//!         .into_iter(),
-//! );
+//!
+//! let yoffset = 20;
+//!
+//! let style = PrimitiveStyleBuilder::new()
+//!     .stroke_width(1)
+//!     .stroke_color(BinaryColor::On)
+//!     .build();
+//!
+//! // screen outline
+//! // default display size is 128x64 if you don't pass a _DisplaySize_
+//! // enum to the _Builder_ struct
+//! Rectangle::new(Point::new(0, 0), Point::new(127, 63))
+//!     .into_styled(style)
+//!     .draw(&mut display);
+//!
+//! // triangle
+//! Triangle::new(
+//!     Point::new(16, 16 + yoffset),
+//!     Point::new(16 + 16, 16 + yoffset),
+//!     Point::new(16 + 8, yoffset),
+//! )
+//! .into_styled(style)
+//! .draw(&mut display);
+//!
+//! // square
+//! Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
+//!     .into_styled(style)
+//!     .draw(&mut display);
+//!
+//! // circle
+//! Circle::new(Point::new(96, yoffset + 8), 8)
+//!     .into_styled(style)
+//!     .draw(&mut display);
+//!
 //! display.flush().unwrap();
 //! ```
 //!

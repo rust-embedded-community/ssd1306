@@ -6,6 +6,14 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- Fix docs.rs build by targeting `x86_64-unknown-linux-gnu`
+
+### Changed
+
+- **(breaking)** Upgrade embedded-graphics from `0.6.0-alpha.2` to version `0.6.0-alpha.3`
+
 ## [0.3.0-alpha.3] - 2020-02-03
 
 ### Changed

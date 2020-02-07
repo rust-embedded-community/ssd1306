@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.3.0-alpha.4] - 2020-02-07
+
 ### Added
 
 - [#101](https://github.com/jamwaffles/ssd1306/pull/101) Add support for modules with a 72x40px display size. These are often advertised as 70x40px displays which are likely the same hardware. An example is also added - `graphics_i2c_72x40`.
@@ -57,8 +59,9 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.4...HEAD
 
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.3...HEAD
+[0.3.0-alpha.4]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.3...v0.3.0-alpha.4
 [0.3.0-alpha.3]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.2...v0.3.0-alpha.3
 [0.3.0-alpha.2]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.1...v0.3.0-alpha.2
 [0.3.0-alpha.1]: https://github.com/jamwaffles/ssd1306/compare/0.2.5...v0.3.0-alpha.1

@@ -12,6 +12,8 @@ Please consider [becoming a sponsor](https://github.com/sponsors/jamwaffles/) so
 
 ## [Documentation](https://docs.rs/ssd1306)
 
+## [Changelog](CHANGELOG.md)
+
 ## [Examples](examples)
 
 From [`examples/image_i2c.rs`](examples/image_i2c.rs):

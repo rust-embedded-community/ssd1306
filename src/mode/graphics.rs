@@ -256,43 +256,42 @@ where
 }
 
 #[cfg(feature = "graphics")]
-extern crate embedded_graphics;
+use core::convert::TryInto;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::{
+use embedded_graphics::{
     drawable,
+    geometry::Size,
     pixelcolor::{
         raw::{RawData, RawU1},
         BinaryColor,
     },
-    Drawing,
+    DrawTarget,
 };
 
 #[cfg(feature = "graphics")]
-impl<DI> Drawing<BinaryColor> for GraphicsMode<DI>
+impl<DI> DrawTarget<BinaryColor> for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
-    fn draw<T>(&mut self, item_pixels: T)
-    where
-        T: IntoIterator<Item = drawable::Pixel<BinaryColor>>,
-    {
-        // Filter out pixels that are off the top left of the screen
-        let on_screen_pixels = item_pixels
-            .into_iter()
-            .filter(|drawable::Pixel(point, _)| point.x >= 0 && point.y >= 0);
+    fn draw_pixel(&mut self, pixel: drawable::Pixel<BinaryColor>) {
+        let drawable::Pixel(pos, color) = pixel;
 
-        for drawable::Pixel(point, color) in on_screen_pixels {
-            // NOTE: The filter above means the coordinate conversions should never panic
-            self.set_pixel(
-                point.x as u32,
-                point.y as u32,
-                RawU1::from(color).into_inner(),
-            );
+        // Guard against negative values. All positive i32 values from `pos` can be represented in
+        // the `u32`s that `set_pixel()` accepts.
+        if pos.x < 0 || pos.y < 0 {
+            return;
         }
-    }
-}
 
-#[cfg(test)]
-mod tests {
-    // TODO lol
+        self.set_pixel(
+            (pos.x).try_into().unwrap(),
+            (pos.y).try_into().unwrap(),
+            RawU1::from(color).into_inner(),
+        );
+    }
+
+    fn size(&self) -> Size {
+        let (w, h) = self.get_dimensions();
+
+        Size::new(w as u32, h as u32)
+    }
 }

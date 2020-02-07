@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#101](https://github.com/jamwaffles/ssd1306/pull/101) Add support for modules with a 72x40px display size. These are often advertised as 70x40px displays which are likely the same hardware. An example is also added - `graphics_i2c_72x40`.
+
 ### Fixed
 
 - Fix docs.rs build by targeting `x86_64-unknown-linux-gnu`

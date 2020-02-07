@@ -12,6 +12,7 @@ pub struct DisplayProperties<DI> {
     iface: DI,
     display_size: DisplaySize,
     display_rotation: DisplayRotation,
+    pub(crate) display_offset: (u8, u8),
     addr_mode: AddrMode,
 }
 
@@ -25,10 +26,18 @@ where
         display_size: DisplaySize,
         display_rotation: DisplayRotation,
     ) -> DisplayProperties<DI> {
+        let display_offset = match display_size {
+            DisplaySize::Display128x64 => (0, 0),
+            DisplaySize::Display128x32 => (0, 0),
+            DisplaySize::Display96x16 => (0, 0),
+            DisplaySize::Display72x40 => (28, 0),
+        };
+
         DisplayProperties {
             iface,
             display_size,
             display_rotation,
+            display_offset,
             addr_mode: AddrMode::Page, // reset value
         }
     }
@@ -61,6 +70,7 @@ where
             DisplaySize::Display128x32 => Command::ComPinConfig(false, false).send(&mut self.iface),
             DisplaySize::Display128x64 => Command::ComPinConfig(true, false).send(&mut self.iface),
             DisplaySize::Display96x16 => Command::ComPinConfig(false, false).send(&mut self.iface),
+            DisplaySize::Display72x40 => Command::ComPinConfig(true, false).send(&mut self.iface),
         }?;
 
         Command::Contrast(0x8F).send(&mut self.iface)?;

@@ -10,6 +10,8 @@ pub enum DisplaySize {
     Display128x32,
     /// 96 by 16 pixels
     Display96x16,
+    /// 70 by 42 pixels
+    Display72x40,
 }
 
 impl DisplaySize {
@@ -20,6 +22,7 @@ impl DisplaySize {
             DisplaySize::Display128x64 => (128, 64),
             DisplaySize::Display128x32 => (128, 32),
             DisplaySize::Display96x16 => (96, 16),
+            DisplaySize::Display72x40 => (72, 40),
         }
     }
 }

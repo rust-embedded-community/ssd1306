@@ -8,6 +8,8 @@ I2C and SPI (4 wire) driver for the SSD1306 OLED display.
 
 See the [announcement blog post](https://wapl.es/electronics/rust/2018/04/30/ssd1306-driver.html) for more information.
 
+Please consider [becoming a sponsor](https://github.com/sponsors/jamwaffles/) so I may continue to maintain these crates in my spare time!
+
 ## [Documentation](https://docs.rs/ssd1306)
 
 ## [Examples](examples)

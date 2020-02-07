@@ -82,18 +82,18 @@ fn main() -> ! {
     // The display uses `BinaryColor` pixels (on/off only). Here, we `map()` over every pixel
     // and naively convert the color to an on/off value. The logic below simply converts any
     // color that's not black into an "on" pixel.
-    let im = im.into_iter().map(|Pixel(position, color)| {
-        Pixel(
-            position,
-            if color != Rgb565::BLACK {
-                BinaryColor::On
-            } else {
-                BinaryColor::Off
-            },
-        )
-    });
-
-    disp.draw(im);
+    im.into_iter()
+        .map(|Pixel(position, color)| {
+            Pixel(
+                position,
+                if color != Rgb565::BLACK {
+                    BinaryColor::On
+                } else {
+                    BinaryColor::Off
+                },
+            )
+        })
+        .draw(&mut disp);
 
     disp.flush().unwrap();
 

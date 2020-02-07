@@ -76,7 +76,7 @@ fn main() -> ! {
     let im: Image<BinaryColor> =
         Image::new(include_bytes!("./rust.raw"), 64, 64).translate(Point::new(32, 0));
 
-    disp.draw(im.into_iter());
+    im.draw(&mut disp);
 
     disp.flush().unwrap();
 

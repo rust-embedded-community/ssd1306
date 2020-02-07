@@ -18,22 +18,26 @@
 //!
 //! // Print a-zA-Z
 //! for c in 97..123 {
-//!     display.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) }).unwrap();
+//!     display
+//!         .write_str(unsafe { core::str::from_utf8_unchecked(&[c]) })
+//!         .unwrap();
 //! }
 //! ```
 
-use crate::command::AddrMode;
-use crate::displayrotation::DisplayRotation;
-use crate::displaysize::DisplaySize;
-use crate::interface::DisplayInterface;
-use crate::mode::displaymode::DisplayModeTrait;
-use crate::mode::terminal::TerminalModeError::{InterfaceError, OutOfBounds, Uninitialized};
-use crate::properties::DisplayProperties;
-use crate::Error;
-use core::cmp::min;
-use core::fmt;
-use hal::blocking::delay::DelayMs;
-use hal::digital::v2::OutputPin;
+use crate::{
+    command::AddrMode,
+    displayrotation::DisplayRotation,
+    displaysize::DisplaySize,
+    interface::DisplayInterface,
+    mode::{
+        displaymode::DisplayModeTrait,
+        terminal::TerminalModeError::{InterfaceError, OutOfBounds, Uninitialized},
+    },
+    properties::DisplayProperties,
+    Error,
+};
+use core::{cmp::min, fmt};
+use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 
 /// Contains the new row that the cursor has wrapped around to
 struct CursorWrapEvent(u8);

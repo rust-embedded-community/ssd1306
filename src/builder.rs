@@ -48,15 +48,15 @@
 //! let display: TerminalMode<_> = Builder::new().connect_spi(spi, dc).into();
 //! ```
 
-use hal;
-use hal::digital::v2::OutputPin;
+use hal::{self, digital::v2::OutputPin};
 
-use crate::displayrotation::DisplayRotation;
-use crate::displaysize::DisplaySize;
-use crate::interface::{I2cInterface, SpiInterface};
-use crate::mode::displaymode::DisplayMode;
-use crate::mode::raw::RawMode;
-use crate::properties::DisplayProperties;
+use crate::{
+    displayrotation::DisplayRotation,
+    displaysize::DisplaySize,
+    interface::{I2cInterface, SpiInterface},
+    mode::{displaymode::DisplayMode, raw::RawMode},
+    properties::DisplayProperties,
+};
 
 /// Builder struct. Driver options and interface are set using its methods.
 #[derive(Clone, Copy)]

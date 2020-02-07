@@ -3,14 +3,14 @@
 //! ```rust
 //! # use ssd1306::test_helpers::I2cStub;
 //! # let i2c = I2cStub;
-//! use ssd1306::{prelude::*, mode::GraphicsMode, Builder};
 //! use embedded_graphics::{
 //!     fonts::Font6x8,
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
 //!     primitives::{Circle, Line, Rectangle, Triangle},
-//!     style::PrimitiveStyleBuilder
+//!     style::PrimitiveStyleBuilder,
 //! };
+//! use ssd1306::{mode::GraphicsMode, prelude::*, Builder};
 //!
 //! let mut display: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //!
@@ -54,14 +54,12 @@
 //!
 //! [embedded_graphics]: https://crates.io/crates/embedded_graphics
 
-use hal::blocking::delay::DelayMs;
-use hal::digital::v2::OutputPin;
+use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 
-use crate::displayrotation::DisplayRotation;
-use crate::interface::DisplayInterface;
-use crate::mode::displaymode::DisplayModeTrait;
-use crate::properties::DisplayProperties;
-use crate::Error;
+use crate::{
+    displayrotation::DisplayRotation, interface::DisplayInterface,
+    mode::displaymode::DisplayModeTrait, properties::DisplayProperties, Error,
+};
 
 // TODO: Add to prelude
 /// Graphics mode handler

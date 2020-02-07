@@ -9,7 +9,7 @@
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::I2cStub as I2cInterface;
-//! use ssd1306::{Builder, mode::GraphicsMode};
+//! use ssd1306::{mode::GraphicsMode, Builder};
 //!
 //! // Configure an I2C interface on the target device; below line shown as example only
 //! let i2c = I2cInterface;
@@ -59,7 +59,7 @@
 //! # use ssd1306::test_helpers::I2cStub;
 //! # let i2c = I2cStub;
 //! use core::fmt::Write;
-//! use ssd1306::{prelude::*, mode::TerminalMode, Builder};
+//! use ssd1306::{mode::TerminalMode, prelude::*, Builder};
 //!
 //! let mut disp: TerminalMode<_> = Builder::new().connect_i2c(i2c).into();
 //! disp.init().unwrap();
@@ -82,14 +82,13 @@
 //! ```rust
 //! # use ssd1306::test_helpers::I2cStub;
 //! # let i2c = I2cStub;
-//! use ssd1306::{prelude::*, mode::GraphicsMode, Builder};
 //! use embedded_graphics::{
-//!     fonts::Font6x8,
+//!     fonts::{Font6x8, Text},
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
+//!     style::TextStyleBuilder,
 //! };
-//! use embedded_graphics::style::TextStyleBuilder;
-//! use embedded_graphics::fonts::Text;
+//! use ssd1306::{mode::GraphicsMode, prelude::*, Builder};
 //!
 //! let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //!

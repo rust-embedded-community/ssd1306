@@ -1,7 +1,6 @@
 //! SSD1306 SPI interface
 
-use hal;
-use hal::digital::v2::OutputPin;
+use hal::{self, digital::v2::OutputPin};
 
 use super::DisplayInterface;
 use crate::Error;

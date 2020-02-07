@@ -3,51 +3,63 @@
 //! ```rust
 //! # use ssd1306::test_helpers::I2cStub;
 //! # let i2c = I2cStub;
-//! use ssd1306::{prelude::*, mode::GraphicsMode, Builder};
 //! use embedded_graphics::{
 //!     fonts::Font6x8,
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
-//!     primitives::{Circle, Line, Rectangle},
+//!     primitives::{Circle, Line, Rectangle, Triangle},
+//!     style::PrimitiveStyleBuilder,
 //! };
+//! use ssd1306::{mode::GraphicsMode, prelude::*, Builder};
 //!
 //! let mut display: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
 //!
 //! display.init().unwrap();
-//! display.draw(
-//!     Line::new(Point::new(0, 0), Point::new(16, 16))
-//!         .stroke(Some(BinaryColor::On))
-//!         .into_iter(),
-//! );
-//! display.draw(
-//!     Rectangle::new(Point::new(24, 0), Point::new(40, 16))
-//!         .stroke(Some(BinaryColor::On))
-//!         .into_iter(),
-//! );
-//! display.draw(
-//!     Circle::new(Point::new(64, 8), 8)
-//!         .stroke(Some(BinaryColor::On))
-//!         .into_iter(),
-//! );
-//! display.draw(
-//!     Font6x8::render_str("Hello Rust!")
-//!         .stroke(Some(BinaryColor::On))
-//!         .translate(Point::new(24, 24))
-//!         .into_iter(),
-//! );
+//!
+//! let yoffset = 20;
+//!
+//! let style = PrimitiveStyleBuilder::new()
+//!     .stroke_width(1)
+//!     .stroke_color(BinaryColor::On)
+//!     .build();
+//!
+//! // screen outline
+//! // default display size is 128x64 if you don't pass a _DisplaySize_
+//! // enum to the _Builder_ struct
+//! Rectangle::new(Point::new(0, 0), Point::new(127, 63))
+//!     .into_styled(style)
+//!     .draw(&mut display);
+//!
+//! // triangle
+//! Triangle::new(
+//!     Point::new(16, 16 + yoffset),
+//!     Point::new(16 + 16, 16 + yoffset),
+//!     Point::new(16 + 8, yoffset),
+//! )
+//! .into_styled(style)
+//! .draw(&mut display);
+//!
+//! // square
+//! Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
+//!     .into_styled(style)
+//!     .draw(&mut display);
+//!
+//! // circle
+//! Circle::new(Point::new(96, yoffset + 8), 8)
+//!     .into_styled(style)
+//!     .draw(&mut display);
+//!
 //! display.flush().unwrap();
 //! ```
 //!
 //! [embedded_graphics]: https://crates.io/crates/embedded_graphics
 
-use hal::blocking::delay::DelayMs;
-use hal::digital::v2::OutputPin;
+use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 
-use crate::displayrotation::DisplayRotation;
-use crate::interface::DisplayInterface;
-use crate::mode::displaymode::DisplayModeTrait;
-use crate::properties::DisplayProperties;
-use crate::Error;
+use crate::{
+    displayrotation::DisplayRotation, interface::DisplayInterface,
+    mode::displaymode::DisplayModeTrait, properties::DisplayProperties, Error,
+};
 
 // TODO: Add to prelude
 /// Graphics mode handler
@@ -256,43 +268,42 @@ where
 }
 
 #[cfg(feature = "graphics")]
-extern crate embedded_graphics;
+use core::convert::TryInto;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::{
+use embedded_graphics::{
     drawable,
+    geometry::Size,
     pixelcolor::{
         raw::{RawData, RawU1},
         BinaryColor,
     },
-    Drawing,
+    DrawTarget,
 };
 
 #[cfg(feature = "graphics")]
-impl<DI> Drawing<BinaryColor> for GraphicsMode<DI>
+impl<DI> DrawTarget<BinaryColor> for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
-    fn draw<T>(&mut self, item_pixels: T)
-    where
-        T: IntoIterator<Item = drawable::Pixel<BinaryColor>>,
-    {
-        // Filter out pixels that are off the top left of the screen
-        let on_screen_pixels = item_pixels
-            .into_iter()
-            .filter(|drawable::Pixel(point, _)| point.x >= 0 && point.y >= 0);
+    fn draw_pixel(&mut self, pixel: drawable::Pixel<BinaryColor>) {
+        let drawable::Pixel(pos, color) = pixel;
 
-        for drawable::Pixel(point, color) in on_screen_pixels {
-            // NOTE: The filter above means the coordinate conversions should never panic
-            self.set_pixel(
-                point.x as u32,
-                point.y as u32,
-                RawU1::from(color).into_inner(),
-            );
+        // Guard against negative values. All positive i32 values from `pos` can be represented in
+        // the `u32`s that `set_pixel()` accepts.
+        if pos.x < 0 || pos.y < 0 {
+            return;
         }
-    }
-}
 
-#[cfg(test)]
-mod tests {
-    // TODO lol
+        self.set_pixel(
+            (pos.x).try_into().unwrap(),
+            (pos.y).try_into().unwrap(),
+            RawU1::from(color).into_inner(),
+        );
+    }
+
+    fn size(&self) -> Size {
+        let (w, h) = self.get_dimensions();
+
+        Size::new(w as u32, h as u32)
+    }
 }

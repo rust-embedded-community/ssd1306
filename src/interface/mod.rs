@@ -15,8 +15,9 @@
 //! # use stm32f1xx_hal::pac::I2C1;
 //! # use stm32f1xx_hal::prelude::*;
 //! use ssd1306::{interface::I2cInterface, prelude::*};
-//! type OledDisplay =
-//!   GraphicsMode<I2cInterface<I2c<I2C1, (PB8<Alternate<OpenDrain>>, PB9<Alternate<OpenDrain>>)>>>;
+//! type OledDisplay = GraphicsMode<
+//!     I2cInterface<I2c<I2C1, (PB8<Alternate<OpenDrain>>, PB9<Alternate<OpenDrain>>)>>,
+//! >;
 //! ```
 //!
 //! [Example](https://github.com/jamwaffles/ssd1306/blob/master/examples/blinky_i2c.rs)
@@ -73,5 +74,4 @@ pub trait DisplayInterface {
     ) -> Result<(), Self::Error>;
 }
 
-pub use self::i2c::I2cInterface;
-pub use self::spi::SpiInterface;
+pub use self::{i2c::I2cInterface, spi::SpiInterface};

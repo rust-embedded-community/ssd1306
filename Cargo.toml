@@ -11,16 +11,21 @@ readme = "README.md"
 repository = "https://github.com/jamwaffles/ssd1306"
 version = "0.3.0-alpha.3"
 edition = "2018"
+
 [badges.travis-ci]
 branch = "master"
 repository = "jamwaffles/ssd1306"
+
+[package.metadata.docs.rs]
+all-features = true
+default-target = "x86_64-unknown-linux-gnu"
 
 [dependencies]
 embedded-hal = "0.2.3"
 
 [dependencies.embedded-graphics]
 optional = true
-version = "0.6.0-alpha.2"
+version = "=0.6.0-alpha.3"
 
 [dev-dependencies]
 cortex-m = "0.6.1"
@@ -29,7 +34,7 @@ panic-semihosting = "0.5.3"
 
 # Turn on `bmp` feature for examples
 [dev-dependencies.embedded-graphics]
-version = "=0.6.0-alpha.2"
+version = "=0.6.0-alpha.3"
 features = ["bmp"]
 
 [dev-dependencies.stm32f1xx-hal]

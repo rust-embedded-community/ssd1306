@@ -26,14 +26,14 @@ extern crate cortex_m_rt as rt;
 extern crate panic_semihosting;
 extern crate stm32f1xx_hal as hal;
 
-use cortex_m_rt::ExceptionFrame;
-use cortex_m_rt::{entry, exception};
-use hal::delay::Delay;
-use hal::prelude::*;
-use hal::spi::{Mode, Phase, Polarity, Spi};
-use hal::stm32;
-use ssd1306::prelude::*;
-use ssd1306::Builder;
+use cortex_m_rt::{entry, exception, ExceptionFrame};
+use hal::{
+    delay::Delay,
+    prelude::*,
+    spi::{Mode, Phase, Polarity, Spi},
+    stm32,
+};
+use ssd1306::{prelude::*, Builder};
 
 #[entry]
 fn main() -> ! {

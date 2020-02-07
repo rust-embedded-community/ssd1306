@@ -2,8 +2,10 @@
 
 use crate::interface::DisplayInterface;
 use embedded_hal::{
-    blocking::i2c,
-    blocking::spi::{self, Transfer},
+    blocking::{
+        i2c,
+        spi::{self, Transfer},
+    },
     digital::v2::OutputPin,
 };
 

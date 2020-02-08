@@ -19,6 +19,7 @@
 ### Changed
 
 - **(breaking)** Upgrade embedded-graphics from `0.6.0-alpha.2` to version `0.6.0-alpha.3`
+- [#106](https://github.com/jamwaffles/ssd1306/pull/106) Switch out some `for` loops for iterators internally to speed up data transfers and reduce code size in `--release` mode.
 
 ## [0.3.0-alpha.3] - 2020-02-03
 
@@ -59,8 +60,8 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.4...HEAD
 
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.4...HEAD
 [0.3.0-alpha.4]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.3...v0.3.0-alpha.4
 [0.3.0-alpha.3]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.2...v0.3.0-alpha.3
 [0.3.0-alpha.2]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.1...v0.3.0-alpha.2

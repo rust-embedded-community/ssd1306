@@ -1,4 +1,4 @@
-
+.gdb_history
 /target/
 **/*.rs.bk
 Cargo.lock

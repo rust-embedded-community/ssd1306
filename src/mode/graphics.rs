@@ -276,8 +276,6 @@ where
 }
 
 #[cfg(feature = "graphics")]
-use core::convert::TryInto;
-#[cfg(feature = "graphics")]
 use embedded_graphics::{
     drawable,
     geometry::Size,
@@ -297,16 +295,13 @@ where
         let drawable::Pixel(pos, color) = pixel;
 
         // Guard against negative values. All positive i32 values from `pos` can be represented in
-        // the `u32`s that `set_pixel()` accepts.
+        // the `u32`s that `set_pixel()` accepts...
         if pos.x < 0 || pos.y < 0 {
             return;
         }
 
-        self.set_pixel(
-            (pos.x).try_into().unwrap(),
-            (pos.y).try_into().unwrap(),
-            RawU1::from(color).into_inner(),
-        );
+        // ... which makes the `as` coercions here safe.
+        self.set_pixel(pos.x as u32, pos.y as u32, RawU1::from(color).into_inner());
     }
 
     fn size(&self) -> Size {

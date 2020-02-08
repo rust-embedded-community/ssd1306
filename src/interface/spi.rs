@@ -57,22 +57,20 @@ where
         self.dc.set_high().map_err(Error::Pin)?;
 
         // Divide by 8 since each row is actually 8 pixels tall
-        let height = ((lower_right.1 - upper_left.1) / 8) as usize;
+        let num_pages = ((lower_right.1 - upper_left.1) / 8) as usize + 1;
 
+        // Each page is 8 bits tall, so calculate which page number to start at (rounded down) from
+        // the top of the display
         let starting_page = (upper_left.1 / 8) as usize;
 
-        let mut page_offset = starting_page * disp_width;
+        // Calculate start and end X coordinates for each page
+        let page_lower = upper_left.0 as usize;
+        let page_upper = lower_right.0 as usize;
 
-        for _ in 0..=height {
-            let start_index = page_offset + upper_left.0 as usize;
-            let end_index = page_offset + lower_right.0 as usize;
-            let sub_buf = &buf[start_index..end_index];
-
-            page_offset += disp_width;
-
-            self.spi.write(&sub_buf).map_err(Error::Comm)?;
-        }
-
-        Ok(())
+        buf.chunks(disp_width)
+            .skip(starting_page)
+            .take(num_pages)
+            .map(|s| &s[page_lower..page_upper])
+            .try_for_each(|c| self.spi.write(&c).map_err(Error::Comm))
     }
 }

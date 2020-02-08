@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- [#105](https://github.com/jamwaffles/ssd1306/pull/105) Reduce flash usage by around 400 bytes by replacing some internal `unwrap()`s with `as` coercions.
+
 ## [0.3.0-alpha.4] - 2020-02-07
 
 ### Added

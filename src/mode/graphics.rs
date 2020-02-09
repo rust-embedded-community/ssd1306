@@ -200,54 +200,32 @@ where
         let (display_width, _) = self.properties.get_size().dimensions();
         let display_rotation = self.properties.get_rotation();
 
-        let idx = match display_rotation {
+        let (idx, bit) = match display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                if x >= display_width as u32 {
-                    return;
-                }
-                ((y as usize) / 8 * display_width as usize) + (x as usize)
-            }
+                let idx = ((y as usize) / 8 * display_width as usize) + (x as usize);
+                let bit = y % 8;
 
+                (idx, bit)
+            }
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                if y >= display_width as u32 {
-                    return;
-                }
-                ((x as usize) / 8 * display_width as usize) + (y as usize)
+                let idx = ((x as usize) / 8 * display_width as usize) + (y as usize);
+                let bit = x % 8;
+
+                (idx, bit)
             }
         };
 
-        if idx >= self.buffer.len() {
-            return;
-        }
+        if let Some(byte) = self.buffer.get_mut(idx) {
+            // Keep track of max and min values
+            self.min_x = self.min_x.min(x as u8);
+            self.max_x = self.max_x.max(x as u8);
 
-        // Keep track of max and min values
-        self.min_x = self.min_x.min(x as u8);
-        self.max_x = self.max_x.max(x as u8);
+            self.min_y = self.min_y.min(y as u8);
+            self.max_y = self.max_y.max(y as u8);
 
-        self.min_y = self.min_y.min(y as u8);
-        self.max_y = self.max_y.max(y as u8);
-
-        let (byte, bit) = match display_rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                let byte =
-                    &mut self.buffer[((y as usize) / 8 * display_width as usize) + (x as usize)];
-                let bit = 1 << (y % 8);
-
-                (byte, bit)
-            }
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                let byte =
-                    &mut self.buffer[((x as usize) / 8 * display_width as usize) + (y as usize)];
-                let bit = 1 << (x % 8);
-
-                (byte, bit)
-            }
-        };
-
-        if value == 0 {
-            *byte &= !bit;
-        } else {
-            *byte |= bit;
+            // Set pixel value in byte
+            // Ref this comment https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit#comment46654671_47990
+            *byte = *byte & !(1 << bit) | (value << bit)
         }
     }
 

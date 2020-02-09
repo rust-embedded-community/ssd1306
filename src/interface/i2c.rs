@@ -50,18 +50,16 @@ where
         // 8.1.5.2 5) b) in the datasheet
         writebuf[0] = 0x40;
 
-        for chunk in buf.chunks(16) {
-            let chunklen = chunk.len();
+        buf.chunks(16).try_for_each(|c| {
+            let chunk_len = c.len();
 
             // Copy over all data from buffer, leaving the data command byte intact
-            writebuf[1..=chunklen].copy_from_slice(&chunk[0..chunklen]);
+            writebuf[1..=chunk_len].copy_from_slice(c);
 
             self.i2c
-                .write(self.addr, &writebuf[..=chunklen])
-                .map_err(Error::Comm)?;
-        }
-
-        Ok(())
+                .write(self.addr, &writebuf[0..=chunk_len])
+                .map_err(Error::Comm)
+        })
     }
 
     fn send_bounded_data(
@@ -76,39 +74,39 @@ where
             return Ok(());
         }
 
-        let mut writebuf: [u8; 17] = [0; 17];
-
-        // Divide by 8 since each row is actually 8 pixels tall
-        let height = ((lower_right.1 - upper_left.1) / 8) as usize;
-
-        let starting_page = (upper_left.1 / 8) as usize;
+        // Write buffer. Writes are sent in chunks of 16 bytes plus DC byte
+        let mut writebuf: [u8; 17] = [0x0; 17];
 
         // Data mode
         // 8.1.5.2 5) b) in the datasheet
         writebuf[0] = 0x40;
 
-        let mut page_offset = starting_page * disp_width;
+        // Divide by 8 since each row is actually 8 pixels tall
+        let num_pages = ((lower_right.1 - upper_left.1) / 8) as usize + 1;
 
-        for _ in 0..=height {
-            let start_index = page_offset + upper_left.0 as usize;
-            let end_index = page_offset + lower_right.0 as usize;
+        // Each page is 8 bits tall, so calculate which page number to start at (rounded down) from
+        // the top of the display
+        let starting_page = (upper_left.1 / 8) as usize;
 
-            page_offset += disp_width;
+        // Calculate start and end X coordinates for each page
+        let page_lower = upper_left.0 as usize;
+        let page_upper = lower_right.0 as usize;
 
-            let sub_buf = &buf[start_index..end_index];
+        buf.chunks(disp_width)
+            .skip(starting_page)
+            .take(num_pages)
+            .map(|s| &s[page_lower..page_upper])
+            .try_for_each(|c| {
+                c.chunks(16).try_for_each(|c| {
+                    let chunk_len = c.len();
 
-            for chunk in sub_buf.chunks(16) {
-                let chunklen = chunk.len();
+                    // Copy over all data from buffer, leaving the data command byte intact
+                    writebuf[1..=chunk_len].copy_from_slice(c);
 
-                // Copy over all data from buffer, leaving the data command byte intact
-                writebuf[1..=chunklen].copy_from_slice(&chunk[0..chunklen]);
-
-                self.i2c
-                    .write(self.addr, &writebuf[..=chunklen])
-                    .map_err(Error::Comm)?;
-            }
-        }
-
-        Ok(())
+                    self.i2c
+                        .write(self.addr, &writebuf[0..=chunk_len])
+                        .map_err(Error::Comm)
+                })
+            })
     }
 }

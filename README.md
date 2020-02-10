@@ -1,6 +1,8 @@
 # SSD1306 driver
 
-[![Build Status](https://travis-ci.org/jamwaffles/ssd1306.svg?branch=master)](https://travis-ci.org/jamwaffles/ssd1306)
+[![Build Status](https://circleci.com/gh/jamwaffles/ssd1306/tree/master.svg?style=shield)](https://circleci.com/gh/jamwaffles/ssd1306/tree/master)
+[![Crates.io](https://img.shields.io/crates/v/ssd1306.svg)](https://crates.io/crates/ssd1306)
+[![Docs.rs](https://docs.rs/ssd1306/badge.svg)](https://docs.rs/ssd1306)
 
 [![CRIUS display showing the Rust logo](readme_banner.jpg?raw=true)](examples/image_i2c.rs)
 
@@ -8,7 +10,7 @@ I2C and SPI (4 wire) driver for the SSD1306 OLED display.
 
 See the [announcement blog post](https://wapl.es/electronics/rust/2018/04/30/ssd1306-driver.html) for more information.
 
-Please consider [becoming a sponsor](https://github.com/sponsors/jamwaffles/) so I may continue to maintain these crates in my spare time!
+Please consider [becoming a sponsor](https://github.com/sponsors/jamwaffles/) so I may continue to maintain this crate in my spare time!
 
 ## [Documentation](https://docs.rs/ssd1306)
 

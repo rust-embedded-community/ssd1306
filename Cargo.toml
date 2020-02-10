@@ -3,7 +3,6 @@ authors = ["James Waples <jamwaffles@gmail.com>"]
 categories = ["embedded", "no-std"]
 description = "I2C/SPI driver for the SSD1306 OLED display controller"
 documentation = "https://docs.rs/ssd1306"
-exclude = [".travis.yml", ".gitignore"]
 keywords = ["no-std", "ssd1306", "oled", "embedded", "embedded-hal-driver"]
 license = "MIT OR Apache-2.0"
 name = "ssd1306"
@@ -12,9 +11,8 @@ repository = "https://github.com/jamwaffles/ssd1306"
 version = "0.3.0-alpha.4"
 edition = "2018"
 
-[badges.travis-ci]
-branch = "master"
-repository = "jamwaffles/ssd1306"
+[badges]
+circle-ci = { repository = "jamwaffles/ssd1306", branch = "master" }
 
 [package.metadata.docs.rs]
 all-features = true

@@ -30,6 +30,11 @@ cortex-m = "0.6.1"
 cortex-m-rt = "0.6.11"
 panic-semihosting = "0.5.3"
 
+[dependencies.rand]
+version = "0.7.3"
+default-features = false
+features = [ "small_rng" ]
+
 # Turn on `bmp` feature for examples
 [dev-dependencies.embedded-graphics]
 version = "=0.6.0-alpha.3"

@@ -11,6 +11,7 @@
 - [#107](https://github.com/jamwaffles/ssd1306/pull/107) Migrate from Travis to CircleCI
 - [#105](https://github.com/jamwaffles/ssd1306/pull/105) Reduce flash usage by around 400 bytes by replacing some internal `unwrap()`s with `as` coercions.
 - [#106](https://github.com/jamwaffles/ssd1306/pull/106) Optimise internals by using iterators to elide bounds checks. Should also speed up `GraphicsMode` (and `embedded-graphics` operations) with a cleaned-up `set_pixel`.
+- [#108](https://github.com/jamwaffles/ssd1306/pull/108) Add an example using `DisplayProperties.draw()` to send a raw buffer of random bytes to the display over I2C.
 
 ## [0.3.0-alpha.4] - 2020-02-07
 

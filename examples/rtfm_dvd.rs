@@ -11,10 +11,9 @@ use core::convert::TryFrom;
 use embedded_graphics::{
     geometry::Point, image::Image, pixelcolor::BinaryColor, prelude::*, primitives::Rectangle,
 };
-use panic_semihosting as _;
+use panic_halt as _;
 use rtfm::app;
-use ssd1306::prelude::*;
-use ssd1306::Builder;
+use ssd1306::{prelude::*, Builder};
 use stm32f1xx_hal::{
     delay::Delay,
     gpio,

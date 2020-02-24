@@ -18,11 +18,6 @@
 #![no_std]
 #![no_main]
 
-extern crate cortex_m;
-extern crate cortex_m_rt as rt;
-extern crate panic_semihosting;
-extern crate stm32f1xx_hal as hal;
-
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use embedded_graphics::{
     fonts::{Font6x8, Text},
@@ -30,12 +25,13 @@ use embedded_graphics::{
     prelude::*,
     style::TextStyleBuilder,
 };
-use hal::{
+use panic_halt as _;
+use ssd1306::{prelude::*, Builder};
+use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
     stm32,
 };
-use ssd1306::{prelude::*, Builder};
 
 #[entry]
 fn main() -> ! {

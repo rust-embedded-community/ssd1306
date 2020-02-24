@@ -79,11 +79,13 @@ fn main() -> ! {
 
     Text::new("Hello world!", Point::zero())
         .into_styled(text_style)
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     Text::new("Hello Rust!", Point::new(0, 16))
         .into_styled(text_style)
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     disp.flush().unwrap();
 

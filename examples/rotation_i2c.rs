@@ -29,7 +29,11 @@ extern crate panic_semihosting;
 extern crate stm32f1xx_hal as hal;
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
-use embedded_graphics::{image::Image, pixelcolor::BinaryColor, prelude::*};
+use embedded_graphics::{
+    image::{Image, ImageRaw},
+    pixelcolor::BinaryColor,
+    prelude::*,
+};
 use hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
@@ -83,10 +87,14 @@ fn main() -> ! {
 
     let (w, h) = disp.get_dimensions();
 
-    let im: Image<BinaryColor> = Image::new(include_bytes!("./rust.raw"), 64, 64)
-        .translate(Point::new(w as i32 / 2 - 64 / 2, h as i32 / 2 - 64 / 2));
+    let raw: ImageRaw<BinaryColor> = ImageRaw::new(include_bytes!("./rust.raw"), 64, 64);
 
-    im.draw(&mut disp);
+    let im = Image::new(
+        &raw,
+        Point::new(w as i32 / 2 - 64 / 2, h as i32 / 2 - 64 / 2),
+    );
+
+    im.draw(&mut disp).unwrap();
 
     disp.flush().unwrap();
 

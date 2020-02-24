@@ -86,7 +86,8 @@ fn main() -> ! {
     // enum to the _Builder_ struct
     Rectangle::new(Point::new(0, 0), Point::new(127, 31))
         .into_styled(style)
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     // triangle
     Triangle::new(
@@ -95,17 +96,20 @@ fn main() -> ! {
         Point::new(16 + 8, yoffset),
     )
     .into_styled(style)
-    .draw(&mut disp);
+    .draw(&mut disp)
+    .unwrap();
 
     // square
     Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
         .into_styled(style)
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     // circle
     Circle::new(Point::new(96, yoffset + 8), 8)
         .into_styled(style)
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     disp.flush().unwrap();
 

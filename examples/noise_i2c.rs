@@ -84,7 +84,7 @@ fn main() -> ! {
     loop {
         rng.fill_bytes(&mut buf);
 
-        props.draw(&buf);
+        props.draw(&buf).unwrap();
     }
 }
 

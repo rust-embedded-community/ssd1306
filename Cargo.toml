@@ -30,6 +30,10 @@ cortex-m = "0.6.2"
 cortex-m-rt = "0.6.12"
 panic-semihosting = "0.5.3"
 
+[dev-dependencies.tinybmp]
+version = "0.2.1"
+features = [ "graphics" ]
+
 [dependencies.rand]
 version = "0.7.3"
 default-features = false

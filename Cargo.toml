@@ -23,11 +23,11 @@ embedded-hal = "0.2.3"
 
 [dependencies.embedded-graphics]
 optional = true
-version = "=0.6.0-alpha.3"
+version = "=0.6.0-beta.1"
 
 [dev-dependencies]
-cortex-m = "0.6.1"
-cortex-m-rt = "0.6.11"
+cortex-m = "0.6.2"
+cortex-m-rt = "0.6.12"
 panic-semihosting = "0.5.3"
 
 [dependencies.rand]
@@ -35,13 +35,8 @@ version = "0.7.3"
 default-features = false
 features = [ "small_rng" ]
 
-# Turn on `bmp` feature for examples
-[dev-dependencies.embedded-graphics]
-version = "=0.6.0-alpha.3"
-features = ["bmp"]
-
 [dev-dependencies.stm32f1xx-hal]
-version = "0.5.2"
+version = "0.5.3"
 features = [ "rt", "stm32f103" ]
 
 [features]

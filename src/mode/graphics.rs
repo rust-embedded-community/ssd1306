@@ -269,17 +269,21 @@ impl<DI> DrawTarget<BinaryColor> for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
-    fn draw_pixel(&mut self, pixel: drawable::Pixel<BinaryColor>) {
+    type Error = DI::Error;
+
+    fn draw_pixel(&mut self, pixel: drawable::Pixel<BinaryColor>) -> Result<(), Self::Error> {
         let drawable::Pixel(pos, color) = pixel;
 
         // Guard against negative values. All positive i32 values from `pos` can be represented in
         // the `u32`s that `set_pixel()` accepts...
         if pos.x < 0 || pos.y < 0 {
-            return;
+            return Ok(());
         }
 
         // ... which makes the `as` coercions here safe.
         self.set_pixel(pos.x as u32, pos.y as u32, RawU1::from(color).into_inner());
+
+        Ok(())
     }
 
     fn size(&self) -> Size {

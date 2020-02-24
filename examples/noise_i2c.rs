@@ -25,12 +25,6 @@ extern crate panic_semihosting;
 extern crate stm32f1xx_hal as hal;
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
-use embedded_graphics::{
-    pixelcolor::BinaryColor,
-    prelude::*,
-    primitives::{Circle, Rectangle, Triangle},
-    style::PrimitiveStyleBuilder,
-};
 use hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,

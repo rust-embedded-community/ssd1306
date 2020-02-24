@@ -34,7 +34,7 @@ panic-semihosting = "0.5.3"
 version = "0.2.1"
 features = [ "graphics" ]
 
-[dependencies.rand]
+[dev-dependencies.rand]
 version = "0.7.3"
 default-features = false
 features = [ "small_rng" ]

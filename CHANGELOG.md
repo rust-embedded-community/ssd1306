@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- Add support for modules with a 64x48px display size.
+
 ### Changed
 
 - [#107](https://github.com/jamwaffles/ssd1306/pull/107) Migrate from Travis to CircleCI

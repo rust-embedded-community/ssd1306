@@ -183,6 +183,7 @@ where
             DisplaySize::Display128x32 => 64,
             DisplaySize::Display96x16 => 24,
             DisplaySize::Display72x40 => 45,
+            DisplaySize::Display64x48 => 48,
         };
 
         // Let the chip handle line wrapping so we can fill the screen with blanks faster

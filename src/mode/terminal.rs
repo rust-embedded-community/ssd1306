@@ -183,6 +183,7 @@ where
             DisplaySize::Display128x32 => 64,
             DisplaySize::Display96x16 => 24,
             DisplaySize::Display72x40 => 45,
+            DisplaySize::Display64x48 => 48,
         };
 
         // Let the chip handle line wrapping so we can fill the screen with blanks faster
@@ -190,8 +191,15 @@ where
             .change_mode(AddrMode::Horizontal)
             .terminal_err()?;
         let (display_width, display_height) = self.properties.get_dimensions();
+        let (display_x_offset, display_y_offset) = self.properties.display_offset;
         self.properties
-            .set_draw_area((0, 0), (display_width, display_height))
+            .set_draw_area(
+                (display_x_offset, display_y_offset),
+                (
+                    display_width + display_x_offset,
+                    display_height + display_y_offset,
+                ),
+            )
             .terminal_err()?;
 
         // Clear the display
@@ -303,8 +311,11 @@ where
 
     /// Reset the draw area and move pointer to the top left corner
     fn reset_pos(&mut self) -> Result<(), TerminalModeError<DI>> {
-        self.properties.set_column(0).terminal_err()?;
-        self.properties.set_row(0).terminal_err()?;
+        let (display_x_offset, display_y_offset) = self.properties.display_offset;
+        self.properties
+            .set_column(display_x_offset)
+            .terminal_err()?;
+        self.properties.set_row(display_y_offset).terminal_err()?;
         // Initialise the counter when we know it's valid
         let (display_width, display_height) = self.properties.get_dimensions();
         self.cursor = Some(Cursor::new(display_width, display_height));

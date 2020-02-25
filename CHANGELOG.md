@@ -6,9 +6,13 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- [#111](https://github.com/jamwaffles/ssd1306/pull/111) Fix TerminalMode offset for smaller displays.
+
 ### Added
 
-- Add support for modules with a 64x48px display size.
+- [#111](https://github.com/jamwaffles/ssd1306/pull/111) Add support for modules with a 64x48px display size.
 
 ### Changed
 

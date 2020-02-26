@@ -10,6 +10,7 @@ target_steps: &target_steps
     - run: sudo pip install linkchecker
     - run: rustup default ${RUST_VERSION:-stable}
     - run: rustup component add rustfmt
+    - run: cargo update
     - run: |
         SYSROOT=$(rustc --print sysroot)
 

@@ -17,11 +17,6 @@
 #![no_std]
 #![no_main]
 
-extern crate cortex_m;
-extern crate cortex_m_rt as rt;
-extern crate panic_semihosting;
-extern crate stm32f1xx_hal as hal;
-
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use embedded_graphics::{
     pixelcolor::BinaryColor,
@@ -29,12 +24,13 @@ use embedded_graphics::{
     primitives::{Circle, Rectangle, Triangle},
     style::PrimitiveStyleBuilder,
 };
-use hal::{
+use panic_halt as _;
+use ssd1306::{prelude::*, Builder};
+use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
     stm32,
 };
-use ssd1306::{prelude::*, Builder};
 
 #[entry]
 fn main() -> ! {
@@ -86,7 +82,8 @@ fn main() -> ! {
     // enum to the _Builder_ struct
     Rectangle::new(Point::new(0, 0), Point::new(127, 31))
         .into_styled(style)
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     // triangle
     Triangle::new(
@@ -95,17 +92,20 @@ fn main() -> ! {
         Point::new(16 + 8, yoffset),
     )
     .into_styled(style)
-    .draw(&mut disp);
+    .draw(&mut disp)
+    .unwrap();
 
     // square
     Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
         .into_styled(style)
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     // circle
     Circle::new(Point::new(96, yoffset + 8), 8)
         .into_styled(style)
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     disp.flush().unwrap();
 

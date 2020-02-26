@@ -21,19 +21,15 @@
 #![no_std]
 #![no_main]
 
-extern crate cortex_m;
-extern crate cortex_m_rt as rt;
-extern crate panic_semihosting;
-extern crate stm32f1xx_hal as hal;
-
 use cortex_m_rt::{entry, exception, ExceptionFrame};
-use hal::{
+use panic_halt as _;
+use ssd1306::{prelude::*, Builder};
+use stm32f1xx_hal::{
     delay::Delay,
     prelude::*,
     spi::{Mode, Phase, Polarity, Spi},
     stm32,
 };
-use ssd1306::{prelude::*, Builder};
 
 #[entry]
 fn main() -> ! {

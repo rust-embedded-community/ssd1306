@@ -21,23 +21,20 @@
 #![no_std]
 #![no_main]
 
-extern crate cortex_m;
-extern crate cortex_m_rt as rt;
-extern crate panic_semihosting;
-extern crate stm32f1xx_hal as hal;
-
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use embedded_graphics::{
-    image::ImageBmp,
+    image::Image,
     pixelcolor::{BinaryColor, Rgb565},
     prelude::*,
 };
-use hal::{
+use panic_halt as _;
+use ssd1306::{prelude::*, Builder};
+use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
     stm32,
 };
-use ssd1306::{prelude::*, Builder};
+use tinybmp::Bmp;
 
 #[entry]
 fn main() -> ! {
@@ -75,11 +72,12 @@ fn main() -> ! {
 
     disp.init().unwrap();
 
-    // The image is an RGB565 encoded BMP, so specifying the type as `ImageBmp<Rgb565>` will read
+    let bmp =
+        Bmp::from_slice(include_bytes!("./rust-pride.bmp")).expect("Failed to load BMP image");
+
+    // The image is an RGB565 encoded BMP, so specifying the type as `Image<Bmp, Rgb565>` will read
     // the pixels correctly
-    let im: ImageBmp<Rgb565> = ImageBmp::new(include_bytes!("./rust-pride.bmp"))
-        .expect("Failed to load BMP image")
-        .translate(Point::new(32, 0));
+    let im: Image<Bmp, Rgb565> = Image::new(&bmp, Point::new(32, 0));
 
     // The display uses `BinaryColor` pixels (on/off only). Here, we `map()` over every pixel
     // and naively convert the color to an on/off value. The logic below simply converts any
@@ -95,7 +93,8 @@ fn main() -> ! {
                 },
             )
         })
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     disp.flush().unwrap();
 

@@ -17,11 +17,6 @@
 #![no_std]
 #![no_main]
 
-extern crate cortex_m;
-extern crate cortex_m_rt as rt;
-extern crate panic_semihosting;
-extern crate stm32f1xx_hal as hal;
-
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use embedded_graphics::{
     pixelcolor::BinaryColor,
@@ -29,12 +24,13 @@ use embedded_graphics::{
     primitives::{Circle, Rectangle, Triangle},
     style::PrimitiveStyleBuilder,
 };
-use hal::{
+use panic_halt as _;
+use ssd1306::{prelude::*, Builder};
+use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
     stm32,
 };
-use ssd1306::{prelude::*, Builder};
 
 #[entry]
 fn main() -> ! {
@@ -89,7 +85,8 @@ fn main() -> ! {
     // enum to the _Builder_ struct
     Rectangle::new(Point::new(0, 0), Point::new(71, 39))
         .into_styled(style)
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     // Triangle
     Triangle::new(
@@ -99,7 +96,8 @@ fn main() -> ! {
     )
     .translate(offset)
     .into_styled(style)
-    .draw(&mut disp);
+    .draw(&mut disp)
+    .unwrap();
 
     // Move over to next position
     let offset = offset + Point::new(spacing, 0);
@@ -108,7 +106,8 @@ fn main() -> ! {
     Rectangle::new(Point::new(0, 0), Point::new(size, size))
         .translate(offset)
         .into_styled(style)
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     // Move over a bit more
     let offset = offset + Point::new(spacing, 0);
@@ -117,7 +116,8 @@ fn main() -> ! {
     Circle::new(Point::new(size / 2, size / 2), size as u32 / 2)
         .translate(offset)
         .into_styled(style)
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     disp.flush().unwrap();
 

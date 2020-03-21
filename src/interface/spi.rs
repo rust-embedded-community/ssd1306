@@ -46,31 +46,4 @@ where
 
         self.spi.write(&buf).map_err(Error::Comm)
     }
-
-    fn send_bounded_data(
-        &mut self,
-        buf: &[u8],
-        disp_width: usize,
-        upper_left: (u8, u8),
-        lower_right: (u8, u8),
-    ) -> Result<(), Self::Error> {
-        self.dc.set_high().map_err(Error::Pin)?;
-
-        // Divide by 8 since each row is actually 8 pixels tall
-        let num_pages = ((lower_right.1 - upper_left.1) / 8) as usize + 1;
-
-        // Each page is 8 bits tall, so calculate which page number to start at (rounded down) from
-        // the top of the display
-        let starting_page = (upper_left.1 / 8) as usize;
-
-        // Calculate start and end X coordinates for each page
-        let page_lower = upper_left.0 as usize;
-        let page_upper = lower_right.0 as usize;
-
-        buf.chunks(disp_width)
-            .skip(starting_page)
-            .take(num_pages)
-            .map(|s| &s[page_lower..page_upper])
-            .try_for_each(|c| self.spi.write(&c).map_err(Error::Comm))
-    }
 }

@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- Fix docs.rs build config
+
 ## [0.3.0] - 2020-03-20
 
 ### Fixed
@@ -82,8 +86,8 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0...HEAD
 
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0...HEAD
 [0.3.0]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.4...v0.3.0
 [0.3.0-alpha.4]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.3...v0.3.0-alpha.4
 [0.3.0-alpha.3]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.2...v0.3.0-alpha.3

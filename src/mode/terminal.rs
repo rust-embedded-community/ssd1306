@@ -9,9 +9,10 @@
 //! # use ssd1306::test_helpers::I2cStub;
 //! # let i2c = I2cStub;
 //! use core::fmt::Write;
-//! use ssd1306::{mode::TerminalMode, Builder};
+//! use ssd1306::{mode::TerminalMode, Builder, I2CDIBuilder};
 //!
-//! let mut display: TerminalMode<_> = Builder::new().connect_i2c(i2c).into();
+//! let interface = I2CDIBuilder::new().init(i2c);
+//! let mut display: TerminalMode<_> = Builder::new().connect(interface).into();
 //!
 //! display.init().unwrap();
 //! display.clear().unwrap();
@@ -24,11 +25,12 @@
 //! }
 //! ```
 
+use display_interface::{DisplayError, WriteOnlyDataCommand};
+
 use crate::{
     command::AddrMode,
     displayrotation::DisplayRotation,
     displaysize::DisplaySize,
-    interface::DisplayInterface,
     mode::{
         displaymode::DisplayModeTrait,
         terminal::TerminalModeError::{InterfaceError, OutOfBounds, Uninitialized},
@@ -101,22 +103,16 @@ impl Cursor {
 
 /// Errors which can occur when interacting with the terminal mode
 #[derive(Clone)]
-pub enum TerminalModeError<DI>
-where
-    DI: DisplayInterface,
-{
+pub enum TerminalModeError {
     /// An error occurred in the underlying interface layer
-    InterfaceError(DI::Error),
+    InterfaceError(DisplayError),
     /// The mode was used before it was initialized
     Uninitialized,
     /// A location was specified outside the bounds of the screen
     OutOfBounds,
 }
 
-impl<DI> core::fmt::Debug for TerminalModeError<DI>
-where
-    DI: DisplayInterface,
-{
+impl core::fmt::Debug for TerminalModeError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         match self {
             InterfaceError(_) => "InterfaceError".fmt(f),
@@ -127,18 +123,12 @@ where
 }
 
 // Cannot use From<_> due to coherence
-trait IntoTerminalModeResult<DI, T>
-where
-    DI: DisplayInterface,
-{
-    fn terminal_err(self) -> Result<T, TerminalModeError<DI>>;
+trait IntoTerminalModeResult<T> {
+    fn terminal_err(self) -> Result<T, TerminalModeError>;
 }
 
-impl<DI, T> IntoTerminalModeResult<DI, T> for Result<T, DI::Error>
-where
-    DI: DisplayInterface,
-{
-    fn terminal_err(self) -> Result<T, TerminalModeError<DI>> {
+impl<T> IntoTerminalModeResult<T> for Result<T, DisplayError> {
+    fn terminal_err(self) -> Result<T, TerminalModeError> {
         self.map_err(InterfaceError)
     }
 }
@@ -152,7 +142,7 @@ pub struct TerminalMode<DI> {
 
 impl<DI> DisplayModeTrait<DI> for TerminalMode<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand<u8>,
 {
     /// Create new TerminalMode instance
     fn new(properties: DisplayProperties<DI>) -> Self {
@@ -170,10 +160,10 @@ where
 
 impl<DI> TerminalMode<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand<u8>,
 {
     /// Clear the display and reset the cursor to the top left corner
-    pub fn clear(&mut self) -> Result<(), TerminalModeError<DI>> {
+    pub fn clear(&mut self) -> Result<(), TerminalModeError> {
         let display_size = self.properties.get_size();
 
         // The number of characters that can fit on the display at once (w * h / 8 * 8)
@@ -232,12 +222,12 @@ where
     }
 
     /// Write out data to display. This is a noop in terminal mode.
-    pub fn flush(&mut self) -> Result<(), TerminalModeError<DI>> {
+    pub fn flush(&mut self) -> Result<(), TerminalModeError> {
         Ok(())
     }
 
     /// Print a character to the display
-    pub fn print_char(&mut self, c: char) -> Result<(), TerminalModeError<DI>> {
+    pub fn print_char(&mut self, c: char) -> Result<(), TerminalModeError> {
         match c {
             '\n' => {
                 let CursorWrapEvent(new_line) = self.ensure_cursor()?.advance_line();
@@ -265,7 +255,7 @@ where
     /// Initialise the display in page mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right, but no automatic line
     /// wrapping.
-    pub fn init(&mut self) -> Result<(), TerminalModeError<DI>> {
+    pub fn init(&mut self) -> Result<(), TerminalModeError> {
         self.properties
             .init_with_mode(AddrMode::Page)
             .terminal_err()?;
@@ -274,20 +264,20 @@ where
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), TerminalModeError<DI>> {
+    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), TerminalModeError> {
         // we don't need to touch the cursor because rotating 90º or 270º currently just flips
         self.properties.set_rotation(rot).terminal_err()
     }
 
     /// Turn the display on or off. The display can be drawn to and retains all
     /// of its memory even while off.
-    pub fn display_on(&mut self, on: bool) -> Result<(), TerminalModeError<DI>> {
+    pub fn display_on(&mut self, on: bool) -> Result<(), TerminalModeError> {
         self.properties.display_on(on).terminal_err()
     }
 
     /// Get the current cursor position, in character coordinates.
     /// This is the (column, row) that the next character will be written to.
-    pub fn get_position(&self) -> Result<(u8, u8), TerminalModeError<DI>> {
+    pub fn get_position(&self) -> Result<(u8, u8), TerminalModeError> {
         self.cursor
             .as_ref()
             .map(|c| c.get_position())
@@ -297,7 +287,7 @@ where
     /// Set the cursor position, in character coordinates.
     /// This is the (column, row) that the next character will be written to.
     /// If the position is out of bounds, an Err will be returned.
-    pub fn set_position(&mut self, column: u8, row: u8) -> Result<(), TerminalModeError<DI>> {
+    pub fn set_position(&mut self, column: u8, row: u8) -> Result<(), TerminalModeError> {
         let (width, height) = self.ensure_cursor()?.get_dimensions();
         if column >= width || row >= height {
             Err(OutOfBounds)
@@ -310,7 +300,7 @@ where
     }
 
     /// Reset the draw area and move pointer to the top left corner
-    fn reset_pos(&mut self) -> Result<(), TerminalModeError<DI>> {
+    fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
         let (display_x_offset, display_y_offset) = self.properties.display_offset;
         self.properties
             .set_column(display_x_offset)
@@ -325,14 +315,14 @@ where
 
     /// Advance the cursor, automatically wrapping lines and/or screens if necessary
     /// Takes in an already-unwrapped cursor to avoid re-unwrapping
-    fn advance_cursor(&mut self) -> Result<(), TerminalModeError<DI>> {
+    fn advance_cursor(&mut self) -> Result<(), TerminalModeError> {
         if let Some(CursorWrapEvent(new_row)) = self.ensure_cursor()?.advance() {
             self.properties.set_row(new_row * 8).terminal_err()?;
         }
         Ok(())
     }
 
-    fn ensure_cursor(&mut self) -> Result<&mut Cursor, TerminalModeError<DI>> {
+    fn ensure_cursor(&mut self) -> Result<&mut Cursor, TerminalModeError> {
         self.cursor.as_mut().ok_or(Uninitialized)
     }
 
@@ -439,7 +429,7 @@ where
 
 impl<DI> fmt::Write for TerminalMode<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand<u8>,
 {
     fn write_str(&mut self, s: &str) -> Result<(), fmt::Error> {
         s.chars().map(move |c| self.print_char(c)).last();

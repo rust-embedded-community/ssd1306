@@ -10,9 +10,10 @@
 //!     primitives::{Circle, Line, Rectangle, Triangle},
 //!     style::PrimitiveStyleBuilder,
 //! };
-//! use ssd1306::{mode::GraphicsMode, prelude::*, Builder};
+//! use ssd1306::{mode::GraphicsMode, prelude::*, Builder, I2CDIBuilder};
 //!
-//! let mut display: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
+//! let interface = I2CDIBuilder::new().init(i2c);
+//! let mut display: GraphicsMode<_> = Builder::new().connect(interface).into();
 //!
 //! display.init().unwrap();
 //!
@@ -54,18 +55,19 @@
 //!
 //! [embedded_graphics]: https://crates.io/crates/embedded_graphics
 
+use display_interface::{DisplayError, WriteOnlyDataCommand};
 use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 
 use crate::{
-    displayrotation::DisplayRotation, interface::DisplayInterface,
-    mode::displaymode::DisplayModeTrait, properties::DisplayProperties, Error,
+    displayrotation::DisplayRotation, mode::displaymode::DisplayModeTrait,
+    properties::DisplayProperties, Error,
 };
 
 // TODO: Add to prelude
 /// Graphics mode handler
 pub struct GraphicsMode<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand<u8>,
 {
     properties: DisplayProperties<DI>,
     buffer: [u8; 1024],
@@ -77,7 +79,7 @@ where
 
 impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand<u8>,
 {
     /// Create new GraphicsMode instance
     fn new(properties: DisplayProperties<DI>) -> Self {
@@ -99,7 +101,7 @@ where
 
 impl<DI> GraphicsMode<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand<u8>,
 {
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
@@ -133,7 +135,7 @@ where
     /// Write out data to a display.
     ///
     /// This only updates the parts of the display that have changed since the last flush.
-    pub fn flush(&mut self) -> Result<(), DI::Error> {
+    pub fn flush(&mut self) -> Result<(), DisplayError> {
         // Nothing to do if no pixels have changed since the last update
         if self.max_x < self.min_x || self.max_y < self.min_y {
             return Ok(());
@@ -231,7 +233,7 @@ where
 
     /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
     /// column 0 on the left, to column _n_ on the right
-    pub fn init(&mut self) -> Result<(), DI::Error> {
+    pub fn init(&mut self) -> Result<(), DisplayError> {
         self.clear();
         self.properties.init_column_mode()
     }
@@ -242,13 +244,13 @@ where
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DI::Error> {
+    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DisplayError> {
         self.properties.set_rotation(rot)
     }
 
     /// Turn the display on or off. The display can be drawn to and retains all
     /// of its memory even while off.
-    pub fn display_on(&mut self, on: bool) -> Result<(), DI::Error> {
+    pub fn display_on(&mut self, on: bool) -> Result<(), DisplayError> {
         self.properties.display_on(on)
     }
 }
@@ -267,9 +269,9 @@ use embedded_graphics::{
 #[cfg(feature = "graphics")]
 impl<DI> DrawTarget<BinaryColor> for GraphicsMode<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand<u8>,
 {
-    type Error = DI::Error;
+    type Error = DisplayError;
 
     fn draw_pixel(&mut self, pixel: drawable::Pixel<BinaryColor>) -> Result<(), Self::Error> {
         let drawable::Pixel(pos, color) = pixel;

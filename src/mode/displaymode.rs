@@ -1,6 +1,8 @@
 //! Abstraction of different operating modes for the SSD1306
 
-use crate::{interface::DisplayInterface, properties::DisplayProperties};
+use display_interface::WriteOnlyDataCommand;
+
+use crate::properties::DisplayProperties;
 
 /// Display mode abstraction
 pub struct DisplayMode<MODE>(pub MODE);
@@ -18,7 +20,7 @@ impl<MODE> DisplayMode<MODE> {
     /// Setup display to run in requested mode
     pub fn new<DI>(properties: DisplayProperties<DI>) -> Self
     where
-        DI: DisplayInterface,
+        DI: WriteOnlyDataCommand<u8>,
         MODE: DisplayModeTrait<DI>,
     {
         DisplayMode(MODE::new(properties))
@@ -28,7 +30,7 @@ impl<MODE> DisplayMode<MODE> {
     // TODO: Figure out how to stay as generic DisplayMode but act as particular mode
     pub fn into<DI, NMODE: DisplayModeTrait<DI>>(self) -> NMODE
     where
-        DI: DisplayInterface,
+        DI: WriteOnlyDataCommand<u8>,
         MODE: DisplayModeTrait<DI>,
     {
         let properties = self.0.release();

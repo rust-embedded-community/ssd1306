@@ -31,7 +31,7 @@ use embedded_graphics::{
     prelude::*,
 };
 use panic_halt as _;
-use ssd1306::{prelude::*, Builder};
+use ssd1306::{prelude::*, Builder, I2CDIBuilder};
 use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
@@ -70,7 +70,8 @@ fn main() -> ! {
         1000,
     );
 
-    let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
+    let interface = I2CDIBuilder::new().init(i2c);
+    let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
 
     disp.init().unwrap();
 

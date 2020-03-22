@@ -9,12 +9,13 @@
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::I2cStub as I2cInterface;
-//! use ssd1306::{mode::GraphicsMode, Builder};
+//! use ssd1306::{mode::GraphicsMode, Builder, I2CDIBuilder};
 //!
 //! // Configure an I2C interface on the target device; below line shown as example only
 //! let i2c = I2cInterface;
 //!
-//! let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
+//! let interface = I2CDIBuilder::new().init(i2c);
+//! let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
 //! disp.init();
 //!
 //! disp.set_pixel(10, 20, 1);
@@ -29,12 +30,13 @@
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::I2cStub as I2cInterface;
-//! use ssd1306::{mode::TerminalMode, Builder};
+//! use ssd1306::{mode::TerminalMode, Builder, I2CDIBuilder};
 //!
 //! // Configure an I2C interface on the target device; below line shown as example only
 //! let i2c = I2cInterface;
 //!
-//! let mut disp: TerminalMode<_> = Builder::new().connect_i2c(i2c).into();
+//! let interface = I2CDIBuilder::new().init(i2c);
+//! let mut disp: TerminalMode<_> = Builder::new().connect(interface).into();
 //!
 //! disp.print_char('A');
 //! ```
@@ -59,9 +61,10 @@
 //! # use ssd1306::test_helpers::I2cStub;
 //! # let i2c = I2cStub;
 //! use core::fmt::Write;
-//! use ssd1306::{mode::TerminalMode, prelude::*, Builder};
+//! use ssd1306::{mode::TerminalMode, prelude::*, Builder, I2CDIBuilder};
 //!
-//! let mut disp: TerminalMode<_> = Builder::new().connect_i2c(i2c).into();
+//! let interface = I2CDIBuilder::new().init(i2c);
+//! let mut disp: TerminalMode<_> = Builder::new().connect(interface).into();
 //! disp.init().unwrap();
 //! let _ = disp.clear();
 //!
@@ -88,9 +91,10 @@
 //!     prelude::*,
 //!     style::TextStyleBuilder,
 //! };
-//! use ssd1306::{mode::GraphicsMode, prelude::*, Builder};
+//! use ssd1306::{mode::GraphicsMode, prelude::*, Builder, I2CDIBuilder};
 //!
-//! let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
+//! let interface = I2CDIBuilder::new().init(i2c);
+//! let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
 //!
 //! disp.init().unwrap();
 //!
@@ -141,7 +145,6 @@ pub mod builder;
 mod command;
 pub mod displayrotation;
 mod displaysize;
-pub mod interface;
 pub mod mode;
 pub mod prelude;
 pub mod properties;
@@ -149,3 +152,4 @@ pub mod properties;
 pub mod test_helpers;
 
 pub use crate::builder::Builder;
+pub use crate::builder::I2CDIBuilder;

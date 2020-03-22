@@ -2,11 +2,12 @@
 //!
 //! This is the easiest way to create a driver instance, with the ability to set various parameters of the driver.
 //!
-//! To finish the builder and produce a connected display interface, call `.connect_i2c(i2c)` or
-//! `.connect_spi(spi, dc)`. The builder will be consumed into a
-//! [`mode::RawMode`](../mode/raw/struct.RawMode.html) object which can be coerced into a richer
-//! display mode like [mode::Graphics](../mode/graphics/struct.GraphicsMode.html) for drawing
-//! primitives and text.
+//! To finish the builder and produce a connected display interface, call `.connect(interface)`
+//! where `interface` is an instantiated `DisplayInterface` implementation . For I2C interfaces
+//! there's also a `I2CDIBuilder` to simplify the construction of a I2C DisplayInterface. The
+//! builder will be consumed into a [`mode::RawMode`](../mode/raw/struct.RawMode.html) object
+//! which can be coerced into a richer display mode like
+//! [mode::Graphics](../mode/graphics/struct.GraphicsMode.html) for drawing primitives and text.
 //!
 //! # Examples
 //!
@@ -18,7 +19,8 @@
 //! # let dc = PinStub;
 //! use ssd1306::Builder;
 //!
-//! Builder::new().connect_spi(spi, dc);
+//! let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
+//! Builder::new().connect(interface);
 //! ```
 //!
 //! Connect over I2C, changing lots of options
@@ -26,13 +28,13 @@
 //! ```rust
 //! # use ssd1306::test_helpers::{PinStub, I2cStub};
 //! # let i2c = I2cStub;
-//! use ssd1306::{prelude::*, Builder};
+//! use ssd1306::{prelude::*, Builder, I2CDIBuilder};
 //!
+//! let interface = I2CDIBuilder::new().init(i2c);
 //! Builder::new()
 //!     .with_rotation(DisplayRotation::Rotate180)
-//!     .with_i2c_addr(0x3D)
 //!     .size(DisplaySize::Display128x32)
-//!     .connect_i2c(i2c);
+//!     .connect(interface);
 //! ```
 //!
 //! The above examples will produce a [RawMode](../mode/raw/struct.RawMode.html) instance
@@ -45,15 +47,15 @@
 //! # let dc = PinStub;
 //! use ssd1306::{prelude::*, Builder};
 //!
-//! let display: TerminalMode<_> = Builder::new().connect_spi(spi, dc).into();
+//! let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
+//! let display: TerminalMode<_> = Builder::new().connect(interface).into();
 //! ```
 
-use hal::{self, digital::v2::OutputPin};
+use display_interface::WriteOnlyDataCommand;
 
 use crate::{
     displayrotation::DisplayRotation,
     displaysize::DisplaySize,
-    interface::{I2cInterface, SpiInterface},
     mode::{displaymode::DisplayMode, raw::RawMode},
     properties::DisplayProperties,
 };
@@ -63,7 +65,6 @@ use crate::{
 pub struct Builder {
     display_size: DisplaySize,
     rotation: DisplayRotation,
-    i2c_addr: u8,
 }
 
 impl Default for Builder {
@@ -78,7 +79,6 @@ impl Builder {
         Self {
             display_size: DisplaySize::Display128x64,
             rotation: DisplayRotation::Rotate0,
-            i2c_addr: 0x3c,
         }
     }
 
@@ -90,12 +90,6 @@ impl Builder {
         }
     }
 
-    /// Set the I2C address to use. Defaults to 0x3C which is the most common address.
-    /// The other address specified in the datasheet is 0x3D. Ignored when using SPI interface.
-    pub fn with_i2c_addr(self, i2c_addr: u8) -> Self {
-        Self { i2c_addr, ..self }
-    }
-
     /// Set the rotation of the display to one of four values. Defaults to no rotation. Note that
     /// 90º and 270º rotations are not supported by
     /// [`TerminalMode`](../mode/terminal/struct.TerminalMode.html).
@@ -103,36 +97,46 @@ impl Builder {
         Self { rotation, ..self }
     }
 
-    /// Finish the builder and use I2C to communicate with the display
+    /// Finish the builder and use some interface communicate with the display
     ///
     /// This method consumes the builder and must come last in the method call chain
-    pub fn connect_i2c<I2C, CommE>(self, i2c: I2C) -> DisplayMode<RawMode<I2cInterface<I2C>>>
+    pub fn connect<I>(self, interface: I) -> DisplayMode<RawMode<I>>
     where
-        I2C: hal::blocking::i2c::Write<Error = CommE>,
+        I: WriteOnlyDataCommand<u8>,
     {
-        let properties = DisplayProperties::new(
-            I2cInterface::new(i2c, self.i2c_addr),
-            self.display_size,
-            self.rotation,
-        );
-        DisplayMode::<RawMode<I2cInterface<I2C>>>::new(properties)
+        let properties = DisplayProperties::new(interface, self.display_size, self.rotation);
+        DisplayMode::<RawMode<I>>::new(properties)
+    }
+}
+
+/// Builder struct for an I2C interface. Driver options and interface are set using its methods.
+#[derive(Clone, Copy)]
+pub struct I2CDIBuilder {
+    i2c_addr: u8,
+}
+
+impl Default for I2CDIBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl I2CDIBuilder {
+    /// Create new builder with a default I2C address of 0x3C
+    pub fn new() -> Self {
+        Self { i2c_addr: 0x3c }
     }
 
-    /// Finish the builder and use SPI to communicate with the display
+    /// Set the I2C address to use. Defaults to 0x3C which is the most common address.
+    /// The other address specified in the datasheet is 0x3D
+    pub fn with_i2c_addr(self, i2c_addr: u8) -> Self {
+        Self { i2c_addr }
+    }
+
+    /// Finish the builder and return an initialised display interface for further use
     ///
     /// This method consumes the builder and must come last in the method call chain
-    pub fn connect_spi<SPI, DC, CommE, PinE>(
-        self,
-        spi: SPI,
-        dc: DC,
-    ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
-    where
-        SPI: hal::blocking::spi::Transfer<u8, Error = CommE>
-            + hal::blocking::spi::Write<u8, Error = CommE>,
-        DC: OutputPin<Error = PinE>,
-    {
-        let properties =
-            DisplayProperties::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
-        DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties)
+    pub fn init<I: hal::blocking::i2c::Write>(self, i2c: I) -> impl WriteOnlyDataCommand<u8> {
+        display_interface_i2c::I2CInterface::new(i2c, self.i2c_addr, 0x40)
     }
 }

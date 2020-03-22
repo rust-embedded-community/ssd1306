@@ -25,7 +25,7 @@ use embedded_graphics::{
     style::PrimitiveStyleBuilder,
 };
 use panic_halt as _;
-use ssd1306::{prelude::*, Builder};
+use ssd1306::{prelude::*, Builder, I2CDIBuilder};
 use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
@@ -64,11 +64,11 @@ fn main() -> ! {
         1000,
     );
 
+    let interface = I2CDIBuilder::new().init(i2c);
     let mut disp: GraphicsMode<_> = Builder::new()
         .size(DisplaySize::Display72x40)
-        .connect_i2c(i2c)
+        .connect(interface)
         .into();
-
     disp.init().unwrap();
 
     let size = 10;

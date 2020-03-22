@@ -19,6 +19,9 @@ targets = [ "thumbv7m-none-eabi", "thumbv7em-none-eabihf" ]
 
 [dependencies]
 embedded-hal = "0.2.3"
+display-interface = { version = "0.2" }
+display-interface-i2c = { version = "0.2" }
+display-interface-spi = { version = "0.2" }
 
 [dependencies.embedded-graphics]
 optional = true

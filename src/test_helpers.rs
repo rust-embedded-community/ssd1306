@@ -1,6 +1,6 @@
 //! Helpers for use in examples and tests
 
-use crate::interface::DisplayInterface;
+use display_interface::{DisplayError, WriteOnlyDataCommand};
 use embedded_hal::{
     blocking::{
         i2c,
@@ -61,13 +61,11 @@ impl OutputPin for PinStub {
 #[derive(Debug, Clone, Copy)]
 pub struct StubInterface;
 
-impl DisplayInterface for StubInterface {
-    type Error = ();
-
-    fn send_commands(&mut self, _cmd: &[u8]) -> Result<(), ()> {
+impl WriteOnlyDataCommand<u8> for StubInterface {
+    fn send_commands(&mut self, _cmd: &[u8]) -> Result<(), DisplayError> {
         Ok(())
     }
-    fn send_data(&mut self, _buf: &[u8]) -> Result<(), ()> {
+    fn send_data(&mut self, _buf: &[u8]) -> Result<(), DisplayError> {
         Ok(())
     }
 }

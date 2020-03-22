@@ -20,6 +20,18 @@ targets = [ "thumbv7m-none-eabi", "thumbv7em-none-eabihf" ]
 [dependencies]
 embedded-hal = "0.2.3"
 
+[dependencies.display-interface]
+version = "0.1.0"
+git = "git://github.com/therealprof/display-interface"
+
+[dependencies.display-interface-i2c]
+version = "0.1.0"
+git = "git://github.com/therealprof/display-interface"
+
+[dependencies.display-interface-spi]
+version = "0.1.0"
+git = "git://github.com/therealprof/display-interface"
+
 [dependencies.embedded-graphics]
 optional = true
 version = "0.6.0"
@@ -58,3 +70,6 @@ incremental = false
 codegen-units = 1
 debug = true
 lto = true
+
+[patch.crates-io]
+display-interface = {git = "git://github.com/therealprof/display-interface" }

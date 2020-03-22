@@ -139,7 +139,7 @@ where
     DI: DisplayInterface,
 {
     fn terminal_err(self) -> Result<T, TerminalModeError<DI>> {
-        self.map_err(|err| InterfaceError(err))
+        self.map_err(InterfaceError)
     }
 }
 

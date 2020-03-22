@@ -83,30 +83,30 @@ impl Builder {
     }
 
     /// Set the size of the display. Supported sizes are defined by [DisplaySize].
-    pub fn size(&self, display_size: DisplaySize) -> Self {
+    pub fn size(self, display_size: DisplaySize) -> Self {
         Self {
             display_size,
-            ..*self
+            ..self
         }
     }
 
     /// Set the I2C address to use. Defaults to 0x3C which is the most common address.
     /// The other address specified in the datasheet is 0x3D. Ignored when using SPI interface.
-    pub fn with_i2c_addr(&self, i2c_addr: u8) -> Self {
-        Self { i2c_addr, ..*self }
+    pub fn with_i2c_addr(self, i2c_addr: u8) -> Self {
+        Self { i2c_addr, ..self }
     }
 
     /// Set the rotation of the display to one of four values. Defaults to no rotation. Note that
     /// 90º and 270º rotations are not supported by
     /// [`TerminalMode`](../mode/terminal/struct.TerminalMode.html).
-    pub fn with_rotation(&self, rotation: DisplayRotation) -> Self {
-        Self { rotation, ..*self }
+    pub fn with_rotation(self, rotation: DisplayRotation) -> Self {
+        Self { rotation, ..self }
     }
 
     /// Finish the builder and use I2C to communicate with the display
     ///
     /// This method consumes the builder and must come last in the method call chain
-    pub fn connect_i2c<I2C, CommE>(&self, i2c: I2C) -> DisplayMode<RawMode<I2cInterface<I2C>>>
+    pub fn connect_i2c<I2C, CommE>(self, i2c: I2C) -> DisplayMode<RawMode<I2cInterface<I2C>>>
     where
         I2C: hal::blocking::i2c::Write<Error = CommE>,
     {
@@ -122,7 +122,7 @@ impl Builder {
     ///
     /// This method consumes the builder and must come last in the method call chain
     pub fn connect_spi<SPI, DC, CommE, PinE>(
-        &self,
+        self,
         spi: SPI,
         dc: DC,
     ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>

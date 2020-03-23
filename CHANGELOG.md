@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- **(breaking)** [#113](https://github.com/jamwaffles/ssd1306/pull/113) Removed public `send_bounded_data` from DisplayInterface and implementations
+
 ## [0.3.1] - 2020-03-21
 
 ### Fixed

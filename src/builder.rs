@@ -130,8 +130,10 @@ impl I2CDIBuilder {
         Self { i2c_addr: 0x3c }
     }
 
-    /// Set the I2C address to use. Defaults to 0x3C which is the most common address.
-    /// The other address specified in the datasheet is 0x3D
+    /// Set the I2C address to use
+    ///
+    /// [`I2CDIBuilder::new`] defaults to an address of `0x3C` which is the most common address.
+    /// The other address specified in the datasheet is `0x3D` which can be set using this method.
     pub fn with_i2c_addr(self, i2c_addr: u8) -> Self {
         Self { i2c_addr }
     }

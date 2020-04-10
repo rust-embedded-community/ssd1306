@@ -3,11 +3,14 @@
 //! This is the easiest way to create a driver instance, with the ability to set various parameters of the driver.
 //!
 //! To finish the builder and produce a connected display interface, call `.connect(interface)`
-//! where `interface` is an instantiated `DisplayInterface` implementation . For I2C interfaces
-//! there's also a `I2CDIBuilder` to simplify the construction of a I2C DisplayInterface. The
-//! builder will be consumed into a [`mode::RawMode`](../mode/raw/struct.RawMode.html) object
-//! which can be coerced into a richer display mode like
-//! [mode::Graphics](../mode/graphics/struct.GraphicsMode.html) for drawing primitives and text.
+//! where `interface` is an instantiated `DisplayInterface` implementation. For I2C interfaces
+//! there's also an [`I2CDIBuilder`] to simplify the construction of an I2C `DisplayInterface`. The
+//! builder will be consumed into a [`mode::RawMode`] object which can be coerced into a richer 
+//! display mode like [`mode::Graphics`].
+//!
+//! [`I2CDIBuilder`]: ./struct.I2CDIBuilder.html
+//! [`mode::RawMode`]: ../mode/raw/struct.RawMode.html
+//! [`mode::Graphics`]: ../mode/graphics/struct.GraphicsMode.html
 //!
 //! # Examples
 //!

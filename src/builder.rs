@@ -5,7 +5,7 @@
 //! To finish the builder and produce a connected display interface, call `.connect(interface)`
 //! where `interface` is an instantiated `DisplayInterface` implementation. For I2C interfaces
 //! there's also an [`I2CDIBuilder`] to simplify the construction of an I2C `DisplayInterface`. The
-//! builder will be consumed into a [`mode::RawMode`] object which can be coerced into a richer 
+//! builder will be consumed into a [`mode::RawMode`] object which can be coerced into a richer
 //! display mode like [`mode::Graphics`].
 //!
 //! [`I2CDIBuilder`]: ./struct.I2CDIBuilder.html
@@ -132,7 +132,7 @@ impl I2CDIBuilder {
 
     /// Set the I2C address to use
     ///
-    /// [`I2CDIBuilder::new`] defaults to an address of `0x3C` which is the most common address.
+    /// [`I2CDIBuilder`] defaults to an address of `0x3C` which is the most common address.
     /// The other address specified in the datasheet is `0x3D` which can be set using this method.
     pub fn with_i2c_addr(self, i2c_addr: u8) -> Self {
         Self { i2c_addr }

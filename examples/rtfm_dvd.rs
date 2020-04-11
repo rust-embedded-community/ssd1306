@@ -8,6 +8,7 @@
 #![no_main]
 
 use core::convert::TryFrom;
+use display_interface_spi::SPIInterfaceNoCS;
 use embedded_graphics::{
     geometry::Point, image::Image, pixelcolor::BinaryColor, prelude::*, primitives::Rectangle,
 };
@@ -25,7 +26,7 @@ use stm32f1xx_hal::{
 use tinybmp::Bmp;
 
 type Display = ssd1306::mode::graphics::GraphicsMode<
-    ssd1306::interface::spi::SpiInterface<
+    SPIInterfaceNoCS<
         spi::Spi<
             SPI1,
             spi::Spi1NoRemap,
@@ -36,6 +37,7 @@ type Display = ssd1306::mode::graphics::GraphicsMode<
             ),
         >,
         gpio::gpiob::PB1<gpio::Output<gpio::PushPull>>,
+        u8,
     >,
 >;
 
@@ -92,9 +94,10 @@ const APP: () = {
             &mut rcc.apb2,
         );
 
+        let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
         let mut display: GraphicsMode<_> = Builder::new()
             .with_rotation(DisplayRotation::Rotate180)
-            .connect_spi(spi, dc)
+            .connect(interface)
             .into();
 
         display.reset(&mut rst, &mut delay).unwrap();

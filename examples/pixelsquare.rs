@@ -69,7 +69,8 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
+    let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
 
     disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();

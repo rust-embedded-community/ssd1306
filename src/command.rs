@@ -1,6 +1,6 @@
 // Shamefully taken from https://github.com/EdgewaterDevelopment/rust-ssd1306
 
-use super::interface::DisplayInterface;
+use display_interface::{DisplayError, WriteOnlyDataCommand};
 
 /// SSD1306 Commands
 
@@ -88,9 +88,9 @@ pub enum Command {
 
 impl Command {
     /// Send command to SSD1306
-    pub fn send<DI>(self, iface: &mut DI) -> Result<(), DI::Error>
+    pub fn send<DI>(self, iface: &mut DI) -> Result<(), DisplayError>
     where
-        DI: DisplayInterface,
+        DI: WriteOnlyDataCommand<u8>,
     {
         // Transform command into a fixed size array of 7 u8 and the real length for sending
         let (data, len) = match self {

@@ -4,8 +4,8 @@ use crate::{
     command::{AddrMode, Command, VcomhLevel},
     displayrotation::DisplayRotation,
     displaysize::DisplaySize,
-    interface::DisplayInterface,
 };
+use display_interface::{DisplayError, WriteOnlyDataCommand};
 
 /// Display properties struct
 pub struct DisplayProperties<DI> {
@@ -18,7 +18,7 @@ pub struct DisplayProperties<DI> {
 
 impl<DI> DisplayProperties<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand<u8>,
 {
     /// Create new DisplayProperties instance
     pub fn new(
@@ -45,12 +45,12 @@ where
 
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right.
-    pub fn init_column_mode(&mut self) -> Result<(), DI::Error> {
+    pub fn init_column_mode(&mut self) -> Result<(), DisplayError> {
         self.init_with_mode(AddrMode::Horizontal)
     }
 
     /// Initialise the display in one of the available addressing modes
-    pub fn init_with_mode(&mut self, mode: AddrMode) -> Result<(), DI::Error> {
+    pub fn init_with_mode(&mut self, mode: AddrMode) -> Result<(), DisplayError> {
         // TODO: Break up into nice bits so display modes can pick whathever they need
         let (_, display_height) = self.display_size.dimensions();
 
@@ -89,7 +89,7 @@ where
     }
 
     /// Change the addressing mode
-    pub fn change_mode(&mut self, mode: AddrMode) -> Result<(), DI::Error> {
+    pub fn change_mode(&mut self, mode: AddrMode) -> Result<(), DisplayError> {
         Command::AddressMode(mode).send(&mut self.iface)?;
         self.addr_mode = mode;
         Ok(())
@@ -99,7 +99,7 @@ where
     /// drawn. This method can be used for changing the affected area on the screen as well
     /// as (re-)setting the start point of the next `draw` call.
     /// Only works in Horizontal or Vertical addressing mode
-    pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), DI::Error> {
+    pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), DisplayError> {
         match self.addr_mode {
             AddrMode::Page => panic!("Device cannot be in Page mode to set draw area"),
             _ => {
@@ -113,7 +113,7 @@ where
     /// Set the column address in the framebuffer of the display where any sent data should be
     /// drawn.
     /// Only works in Page addressing mode.
-    pub fn set_column(&mut self, column: u8) -> Result<(), DI::Error> {
+    pub fn set_column(&mut self, column: u8) -> Result<(), DisplayError> {
         match self.addr_mode {
             AddrMode::Page => Command::ColStart(column).send(&mut self.iface),
             _ => panic!("Device must be in Page mode to set column"),
@@ -125,7 +125,7 @@ where
     /// Note that the parameter is in pixels, but the page will be set to the start of the 8px
     /// row which contains the passed-in row.
     /// Only works in Page addressing mode.
-    pub fn set_row(&mut self, row: u8) -> Result<(), DI::Error> {
+    pub fn set_row(&mut self, row: u8) -> Result<(), DisplayError> {
         match self.addr_mode {
             AddrMode::Page => Command::PageStart(row.into()).send(&mut self.iface),
             _ => panic!("Device must be in Page mode to set row"),
@@ -135,7 +135,7 @@ where
     /// Send the data to the display for drawing at the current position in the framebuffer
     /// and advance the position accordingly. Cf. `set_draw_area` to modify the area affected by
     /// this method in horizontal / vertical mode.
-    pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DI::Error> {
+    pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DisplayError> {
         self.iface.send_data(&buffer)
     }
 
@@ -150,7 +150,7 @@ where
         disp_width: usize,
         upper_left: (u8, u8),
         lower_right: (u8, u8),
-    ) -> Result<(), DI::Error> {
+    ) -> Result<(), DisplayError> {
         // Divide by 8 since each row is actually 8 pixels tall
         let num_pages = ((lower_right.1 - upper_left.1) / 8) as usize + 1;
 
@@ -212,7 +212,7 @@ where
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), DI::Error> {
+    pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), DisplayError> {
         self.display_rotation = display_rotation;
 
         match display_rotation {
@@ -239,7 +239,7 @@ where
 
     /// Turn the display on or off. The display can be drawn to and retains all
     /// of its memory even while off.
-    pub fn display_on(&mut self, on: bool) -> Result<(), DI::Error> {
+    pub fn display_on(&mut self, on: bool) -> Result<(), DisplayError> {
         Command::DisplayOn(on).send(&mut self.iface)
     }
 }

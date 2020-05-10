@@ -142,7 +142,7 @@ pub struct TerminalMode<DI> {
 
 impl<DI> DisplayModeTrait<DI> for TerminalMode<DI>
 where
-    DI: WriteOnlyDataCommand<u8>,
+    DI: WriteOnlyDataCommand,
 {
     /// Create new TerminalMode instance
     fn new(properties: DisplayProperties<DI>) -> Self {
@@ -160,7 +160,7 @@ where
 
 impl<DI> TerminalMode<DI>
 where
-    DI: WriteOnlyDataCommand<u8>,
+    DI: WriteOnlyDataCommand,
 {
     /// Clear the display and reset the cursor to the top left corner
     pub fn clear(&mut self) -> Result<(), TerminalModeError> {
@@ -429,7 +429,7 @@ where
 
 impl<DI> fmt::Write for TerminalMode<DI>
 where
-    DI: WriteOnlyDataCommand<u8>,
+    DI: WriteOnlyDataCommand,
 {
     fn write_str(&mut self, s: &str) -> Result<(), fmt::Error> {
         s.chars().map(move |c| self.print_char(c)).last();

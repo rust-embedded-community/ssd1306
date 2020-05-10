@@ -37,7 +37,6 @@ type Display = ssd1306::mode::graphics::GraphicsMode<
             ),
         >,
         gpio::gpiob::PB1<gpio::Output<gpio::PushPull>>,
-        u8,
     >,
 >;
 

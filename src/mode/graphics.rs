@@ -67,7 +67,7 @@ use crate::{
 /// Graphics mode handler
 pub struct GraphicsMode<DI>
 where
-    DI: WriteOnlyDataCommand<u8>,
+    DI: WriteOnlyDataCommand,
 {
     properties: DisplayProperties<DI>,
     buffer: [u8; 1024],
@@ -79,7 +79,7 @@ where
 
 impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
 where
-    DI: WriteOnlyDataCommand<u8>,
+    DI: WriteOnlyDataCommand,
 {
     /// Create new GraphicsMode instance
     fn new(properties: DisplayProperties<DI>) -> Self {
@@ -101,7 +101,7 @@ where
 
 impl<DI> GraphicsMode<DI>
 where
-    DI: WriteOnlyDataCommand<u8>,
+    DI: WriteOnlyDataCommand,
 {
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
@@ -269,7 +269,7 @@ use embedded_graphics::{
 #[cfg(feature = "graphics")]
 impl<DI> DrawTarget<BinaryColor> for GraphicsMode<DI>
 where
-    DI: WriteOnlyDataCommand<u8>,
+    DI: WriteOnlyDataCommand,
 {
     type Error = DisplayError;
 

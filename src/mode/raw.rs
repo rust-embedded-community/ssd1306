@@ -10,14 +10,14 @@ use display_interface::WriteOnlyDataCommand;
 /// Raw display mode
 pub struct RawMode<DI>
 where
-    DI: WriteOnlyDataCommand<u8>,
+    DI: WriteOnlyDataCommand,
 {
     properties: DisplayProperties<DI>,
 }
 
 impl<DI> DisplayModeTrait<DI> for RawMode<DI>
 where
-    DI: WriteOnlyDataCommand<u8>,
+    DI: WriteOnlyDataCommand,
 {
     /// Create new RawMode instance
     fn new(properties: DisplayProperties<DI>) -> Self {
@@ -30,7 +30,7 @@ where
     }
 }
 
-impl<DI: WriteOnlyDataCommand<u8>> RawMode<DI> {
+impl<DI: WriteOnlyDataCommand> RawMode<DI> {
     /// Create a new raw display mode
     pub fn new(properties: DisplayProperties<DI>) -> Self {
         RawMode { properties }

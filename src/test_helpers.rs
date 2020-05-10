@@ -61,11 +61,14 @@ impl OutputPin for PinStub {
 #[derive(Debug, Clone, Copy)]
 pub struct StubInterface;
 
-impl WriteOnlyDataCommand<u8> for StubInterface {
-    fn send_commands(&mut self, _cmd: &[u8]) -> Result<(), DisplayError> {
+impl WriteOnlyDataCommand for StubInterface {
+    fn send_commands(
+        &mut self,
+        _cmd: display_interface::DataFormat<'_>,
+    ) -> Result<(), DisplayError> {
         Ok(())
     }
-    fn send_data(&mut self, _buf: &[u8]) -> Result<(), DisplayError> {
+    fn send_data(&mut self, _buf: display_interface::DataFormat<'_>) -> Result<(), DisplayError> {
         Ok(())
     }
 }

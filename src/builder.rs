@@ -105,7 +105,7 @@ impl Builder {
     /// This method consumes the builder and must come last in the method call chain
     pub fn connect<I>(self, interface: I) -> DisplayMode<RawMode<I>>
     where
-        I: WriteOnlyDataCommand<u8>,
+        I: WriteOnlyDataCommand,
     {
         let properties = DisplayProperties::new(interface, self.display_size, self.rotation);
         DisplayMode::<RawMode<I>>::new(properties)
@@ -141,7 +141,7 @@ impl I2CDIBuilder {
     /// Finish the builder and return an initialised display interface for further use
     ///
     /// This method consumes the builder and must come last in the method call chain
-    pub fn init<I: hal::blocking::i2c::Write>(self, i2c: I) -> impl WriteOnlyDataCommand<u8> {
+    pub fn init<I: hal::blocking::i2c::Write>(self, i2c: I) -> impl WriteOnlyDataCommand {
         display_interface_i2c::I2CInterface::new(i2c, self.i2c_addr, 0x40)
     }
 }

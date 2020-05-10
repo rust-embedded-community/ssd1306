@@ -5,7 +5,7 @@ use crate::{
     displayrotation::DisplayRotation,
     displaysize::DisplaySize,
 };
-use display_interface::{DisplayError, WriteOnlyDataCommand};
+use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 
 /// Display properties struct
 pub struct DisplayProperties<DI> {
@@ -18,7 +18,7 @@ pub struct DisplayProperties<DI> {
 
 impl<DI> DisplayProperties<DI>
 where
-    DI: WriteOnlyDataCommand<u8>,
+    DI: WriteOnlyDataCommand,
 {
     /// Create new DisplayProperties instance
     pub fn new(
@@ -136,7 +136,7 @@ where
     /// and advance the position accordingly. Cf. `set_draw_area` to modify the area affected by
     /// this method in horizontal / vertical mode.
     pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DisplayError> {
-        self.iface.send_data(&buffer)
+        self.iface.send_data(U8(&buffer))
     }
 
     /// Send the data to the display for drawing at the current position in the framebuffer
@@ -167,7 +167,7 @@ where
             .skip(starting_page)
             .take(num_pages)
             .map(|s| &s[page_lower..page_upper])
-            .try_for_each(|c| self.iface.send_data(&c))
+            .try_for_each(|c| self.iface.send_data(U8(&c)))
     }
 
     /// Get the configured display size

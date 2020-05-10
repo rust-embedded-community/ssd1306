@@ -20,7 +20,7 @@ impl<MODE> DisplayMode<MODE> {
     /// Setup display to run in requested mode
     pub fn new<DI>(properties: DisplayProperties<DI>) -> Self
     where
-        DI: WriteOnlyDataCommand<u8>,
+        DI: WriteOnlyDataCommand,
         MODE: DisplayModeTrait<DI>,
     {
         DisplayMode(MODE::new(properties))
@@ -30,7 +30,7 @@ impl<MODE> DisplayMode<MODE> {
     // TODO: Figure out how to stay as generic DisplayMode but act as particular mode
     pub fn into<DI, NMODE: DisplayModeTrait<DI>>(self) -> NMODE
     where
-        DI: WriteOnlyDataCommand<u8>,
+        DI: WriteOnlyDataCommand,
         MODE: DisplayModeTrait<DI>,
     {
         let properties = self.0.release();

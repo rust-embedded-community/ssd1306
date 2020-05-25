@@ -43,6 +43,11 @@ where
         }
     }
 
+    /// Releases the display interface
+    pub fn release(self) -> DI {
+        self.iface
+    }
+
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right.
     pub fn init_column_mode(&mut self) -> Result<(), DisplayError> {

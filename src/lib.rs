@@ -2,8 +2,8 @@
 //!
 //! The driver must be initialised by passing an I2C or SPI interface peripheral to the [`Builder`],
 //! which will in turn create a driver instance in a particular mode. By default, the builder
-//! returns a [`RawMode`] instance which isn't very useful by itself. You can coerce the driver
-//! into a more useful mode by calling `into()` and defining the type you want to coerce to. For
+//! returns a [`DisplayProperty`] instance which is a low level interface to manipulate the display properties (e.g. rotation).
+//! You can coerce the driver into a more useful mode by calling `into()` and defining the type you want to coerce to. For
 //! example, to initialise the display with an I2C interface and [`GraphicsMode`], you would do
 //! something like this:
 //!
@@ -114,9 +114,9 @@
 //! ```
 //!
 //! [`Builder`]: ./builder/struct.Builder.html
+//! [`DisplayProperty`]: ./properties/struct.DisplayProperty.html
 //! [`GraphicsMode`]: ./mode/graphics/struct.GraphicsMode.html
 //! [`TerminalMode`]: ./mode/terminal/struct.TerminalMode.html
-//! [`RawMode`]: ./mode/raw/struct.RawMode.html
 
 #![no_std]
 // #![deny(missing_debug_implementations)]

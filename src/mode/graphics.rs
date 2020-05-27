@@ -66,8 +66,6 @@ use crate::{
 // TODO: Add to prelude
 /// Graphics mode handler
 pub struct GraphicsMode<DI>
-where
-    DI: WriteOnlyDataCommand,
 {
     properties: DisplayProperties<DI>,
     buffer: [u8; 1024],
@@ -78,8 +76,6 @@ where
 }
 
 impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
-where
-    DI: WriteOnlyDataCommand,
 {
     /// Create new GraphicsMode instance
     fn new(properties: DisplayProperties<DI>) -> Self {

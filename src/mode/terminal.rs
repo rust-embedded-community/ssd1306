@@ -153,8 +153,8 @@ where
         }
     }
 
-    /// Release all resources used by TerminalMode
-    fn release(self) -> DisplayProperties<DI> {
+    /// Release display interface used by TerminalMode
+    fn properties(self) -> DisplayProperties<DI> {
         self.properties
     }
 }

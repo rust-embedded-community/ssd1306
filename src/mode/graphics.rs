@@ -87,8 +87,8 @@ impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI> {
         }
     }
 
-    /// Release all resources used by GraphicsMode
-    fn release(self) -> DisplayProperties<DI> {
+    /// Release display interface used by TerminalMode
+    fn properties(self) -> DisplayProperties<DI> {
         self.properties
     }
 }

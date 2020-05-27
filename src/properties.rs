@@ -18,8 +18,6 @@ pub struct DisplayProperties<DI> {
 }
 
 impl<DI> DisplayProperties<DI>
-where
-    DI: WriteOnlyDataCommand,
 {
     /// Create new DisplayProperties instance
     pub fn new(
@@ -48,7 +46,12 @@ where
     pub fn release(self) -> DI {
         self.iface
     }
+}
 
+impl<DI> DisplayProperties<DI>
+where
+    DI: WriteOnlyDataCommand,
+{
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right.
     pub fn init_column_mode(&mut self) -> Result<(), DisplayError> {

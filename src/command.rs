@@ -76,7 +76,7 @@ pub enum Command {
     /// First value is oscillator frequency, increasing with higher value
     /// Second value is divide ratio - 1
     DisplayClockDiv(u8, u8),
-    /// Set up phase 1 and 2 of precharge period. each value is from 0-63
+    /// Set up phase 1 and 2 of precharge period. each value is from 1-15
     PreChargePeriod(u8, u8),
     /// Set Vcomh Deselect level
     VcomhDeselect(VcomhLevel),

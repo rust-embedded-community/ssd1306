@@ -8,7 +8,7 @@
 
 ### Changed
 
-- [#120](https://github.com/jamwaffles/ssd1306/pull/120) Update to new [`display-interface`](https://crates.io/crates/display-interface)
+- [#120](https://github.com/jamwaffles/ssd1306/pull/120) Update to v0.4 [`display-interface`](https://crates.io/crates/display-interface)
 - **(breaking)** [#116](https://github.com/jamwaffles/ssd1306/pull/116) Replace custom I2C and SPI interfaces by generic [`display-interface`](https://crates.io/crates/display-interface)
 - **(breaking)** [#113](https://github.com/jamwaffles/ssd1306/pull/113) Removed public `send_bounded_data` from DisplayInterface and implementations
 

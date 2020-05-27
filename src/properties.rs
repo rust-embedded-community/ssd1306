@@ -6,6 +6,7 @@ use crate::{
     displaysize::DisplaySize,
 };
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
+use crate::mode::displaymode::DisplayModeTrait;
 
 /// Display properties struct
 pub struct DisplayProperties<DI> {
@@ -246,5 +247,13 @@ where
     /// of its memory even while off.
     pub fn display_on(&mut self, on: bool) -> Result<(), DisplayError> {
         Command::DisplayOn(on).send(&mut self.iface)
+    }
+
+    /// Change into any mode implementing DisplayModeTrait
+    pub fn into<NMODE: DisplayModeTrait<DI>>(self) -> NMODE
+    where
+        DI: WriteOnlyDataCommand,
+    {
+        NMODE::new(self)
     }
 }

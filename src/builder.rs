@@ -59,7 +59,6 @@ use display_interface::WriteOnlyDataCommand;
 use crate::{
     displayrotation::DisplayRotation,
     displaysize::DisplaySize,
-    mode::{displaymode::DisplayMode, raw::RawMode},
     properties::DisplayProperties,
 };
 
@@ -103,12 +102,11 @@ impl Builder {
     /// Finish the builder and use some interface communicate with the display
     ///
     /// This method consumes the builder and must come last in the method call chain
-    pub fn connect<I>(self, interface: I) -> DisplayMode<RawMode<I>>
+    pub fn connect<I>(self, interface: I) -> DisplayProperties<I>
     where
         I: WriteOnlyDataCommand,
     {
-        let properties = DisplayProperties::new(interface, self.display_size, self.rotation);
-        DisplayMode::<RawMode<I>>::new(properties)
+        DisplayProperties::new(interface, self.display_size, self.rotation)
     }
 }
 

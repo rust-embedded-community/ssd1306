@@ -1,4 +1,4 @@
-//! Send random raw data to the display, emulating an old untuned TV. This example `release()`s the
+//! Send random raw data to the display, emulating an old untuned TV. This example retrieves the
 //! underlying display properties struct and allows calling of the low-level `draw()` method,
 //! sending a 1024 byte buffer straight to the display.
 //!
@@ -65,7 +65,7 @@ fn main() -> ! {
     let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
     disp.init().unwrap();
 
-    let mut props = disp.release();
+    let mut props = disp.properties();
 
     let mut buf = [0x00u8; 1024];
 

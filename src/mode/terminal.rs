@@ -159,6 +159,26 @@ where
 }
 
 impl<DI> TerminalMode<DI>
+{
+    /// Reset display
+    pub fn reset<RST, DELAY, PinE>(
+        &mut self,
+        rst: &mut RST,
+        delay: &mut DELAY,
+    ) -> Result<(), Error<(), PinE>>
+    where
+        RST: OutputPin<Error = PinE>,
+        DELAY: DelayMs<u8>,
+    {
+        rst.set_high().map_err(Error::Pin)?;
+        delay.delay_ms(1);
+        rst.set_low().map_err(Error::Pin)?;
+        delay.delay_ms(10);
+        rst.set_high().map_err(Error::Pin)
+    }
+}
+
+impl<DI> TerminalMode<DI>
 where
     DI: WriteOnlyDataCommand,
 {
@@ -202,23 +222,6 @@ where
         self.reset_pos()?;
 
         Ok(())
-    }
-
-    /// Reset display
-    pub fn reset<RST, DELAY, PinE>(
-        &mut self,
-        rst: &mut RST,
-        delay: &mut DELAY,
-    ) -> Result<(), Error<(), PinE>>
-    where
-        RST: OutputPin<Error = PinE>,
-        DELAY: DelayMs<u8>,
-    {
-        rst.set_high().map_err(Error::Pin)?;
-        delay.delay_ms(1);
-        rst.set_low().map_err(Error::Pin)?;
-        delay.delay_ms(10);
-        rst.set_high().map_err(Error::Pin)
     }
 
     /// Write out data to display. This is a noop in terminal mode.

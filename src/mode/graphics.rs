@@ -96,20 +96,7 @@ impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
 }
 
 impl<DI> GraphicsMode<DI>
-where
-    DI: WriteOnlyDataCommand,
 {
-    /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
-    pub fn clear(&mut self) {
-        self.buffer = [0; 1024];
-
-        let (width, height) = self.get_dimensions();
-        self.min_x = 0;
-        self.max_x = width - 1;
-        self.min_y = 0;
-        self.max_y = height - 1;
-    }
-
     /// Reset display
     // TODO: Move to a more appropriate place
     pub fn reset<RST, DELAY, PinE>(
@@ -126,6 +113,22 @@ where
         rst.set_low().map_err(Error::Pin)?;
         delay.delay_ms(10);
         rst.set_high().map_err(Error::Pin)
+    }
+}
+
+impl<DI> GraphicsMode<DI>
+where
+    DI: WriteOnlyDataCommand,
+{
+    /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
+    pub fn clear(&mut self) {
+        self.buffer = [0; 1024];
+
+        let (width, height) = self.get_dimensions();
+        self.min_x = 0;
+        self.max_x = width - 1;
+        self.min_y = 0;
+        self.max_y = height - 1;
     }
 
     /// Write out data to a display.

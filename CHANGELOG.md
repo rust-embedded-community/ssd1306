@@ -6,10 +6,15 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#118](https://github.com/jamwaffles/ssd1306/pull/118) `DisplayModeTrait::properties()` new method that consumes the driver and returns the `DisplayProperties`
+
 ### Changed
 
 -**(breaking)** [#119](https://github.com/jamwaffles/ssd1306/pull/119) Remove `DisplayMode` and `RawMode`
 - [#120](https://github.com/jamwaffles/ssd1306/pull/120) Update to v0.4 [`display-interface`](https://crates.io/crates/display-interface)
+- **(breaking)** [#118](https://github.com/jamwaffles/ssd1306/pull/118) Change `release` method to return the display interface instead of the `DisplayProperties`.
 - **(breaking)** [#116](https://github.com/jamwaffles/ssd1306/pull/116) Replace custom I2C and SPI interfaces by generic [`display-interface`](https://crates.io/crates/display-interface)
 - **(breaking)** [#113](https://github.com/jamwaffles/ssd1306/pull/113) Removed public `send_bounded_data` from DisplayInterface and implementations
 

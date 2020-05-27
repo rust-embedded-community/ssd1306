@@ -17,8 +17,7 @@ pub struct DisplayProperties<DI> {
     addr_mode: AddrMode,
 }
 
-impl<DI> DisplayProperties<DI>
-{
+impl<DI> DisplayProperties<DI> {
     /// Create new DisplayProperties instance
     pub fn new(
         iface: DI,

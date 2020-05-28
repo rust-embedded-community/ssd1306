@@ -143,6 +143,7 @@ pub enum Error<CommE, PinE> {
 extern crate embedded_hal as hal;
 
 pub mod builder;
+pub mod brightness;
 mod command;
 pub mod displayrotation;
 mod displaysize;

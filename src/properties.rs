@@ -2,6 +2,7 @@
 
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::{
+    brightness::Brightness,
     command::{AddrMode, Command, VcomhLevel},
     displayrotation::DisplayRotation,
     displaysize::DisplaySize,
@@ -83,8 +84,7 @@ where
             DisplaySize::Display64x48 => Command::ComPinConfig(true, false).send(&mut self.iface),
         }?;
 
-        Command::Contrast(0x8F).send(&mut self.iface)?;
-        Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface)?;
+        self.change_brightness(Brightness::NORMAL)?;
         Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
         Command::AllOn(false).send(&mut self.iface)?;
         Command::Invert(false).send(&mut self.iface)?;
@@ -249,6 +249,12 @@ where
     /// of its memory even while off.
     pub fn display_on(&mut self, on: bool) -> Result<(), DisplayError> {
         Command::DisplayOn(on).send(&mut self.iface)
+    }
+
+    /// Change the display brightness.
+    pub fn change_brightness(&mut self, brightness: Brightness) -> Result<(), DisplayError> {
+        Command::PreChargePeriod(1, brightness.precharge).send(&mut self.iface)?;
+        Command::Contrast(brightness.contrast).send(&mut self.iface)
     }
 
     /// Change into any mode implementing DisplayModeTrait

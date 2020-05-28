@@ -58,6 +58,7 @@
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 
 use crate::{
+    brightness::Brightness,
     displayrotation::DisplayRotation, mode::displaymode::DisplayModeTrait,
     properties::DisplayProperties,
 };
@@ -89,6 +90,11 @@ impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI> {
     /// Release display interface used by `GraphicsMode`
     fn into_properties(self) -> DisplayProperties<DI> {
         self.properties
+    }
+
+    /// Allow changing display properties by passing a closure
+    fn change_property<T>(&mut self, op: impl FnOnce(&mut DisplayProperties<DI>) -> T) -> T {
+        op(&mut self.properties)
     }
 }
 
@@ -227,6 +233,11 @@ where
     /// of its memory even while off.
     pub fn display_on(&mut self, on: bool) -> Result<(), DisplayError> {
         self.properties.display_on(on)
+    }
+
+    /// Change the display brightness.
+    pub fn change_brightness(&mut self, brightness: Brightness) -> Result<(), DisplayError> {
+        self.properties.change_brightness(brightness)
     }
 }
 

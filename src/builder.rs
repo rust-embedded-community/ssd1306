@@ -5,12 +5,8 @@
 //! To finish the builder and produce a connected display interface, call `.connect(interface)`
 //! where `interface` is an instantiated `DisplayInterface` implementation. For I2C interfaces
 //! there's also an [`I2CDIBuilder`] to simplify the construction of an I2C `DisplayInterface`. The
-//! builder will be consumed into a [`mode::RawMode`] object which can be coerced into a richer
-//! display mode like [`mode::Graphics`].
-//!
-//! [`I2CDIBuilder`]: ./struct.I2CDIBuilder.html
-//! [`mode::RawMode`]: ../mode/raw/struct.RawMode.html
-//! [`mode::Graphics`]: ../mode/graphics/struct.GraphicsMode.html
+//! builder will be consumed into a [`DisplayProperties`] object which can be coerced into a richer
+//! display mode like [`GraphicsMode`] or [`TerminalMode`].
 //!
 //! # Examples
 //!
@@ -40,9 +36,9 @@
 //!     .connect(interface);
 //! ```
 //!
-//! The above examples will produce a [DisplayProperties](crate::properties::DisplayProperties) instance
+//! The above examples will produce a [`DisplayProperties`] instance
 //! by default. You need to coerce them into a mode by specifying a type on assignment. For
-//! example, to use [`TerminalMode` mode](crate::mode::terminal::TerminalMode):
+//! example, to use [`TerminalMode`] mode:
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::{PinStub, SpiStub};
@@ -53,6 +49,11 @@
 //! let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
 //! let display: TerminalMode<_> = Builder::new().connect(interface).into();
 //! ```
+//!
+//! [`I2CDIBuilder`]: crate::builder::I2CDIBuilder
+//! [`DisplayProperties`]: crate::properties::DisplayProperties
+//! [`GraphicsMode`]: crate::mode::graphics::GraphicsMode
+//! [`TerminalMode`]: crate::mode::terminal::TerminalMode
 
 use display_interface::WriteOnlyDataCommand;
 

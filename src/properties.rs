@@ -1,12 +1,12 @@
 //! Container to store and set display properties
 
+use crate::mode::displaymode::DisplayModeTrait;
 use crate::{
     command::{AddrMode, Command, VcomhLevel},
     displayrotation::DisplayRotation,
     displaysize::DisplaySize,
 };
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
-use crate::mode::displaymode::DisplayModeTrait;
 
 /// Display properties struct
 pub struct DisplayProperties<DI> {

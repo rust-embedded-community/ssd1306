@@ -57,9 +57,7 @@
 use display_interface::WriteOnlyDataCommand;
 
 use crate::{
-    displayrotation::DisplayRotation,
-    displaysize::DisplaySize,
-    properties::DisplayProperties,
+    displayrotation::DisplayRotation, displaysize::DisplaySize, properties::DisplayProperties,
 };
 
 /// Builder struct. Driver options and interface are set using its methods.

@@ -158,8 +158,7 @@ where
     }
 }
 
-impl<DI> TerminalMode<DI>
-{
+impl<DI> TerminalMode<DI> {
     /// Reset display
     pub fn reset<RST, DELAY, PinE>(
         &mut self,

@@ -65,8 +65,7 @@ use crate::{
 
 // TODO: Add to prelude
 /// Graphics mode handler
-pub struct GraphicsMode<DI>
-{
+pub struct GraphicsMode<DI> {
     properties: DisplayProperties<DI>,
     buffer: [u8; 1024],
     min_x: u8,
@@ -75,8 +74,7 @@ pub struct GraphicsMode<DI>
     max_y: u8,
 }
 
-impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
-{
+impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI> {
     /// Create new GraphicsMode instance
     fn new(properties: DisplayProperties<DI>) -> Self {
         GraphicsMode {
@@ -95,8 +93,7 @@ impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
     }
 }
 
-impl<DI> GraphicsMode<DI>
-{
+impl<DI> GraphicsMode<DI> {
     /// Reset display
     // TODO: Move to a more appropriate place
     pub fn reset<RST, DELAY, PinE>(

@@ -40,9 +40,9 @@
 //!     .connect(interface);
 //! ```
 //!
-//! The above examples will produce a [RawMode](../mode/raw/struct.RawMode.html) instance
+//! The above examples will produce a [DisplayProperties](crate::properties::DisplayProperties) instance
 //! by default. You need to coerce them into a mode by specifying a type on assignment. For
-//! example, to use [`TerminalMode` mode](../mode/terminal/struct.TerminalMode.html):
+//! example, to use [`TerminalMode` mode](crate::mode::terminal::TerminalMode):
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::{PinStub, SpiStub};
@@ -92,7 +92,7 @@ impl Builder {
 
     /// Set the rotation of the display to one of four values. Defaults to no rotation. Note that
     /// 90º and 270º rotations are not supported by
-    /// [`TerminalMode`](../mode/terminal/struct.TerminalMode.html).
+    /// [`TerminalMode`](crate::mode::terminal::TerminalMode).
     pub fn with_rotation(self, rotation: DisplayRotation) -> Self {
         Self { rotation, ..self }
     }

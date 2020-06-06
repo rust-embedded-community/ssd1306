@@ -4,7 +4,7 @@
 /// Display rotation.
 ///
 /// Note that 90º and 270º rotations are not supported by
-// [`TerminalMode`](../mode/terminal/struct.TerminalMode.html).
+// [`TerminalMode`](crate::mode::terminal::TerminalMode).
 #[derive(Clone, Copy)]
 pub enum DisplayRotation {
     /// No rotation, normal display

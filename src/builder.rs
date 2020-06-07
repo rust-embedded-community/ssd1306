@@ -1,6 +1,7 @@
 //! Interface factory
 //!
-//! This is the easiest way to create a driver instance, with the ability to set various parameters of the driver.
+//! This is the easiest way to create a driver instance, with the ability to set various parameters
+//! of the driver.
 //!
 //! To finish the builder and produce a connected display interface, call `.connect(interface)`
 //! where `interface` is an instantiated `DisplayInterface` implementation. For I2C interfaces

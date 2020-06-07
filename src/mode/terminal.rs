@@ -64,7 +64,8 @@ impl Cursor {
     }
 
     /// Advances the logical cursor by one character.
-    /// Returns a value indicating if this caused the cursor to wrap to the next line or the next screen.
+    /// Returns a value indicating if this caused the cursor to wrap to the next line or the next
+    /// screen.
     pub fn advance(&mut self) -> Option<CursorWrapEvent> {
         self.col = (self.col + 1) % self.width;
         if self.col == 0 {

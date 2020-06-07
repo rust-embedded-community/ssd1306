@@ -114,10 +114,10 @@
 //! ```
 //!
 //! [featureset]: https://github.com/jamwaffles/embedded-graphics#features
-//! [`Builder`]: crate::builder::Builder
-//! [`DisplayProperties`]: crate::properties::DisplayProperties
-//! [`GraphicsMode`]: crate::mode::graphics::GraphicsMode
-//! [`TerminalMode`]: crate::mode::terminal::TerminalMode
+//! [`Builder`]: ./builder/struct.Builder.html
+//! [`DisplayProperties`]: ./properties/struct.DisplayProperties.html
+//! [`GraphicsMode`]: ./mode/graphics/struct.GraphicsMode.html
+//! [`TerminalMode`]: ./mode/terminal/struct.TerminalMode.html
 
 #![no_std]
 // #![deny(missing_debug_implementations)]

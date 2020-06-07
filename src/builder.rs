@@ -51,10 +51,10 @@
 //! let display: TerminalMode<_> = Builder::new().connect(interface).into();
 //! ```
 //!
-//! [`I2CDIBuilder`]: crate::builder::I2CDIBuilder
-//! [`DisplayProperties`]: crate::properties::DisplayProperties
-//! [`GraphicsMode`]: crate::mode::graphics::GraphicsMode
-//! [`TerminalMode`]: crate::mode::terminal::TerminalMode
+//! [`I2CDIBuilder`]: ./struct.I2CDIBuilder.html
+//! [`DisplayProperties`]: ../properties/struct.DisplayProperties.html
+//! [`GraphicsMode`]: ../mode/graphics/struct.GraphicsMode.html
+//! [`TerminalMode`]: ../mode/terminal/struct.TerminalMode.html
 
 use display_interface::WriteOnlyDataCommand;
 

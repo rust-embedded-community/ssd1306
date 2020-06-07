@@ -88,7 +88,7 @@ impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI> {
     }
 
     /// Release display interface used by TerminalMode
-    fn properties(self) -> DisplayProperties<DI> {
+    fn into_properties(self) -> DisplayProperties<DI> {
         self.properties
     }
 }

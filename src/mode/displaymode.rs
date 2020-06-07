@@ -8,11 +8,11 @@ pub trait DisplayModeTrait<DI>: Sized {
     fn new(properties: DisplayProperties<DI>) -> Self;
 
     /// Deconstruct object and retrieve DisplayProperties
-    fn properties(self) -> DisplayProperties<DI>;
+    fn into_properties(self) -> DisplayProperties<DI>;
 
     /// Release display interface
     fn release(self) -> DI {
-        self.properties().release()
+        self.into_properties().release()
     }
 }
 
@@ -33,7 +33,7 @@ impl<MODE> DisplayMode<MODE> {
         DI: WriteOnlyDataCommand,
         MODE: DisplayModeTrait<DI>,
     {
-        let properties = self.0.properties();
+        let properties = self.0.into_properties();
         NMODE::new(properties)
     }
 }

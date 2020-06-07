@@ -65,7 +65,7 @@ fn main() -> ! {
     let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
     disp.init().unwrap();
 
-    let mut props = disp.properties();
+    let mut props = disp.into_properties();
 
     let mut buf = [0x00u8; 1024];
 

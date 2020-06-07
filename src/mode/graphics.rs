@@ -91,11 +91,6 @@ impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI> {
     fn into_properties(self) -> DisplayProperties<DI> {
         self.properties
     }
-
-    /// Allow changing display properties by passing a closure
-    fn change_property<T>(&mut self, op: impl FnOnce(&mut DisplayProperties<DI>) -> T) -> T {
-        op(&mut self.properties)
-    }
 }
 
 impl<DI> GraphicsMode<DI>

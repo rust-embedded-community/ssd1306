@@ -8,11 +8,11 @@ pub struct Brightness {
 }
 
 impl Brightness {
-    /// The darkest predefined brightness level
+    /// The dimmest predefined brightness level
     pub const DIMMEST: Brightness   = Brightness::custom(0x1, 0x00);
 
-    /// A dark predefined brightness level
-    pub const DIM: Brightness      = Brightness::custom(0x2, 0x2F);
+    /// A dim predefined brightness level
+    pub const DIM: Brightness       = Brightness::custom(0x2, 0x2F);
 
     /// A medium predefined brightness level
     pub const NORMAL: Brightness    = Brightness::custom(0x2, 0x5F);

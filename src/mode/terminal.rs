@@ -153,7 +153,7 @@ where
         }
     }
 
-    /// Release display interface used by TerminalMode
+    /// Release display interface used by `TerminalMode`
     fn into_properties(self) -> DisplayProperties<DI> {
         self.properties
     }

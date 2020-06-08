@@ -8,7 +8,7 @@
 
 ### Added
 
-- [#118](https://github.com/jamwaffles/ssd1306/pull/118) `DisplayModeTrait::properties()` new method that consumes the driver and returns the `DisplayProperties`
+- [#118](https://github.com/jamwaffles/ssd1306/pull/118) `DisplayModeTrait::into_properties()` new method that consumes the driver and returns the `DisplayProperties`
 
 ### Changed
 

@@ -1,16 +1,13 @@
 //! Interface factory
 //!
-//! This is the easiest way to create a driver instance, with the ability to set various parameters of the driver.
+//! This is the easiest way to create a driver instance, with the ability to set various parameters
+//! of the driver.
 //!
 //! To finish the builder and produce a connected display interface, call `.connect(interface)`
 //! where `interface` is an instantiated `DisplayInterface` implementation. For I2C interfaces
 //! there's also an [`I2CDIBuilder`] to simplify the construction of an I2C `DisplayInterface`. The
-//! builder will be consumed into a [`mode::RawMode`] object which can be coerced into a richer
-//! display mode like [`mode::Graphics`].
-//!
-//! [`I2CDIBuilder`]: ./struct.I2CDIBuilder.html
-//! [`mode::RawMode`]: ../mode/raw/struct.RawMode.html
-//! [`mode::Graphics`]: ../mode/graphics/struct.GraphicsMode.html
+//! builder will be consumed into a [`DisplayProperties`] object which can be coerced into a richer
+//! display mode like [`GraphicsMode`] or [`TerminalMode`].
 //!
 //! # Examples
 //!
@@ -40,9 +37,9 @@
 //!     .connect(interface);
 //! ```
 //!
-//! The above examples will produce a [RawMode](../mode/raw/struct.RawMode.html) instance
+//! The above examples will produce a [`DisplayProperties`] instance
 //! by default. You need to coerce them into a mode by specifying a type on assignment. For
-//! example, to use [`TerminalMode` mode](../mode/terminal/struct.TerminalMode.html):
+//! example, to use [`TerminalMode`] mode:
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::{PinStub, SpiStub};
@@ -53,14 +50,16 @@
 //! let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
 //! let display: TerminalMode<_> = Builder::new().connect(interface).into();
 //! ```
+//!
+//! [`I2CDIBuilder`]: ./struct.I2CDIBuilder.html
+//! [`DisplayProperties`]: ../properties/struct.DisplayProperties.html
+//! [`GraphicsMode`]: ../mode/graphics/struct.GraphicsMode.html
+//! [`TerminalMode`]: ../mode/terminal/struct.TerminalMode.html
 
 use display_interface::WriteOnlyDataCommand;
 
 use crate::{
-    displayrotation::DisplayRotation,
-    displaysize::DisplaySize,
-    mode::{displaymode::DisplayMode, raw::RawMode},
-    properties::DisplayProperties,
+    displayrotation::DisplayRotation, displaysize::DisplaySize, properties::DisplayProperties,
 };
 
 /// Builder struct. Driver options and interface are set using its methods.
@@ -103,12 +102,11 @@ impl Builder {
     /// Finish the builder and use some interface communicate with the display
     ///
     /// This method consumes the builder and must come last in the method call chain
-    pub fn connect<I>(self, interface: I) -> DisplayMode<RawMode<I>>
+    pub fn connect<I>(self, interface: I) -> DisplayProperties<I>
     where
         I: WriteOnlyDataCommand,
     {
-        let properties = DisplayProperties::new(interface, self.display_size, self.rotation);
-        DisplayMode::<RawMode<I>>::new(properties)
+        DisplayProperties::new(interface, self.display_size, self.rotation)
     }
 }
 

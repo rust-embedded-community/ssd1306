@@ -1,5 +1,6 @@
 //! Container to store and set display properties
 
+use crate::mode::displaymode::DisplayModeTrait;
 use crate::{
     command::{AddrMode, Command, VcomhLevel},
     displayrotation::DisplayRotation,
@@ -41,6 +42,11 @@ where
             display_offset,
             addr_mode: AddrMode::Page, // reset value
         }
+    }
+
+    /// Releases the display interface
+    pub fn release(self) -> DI {
+        self.iface
     }
 
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
@@ -241,5 +247,13 @@ where
     /// of its memory even while off.
     pub fn display_on(&mut self, on: bool) -> Result<(), DisplayError> {
         Command::DisplayOn(on).send(&mut self.iface)
+    }
+
+    /// Change into any mode implementing DisplayModeTrait
+    pub fn into<NMODE: DisplayModeTrait<DI>>(self) -> NMODE
+    where
+        DI: WriteOnlyDataCommand,
+    {
+        NMODE::new(self)
     }
 }

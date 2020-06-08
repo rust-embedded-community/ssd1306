@@ -2,10 +2,10 @@
 //!
 //! The driver must be initialised by passing an I2C or SPI interface peripheral to the [`Builder`],
 //! which will in turn create a driver instance in a particular mode. By default, the builder
-//! returns a [`RawMode`] instance which isn't very useful by itself. You can coerce the driver
-//! into a more useful mode by calling `into()` and defining the type you want to coerce to. For
-//! example, to initialise the display with an I2C interface and [`GraphicsMode`], you would do
-//! something like this:
+//! returns a [`DisplayProperties`] instance which is a low level interface to manipulate the
+//! display properties (e.g. rotation). The driver can be coerced into a more useful mode by calling
+//! `into()` and defining the type you want to coerce to. For example, to initialise the display
+//! with an I2C interface and [`GraphicsMode`], you would do something like this:
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::I2cStub as I2cInterface;
@@ -22,7 +22,7 @@
 //! ```
 //!
 //! See the [example](https://github.com/jamwaffles/ssd1306/blob/master/examples/graphics_i2c.rs)
-//! for more usage. The [entire `embedded_graphics` featureset](https://github.com/jamwaffles/embedded-graphics#features)
+//! for more usage. The entire `embedded_graphics` [featureset]
 //! is supported by this driver.
 //!
 //! There is also [`TerminalMode`] which allows drawing of characters to the display without
@@ -113,10 +113,11 @@
 //! disp.flush().unwrap();
 //! ```
 //!
+//! [featureset]: https://github.com/jamwaffles/embedded-graphics#features
 //! [`Builder`]: ./builder/struct.Builder.html
+//! [`DisplayProperties`]: ./properties/struct.DisplayProperties.html
 //! [`GraphicsMode`]: ./mode/graphics/struct.GraphicsMode.html
 //! [`TerminalMode`]: ./mode/terminal/struct.TerminalMode.html
-//! [`RawMode`]: ./mode/raw/struct.RawMode.html
 
 #![no_std]
 // #![deny(missing_debug_implementations)]

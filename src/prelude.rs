@@ -7,5 +7,5 @@ pub use display_interface_spi::{SPIInterface, SPIInterfaceNoCS};
 pub use super::{
     displayrotation::DisplayRotation,
     displaysize::DisplaySize,
-    mode::{GraphicsMode, TerminalMode},
+    mode::{displaymode::DisplayModeTrait, GraphicsMode, TerminalMode},
 };

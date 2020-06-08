@@ -92,6 +92,18 @@ impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI> {
     }
 }
 
+impl<DI> GraphicsMode<DI> {
+    /// Resets the area where the framebuffer was modified.
+    fn reset_dirty_area(&mut self) {
+        //  min > max means no set_pixel calls were made so far
+        self.min_x = 255;
+        self.max_x = 0;
+
+        self.min_y = 255;
+        self.max_y = 0;
+    }
+}
+
 impl<DI> GraphicsMode<DI>
 where
     DI: WriteOnlyDataCommand,
@@ -112,7 +124,9 @@ where
     /// This only updates the parts of the display that have changed since the last flush.
     pub fn flush(&mut self) -> Result<(), DisplayError> {
         // Nothing to do if no pixels have changed since the last update
-        if self.max_x < self.min_x || self.max_y < self.min_y {
+        // It's enough to check one of the dimensions because both are set to valid values by the
+        // first set_pixel call.
+        if self.max_x < self.min_x {
             return Ok(());
         }
 
@@ -131,10 +145,7 @@ where
             }
         };
 
-        self.min_x = width - 1;
-        self.max_x = 0;
-        self.min_y = width - 1;
-        self.max_y = 0;
+        self.reset_dirty_area();
 
         // Compensate for any offset in the physical display. For example, the 72x40 display has an
         // offset of (28, 0) pixels.

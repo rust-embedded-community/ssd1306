@@ -3,10 +3,15 @@
 use crate::properties::DisplayProperties;
 
 /// Trait with core functionality for display mode switching
-pub trait DisplayModeTrait<DI> {
+pub trait DisplayModeTrait<DI>: Sized {
     /// Allocate all required data and initialise display for mode
     fn new(properties: DisplayProperties<DI>) -> Self;
 
-    /// Release resources for reuse with different mode
-    fn release(self) -> DisplayProperties<DI>;
+    /// Deconstruct object and retrieve DisplayProperties
+    fn into_properties(self) -> DisplayProperties<DI>;
+
+    /// Release display interface
+    fn release(self) -> DI {
+        self.into_properties().release()
+    }
 }

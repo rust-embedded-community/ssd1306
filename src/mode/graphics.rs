@@ -60,7 +60,7 @@ use display_interface::{DisplayError, WriteOnlyDataCommand};
 use crate::{
     brightness::Brightness,
     displayrotation::DisplayRotation, mode::displaymode::DisplayModeTrait,
-    properties::DisplayProperties,
+    properties::DisplayProperties, Error,
 };
 
 // TODO: Add to prelude

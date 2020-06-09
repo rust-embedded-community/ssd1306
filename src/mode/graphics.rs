@@ -62,27 +62,145 @@ use crate::{
     properties::DisplayProperties,
 };
 
-// TODO: Add to prelude
-/// Graphics mode handler
-pub struct GraphicsMode<DI> {
-    properties: DisplayProperties<DI>,
-    buffer: [u8; 1024],
+#[derive(Copy, Clone)]
+/// This optimization method keeps track of the area that needs to be updated,
+/// resulting in a potentially faster flush process.
+pub struct DirtyArea {
     min_x: u8,
     max_x: u8,
     min_y: u8,
     max_y: u8,
 }
 
-impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI> {
+#[derive(Copy, Clone)]
+/// This optimization method does not keep track of the dirty area,
+/// resulting in a potentially faster set_pixel call.
+pub struct FastSetPixel {
+    width: u8,
+    height: u8,
+}
+
+/// Common interface of drawing-related optimization strategies
+pub trait GraphicsModeOptimization {
+    /// Create a new object
+    fn new(width: u8, height: u8) -> Self;
+
+    /// Mark as no need to update
+    fn reset_dirty(&mut self);
+
+    /// Mark part of the framebuffer to be updated
+    fn mark_dirty(&mut self, min_x: u8, max_x: u8, min_y: u8, max_y: u8);
+
+    /// Get the area to be updated
+    fn get_dirty_area(&self) -> (u8, u8, u8, u8);
+
+    /// Returns whether the display needs to be updated
+    fn needs_update(&self) -> bool;
+}
+
+impl GraphicsModeOptimization for DirtyArea {
+    fn new(width: u8, height: u8) -> Self {
+        Self {
+            min_x: 0,
+            max_x: width - 1,
+            min_y: 0,
+            max_y: height - 1,
+        }
+    }
+
+    fn reset_dirty(&mut self) {
+        // min > max means no draws yet
+        self.min_x = 255;
+        self.max_x = 0;
+        self.min_y = 255;
+        self.max_y = 0;
+    }
+
+    fn mark_dirty(&mut self, min_x: u8, max_x: u8, min_y: u8, max_y: u8) {
+        self.min_x = self.min_x.min(min_x);
+        self.max_x = self.max_x.max(max_x);
+        self.min_y = self.min_y.min(min_y);
+        self.max_y = self.max_y.max(max_y);
+    }
+
+    fn get_dirty_area(&self) -> (u8, u8, u8, u8) {
+        (self.min_x, self.max_x, self.min_y, self.max_y)
+    }
+
+    fn needs_update(&self) -> bool {
+        self.min_x <= self.max_x
+    }
+}
+
+impl GraphicsModeOptimization for FastSetPixel {
+    fn new(width: u8, height: u8) -> Self {
+        Self { width, height }
+    }
+
+    fn reset_dirty(&mut self) {}
+
+    fn mark_dirty(&mut self, _min_x: u8, _max_x: u8, _min_y: u8, _max_y: u8) {}
+
+    fn get_dirty_area(&self) -> (u8, u8, u8, u8) {
+        (0, self.width, 0, self.height)
+    }
+
+    fn needs_update(&self) -> bool {
+        true
+    }
+}
+
+/// Graphics mode handler
+///
+/// The second template parameter allows specifying an optimization method.
+///  * `DirtyArea` (default): keeps track of which part of the display was drawn to and only writes
+///     the modified data to the screen. Use this for slower communication interfaces.
+///  * `FastSetPixel`: assumes that the whole screen needs to be updated when `flush` is called.
+///     This makes the drawing operations faster.
+///
+/// Examples:
+/// ```rust
+/// # use ssd1306::test_helpers::{PinStub, SpiStub};
+/// # let spi = SpiStub;
+/// # let dc = PinStub;
+/// use ssd1306::{prelude::*, Builder};
+///
+/// let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
+/// // Use the default optimization
+/// let display: GraphicsMode<_> = Builder::new().connect(interface).into();
+/// ```
+///
+/// ```rust
+/// # use ssd1306::test_helpers::{PinStub, SpiStub};
+/// # let spi = SpiStub;
+/// # let dc = PinStub;
+/// use ssd1306::{prelude::*, Builder, mode::graphics::FastSetPixel};
+///
+/// let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
+/// // Use the FastSetPixel optimization
+/// let display: GraphicsMode<_, FastSetPixel> = Builder::new().connect(interface).into();
+/// ```
+pub struct GraphicsMode<DI, OPT = DirtyArea>
+where
+    OPT: GraphicsModeOptimization,
+{
+    properties: DisplayProperties<DI>,
+    buffer: [u8; 1024],
+    opt: OPT,
+}
+
+impl<DI, OPT> DisplayModeTrait<DI> for GraphicsMode<DI, OPT>
+where
+    DI: WriteOnlyDataCommand,
+    OPT: GraphicsModeOptimization,
+{
     /// Create new GraphicsMode instance
     fn new(properties: DisplayProperties<DI>) -> Self {
+        let (width, height) = properties.get_dimensions();
         GraphicsMode {
             properties,
             buffer: [0; 1024],
-            min_x: 255,
-            max_x: 0,
-            min_y: 255,
-            max_y: 0,
+            opt: OPT::new(width, height),
         }
     }
 
@@ -92,31 +210,18 @@ impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI> {
     }
 }
 
-impl<DI> GraphicsMode<DI> {
-    /// Resets the area where the framebuffer was modified.
-    fn reset_dirty_area(&mut self) {
-        //  min > max means no set_pixel calls were made so far
-        self.min_x = 255;
-        self.max_x = 0;
-
-        self.min_y = 255;
-        self.max_y = 0;
-    }
-}
-
-impl<DI> GraphicsMode<DI>
+impl<DI, OPT> GraphicsMode<DI, OPT>
 where
     DI: WriteOnlyDataCommand,
+    OPT: GraphicsModeOptimization,
 {
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
         self.buffer = [0; 1024];
 
+        // invalidate the whole display area
         let (width, height) = self.get_dimensions();
-        self.min_x = 0;
-        self.max_x = width - 1;
-        self.min_y = 0;
-        self.max_y = height - 1;
+        self.opt.mark_dirty(0, width - 1, 0, height - 1);
     }
 
     /// Write out data to a display.
@@ -124,28 +229,27 @@ where
     /// This only updates the parts of the display that have changed since the last flush.
     pub fn flush(&mut self) -> Result<(), DisplayError> {
         // Nothing to do if no pixels have changed since the last update
-        // It's enough to check one of the dimensions because both are set to valid values by the
-        // first set_pixel call.
-        if self.max_x < self.min_x {
+        if !self.opt.needs_update() {
             return Ok(());
         }
 
         let (width, height) = self.get_dimensions();
 
+        let (min_x, max_x, min_y, max_y) = self.opt.get_dirty_area();
+        self.opt.reset_dirty();
+
         // Determine which bytes need to be sent
-        let disp_min_x = self.min_x;
-        let disp_min_y = self.min_y;
+        let disp_min_x = min_x;
+        let disp_min_y = min_y;
 
         let (disp_max_x, disp_max_y) = match self.properties.get_rotation() {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                ((self.max_x + 1).min(width), (self.max_y | 7).min(height))
+                ((max_x + 1).min(width), (max_y | 7).min(height))
             }
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                ((self.max_x | 7).min(width), (self.max_y + 1).min(height))
+                ((max_x | 7).min(width), (max_y + 1).min(height))
             }
         };
-
-        self.reset_dirty_area();
 
         // Compensate for any offset in the physical display. For example, the 72x40 display has an
         // offset of (28, 0) pixels.
@@ -205,11 +309,7 @@ where
 
         if let Some(byte) = self.buffer.get_mut(idx) {
             // Keep track of max and min values
-            self.min_x = self.min_x.min(x as u8);
-            self.max_x = self.max_x.max(x as u8);
-
-            self.min_y = self.min_y.min(y as u8);
-            self.max_y = self.max_y.max(y as u8);
+            self.opt.mark_dirty(x as u8, x as u8, y as u8, y as u8);
 
             // Set pixel value in byte
             // Ref this comment https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit#comment46654671_47990
@@ -258,9 +358,10 @@ use embedded_graphics::{
 };
 
 #[cfg(feature = "graphics")]
-impl<DI> DrawTarget<BinaryColor> for GraphicsMode<DI>
+impl<DI, OPT> DrawTarget<BinaryColor> for GraphicsMode<DI, OPT>
 where
     DI: WriteOnlyDataCommand,
+    OPT: GraphicsModeOptimization,
 {
     type Error = DisplayError;
 

@@ -31,9 +31,11 @@ impl Brightness {
 
     /// Create a Brightness object from a precharge period and contrast pair.
     ///
-    /// `precharge` sets the `phase 1` argument of the `0xD9 Set Pre-Charge Period` command and must
-    /// be must be between 1 and 15. See section 10.1.17 of the SSD1306 datasheet for more
-    /// information.
+    /// `precharge` sets the `phase 2` argument of the `0xD9 Set Pre-Charge Period` command and must
+    /// be must be between 1 and 15.
+    /// The effects of this parameter are hardware dependent. For the common 128x64 displays, values
+    /// 1 and 2 result in different brightness levels, values above 2 behave the same was as 2.
+    /// See section 10.1.17 of the SSD1306 datasheet for more information.
     ///
     /// `contrast` sets the value used in the `0x81 Set Contrast Control` command and must be
     /// between 0 and 255. See section 10.1.7 of the SSD1306 datasheet for more information.

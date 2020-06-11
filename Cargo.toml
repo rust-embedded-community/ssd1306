@@ -22,6 +22,7 @@ embedded-hal = "0.2.3"
 display-interface = "0.4"
 display-interface-i2c = "0.4"
 display-interface-spi = "0.4"
+typenum = "1.12.0"
 
 [dependencies.embedded-graphics]
 optional = true

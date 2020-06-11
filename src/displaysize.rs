@@ -1,31 +1,73 @@
 //! Display size
 
-// TODO: Add to prelude
-/// Display size enumeration
-#[derive(Clone, Copy)]
-pub enum DisplaySize {
-    /// 128 by 64 pixels
-    Display128x64,
-    /// 128 by 32 pixels
-    Display128x32,
-    /// 96 by 16 pixels
-    Display96x16,
-    /// 70 by 42 pixels
-    Display72x40,
-    /// 64 by 48 pixels
-    Display64x48,
+use super::command::Command;
+use typenum::{Unsigned, U0, U16, U28, U32, U40, U48, U64, U72, U96, U128};
+
+pub trait DisplaySize {
+    type Width: Unsigned;
+    type Height: Unsigned;
+    type OffsetX: Unsigned;
+    type OffsetY: Unsigned;
+
+    fn ComPinConfig() -> Command;
 }
 
-impl DisplaySize {
-    /// Get integral dimensions from DisplaySize
-    // TODO: Use whatever vec2 impl I decide to use here
-    pub fn dimensions(self) -> (u8, u8) {
-        match self {
-            DisplaySize::Display128x64 => (128, 64),
-            DisplaySize::Display128x32 => (128, 32),
-            DisplaySize::Display96x16 => (96, 16),
-            DisplaySize::Display72x40 => (72, 40),
-            DisplaySize::Display64x48 => (64, 48),
-        }
+pub struct DisplaySize128x64;
+impl DisplaySize for DisplaySize128x64 {
+    type Width = U128;
+    type Height = U64;
+    type OffsetX = U0;
+    type OffsetY = U0;
+
+    fn ComPinConfig() -> Command {
+        Command::ComPinConfig(true, false)
+    }
+}
+
+pub struct DisplaySize128x32;
+impl DisplaySize for DisplaySize128x32 {
+    type Width = U128;
+    type Height = U32;
+    type OffsetX = U0;
+    type OffsetY = U0;
+
+    fn ComPinConfig() -> Command {
+        Command::ComPinConfig(false, false)
+    }
+}
+
+pub struct DisplaySize96x16;
+impl DisplaySize for DisplaySize96x16 {
+    type Width = U96;
+    type Height = U16;
+    type OffsetX = U0;
+    type OffsetY = U0;
+
+    fn ComPinConfig() -> Command {
+        Command::ComPinConfig(false, false)
+    }
+}
+
+pub struct DisplaySize72x40;
+impl DisplaySize for DisplaySize72x40 {
+    type Width = U72;
+    type Height = U40;
+    type OffsetX = U28;
+    type OffsetY = U0;
+
+    fn ComPinConfig() -> Command {
+        Command::ComPinConfig(true, false)
+    }
+}
+
+pub struct DisplaySize64x48;
+impl DisplaySize for DisplaySize64x48 {
+    type Width = U64;
+    type Height = U48;
+    type OffsetX = U32;
+    type OffsetY = U0;
+
+    fn ComPinConfig() -> Command {
+        Command::ComPinConfig(true, false)
     }
 }

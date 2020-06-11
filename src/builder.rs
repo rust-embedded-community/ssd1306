@@ -59,36 +59,45 @@
 use display_interface::WriteOnlyDataCommand;
 
 use crate::{
-    displayrotation::DisplayRotation, displaysize::DisplaySize, properties::DisplayProperties,
+    displayrotation::DisplayRotation, displaysize::*, properties::DisplayProperties,
 };
 
 /// Builder struct. Driver options and interface are set using its methods.
 #[derive(Clone, Copy)]
-pub struct Builder {
-    display_size: DisplaySize,
+pub struct Builder<DSIZE=DisplaySize128x64>
+where
+    DSIZE: DisplaySize
+{
     rotation: DisplayRotation,
+    _size: core::marker::PhantomData<DSIZE>,
 }
 
-impl Default for Builder {
+impl<DSIZE> Default for Builder<DSIZE>
+where
+    DSIZE: DisplaySize,
+{
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Builder {
+impl<DSIZE> Builder<DSIZE>
+where
+    DSIZE: DisplaySize
+{
     /// Create new builder with a default size of 128 x 64 pixels and no rotation.
     pub fn new() -> Self {
         Self {
-            display_size: DisplaySize::Display128x64,
             rotation: DisplayRotation::Rotate0,
+            _size: core::marker::PhantomData,
         }
     }
 
     /// Set the size of the display. Supported sizes are defined by [DisplaySize].
-    pub fn size(self, display_size: DisplaySize) -> Self {
-        Self {
-            display_size,
-            ..self
+    pub fn size<SIZE: DisplaySize>(self) -> Builder<SIZE> {
+        Builder {
+            rotation: self.rotation,
+            _size: core::marker::PhantomData,
         }
     }
 
@@ -102,11 +111,11 @@ impl Builder {
     /// Finish the builder and use some interface communicate with the display
     ///
     /// This method consumes the builder and must come last in the method call chain
-    pub fn connect<I>(self, interface: I) -> DisplayProperties<I>
+    pub fn connect<I>(self, interface: I) -> DisplayProperties<I, DSIZE>
     where
         I: WriteOnlyDataCommand,
     {
-        DisplayProperties::new(interface, self.display_size, self.rotation)
+        DisplayProperties::new(interface, self.rotation)
     }
 }
 

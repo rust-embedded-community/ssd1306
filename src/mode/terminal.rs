@@ -25,13 +25,14 @@
 //! }
 //! ```
 
+use typenum::{Unsigned, U128, U64, U24, U45, U48};
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 
 use crate::{
     brightness::Brightness,
     command::AddrMode,
     displayrotation::DisplayRotation,
-    displaysize::DisplaySize,
+    displaysize::*,
     mode::{
         displaymode::DisplayModeTrait,
         terminal::TerminalModeError::{InterfaceError, OutOfBounds, Uninitialized},
@@ -39,6 +40,30 @@ use crate::{
     properties::DisplayProperties,
 };
 use core::{cmp::min, fmt};
+
+pub trait TerminalDisplaySize: DisplaySize {
+    type CharNum: Unsigned;
+}
+
+impl TerminalDisplaySize for DisplaySize128x64 {
+    type CharNum = U128;
+}
+
+impl TerminalDisplaySize for DisplaySize128x32 {
+    type CharNum = U64;
+}
+
+impl TerminalDisplaySize for DisplaySize96x16 {
+    type CharNum = U24;
+}
+
+impl TerminalDisplaySize for DisplaySize72x40 {
+    type CharNum = U45;
+}
+
+impl TerminalDisplaySize for DisplaySize64x48 {
+    type CharNum = U48;
+}
 
 /// Contains the new row that the cursor has wrapped around to
 struct CursorWrapEvent(u8);
@@ -135,17 +160,21 @@ impl<T> IntoTerminalModeResult<T> for Result<T, DisplayError> {
 
 // TODO: Add to prelude
 /// Terminal mode handler
-pub struct TerminalMode<DI> {
-    properties: DisplayProperties<DI>,
+pub struct TerminalMode<DI, DSIZE>
+where
+    DSIZE: TerminalDisplaySize,
+{
+    properties: DisplayProperties<DI, DSIZE>,
     cursor: Option<Cursor>,
 }
 
-impl<DI> DisplayModeTrait<DI> for TerminalMode<DI>
+impl<DI, DSIZE> DisplayModeTrait<DI, DSIZE> for TerminalMode<DI, DSIZE>
 where
     DI: WriteOnlyDataCommand,
+    DSIZE: TerminalDisplaySize,
 {
     /// Create new TerminalMode instance
-    fn new(properties: DisplayProperties<DI>) -> Self {
+    fn new(properties: DisplayProperties<DI, DSIZE>) -> Self {
         TerminalMode {
             properties,
             cursor: None,
@@ -153,41 +182,32 @@ where
     }
 
     /// Release display interface used by `TerminalMode`
-    fn into_properties(self) -> DisplayProperties<DI> {
+    fn into_properties(self) -> DisplayProperties<DI, DSIZE> {
         self.properties
     }
 }
 
 impl<DI> TerminalMode<DI>
 where
+    DSIZE: TerminalDisplaySize,
     DI: WriteOnlyDataCommand,
 {
     /// Clear the display and reset the cursor to the top left corner
     pub fn clear(&mut self) -> Result<(), TerminalModeError> {
-        let display_size = self.properties.get_size();
 
-        // The number of characters that can fit on the display at once (w * h / 8 * 8)
-        // TODO: Use `display_size.dimensions()`
-        let numchars = match display_size {
-            DisplaySize::Display128x64 => 128,
-            DisplaySize::Display128x32 => 64,
-            DisplaySize::Display96x16 => 24,
-            DisplaySize::Display72x40 => 45,
-            DisplaySize::Display64x48 => 48,
-        };
+        // The number of characters that can fit on the display at once (w * h / (8 * 8))
+        let numchars = DSIZE::CharNum::U8;
 
         // Let the chip handle line wrapping so we can fill the screen with blanks faster
         self.properties
             .change_mode(AddrMode::Horizontal)
             .terminal_err()?;
-        let (display_width, display_height) = self.properties.get_dimensions();
-        let (display_x_offset, display_y_offset) = self.properties.display_offset;
         self.properties
             .set_draw_area(
-                (display_x_offset, display_y_offset),
+                (DSIZE::OffsetX::U8, DSIZE::OffsetY::U8),
                 (
-                    display_width + display_x_offset,
-                    display_height + display_y_offset,
+                    DSIZE::Width::U8 + DSIZE::OffsetX::U8,
+                    DSIZE::Height::U8 + DSIZE::OffsetY::U8,
                 ),
             )
             .terminal_err()?;
@@ -236,7 +256,7 @@ where
     }
 
     /// Initialise the display in page mode (i.e. a byte walks down a column of 8 pixels) with
-    /// column 0 on the left and column _(display_width - 1)_ on the right, but no automatic line
+    /// column 0 on the left and column _(DSIZE::Width::U8 - 1)_ on the right, but no automatic line
     /// wrapping.
     pub fn init(&mut self) -> Result<(), TerminalModeError> {
         self.properties
@@ -289,14 +309,12 @@ where
 
     /// Reset the draw area and move pointer to the top left corner
     fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
-        let (display_x_offset, display_y_offset) = self.properties.display_offset;
         self.properties
-            .set_column(display_x_offset)
+            .set_column(DSIZE::OffsetX::U8)
             .terminal_err()?;
-        self.properties.set_row(display_y_offset).terminal_err()?;
+        self.properties.set_row(DSIZE::OffsetY::U8).terminal_err()?;
         // Initialise the counter when we know it's valid
-        let (display_width, display_height) = self.properties.get_dimensions();
-        self.cursor = Some(Cursor::new(display_width, display_height));
+        self.cursor = Some(Cursor::new(DSIZE::Width::U8, DSIZE::Height::U8));
 
         Ok(())
     }
@@ -415,9 +433,10 @@ where
     }
 }
 
-impl<DI> fmt::Write for TerminalMode<DI>
+impl<DI, DSIZE> fmt::Write for TerminalMode<DI, DSIZE>
 where
     DI: WriteOnlyDataCommand,
+    DSIZE: TerminalDisplaySize,
 {
     fn write_str(&mut self, s: &str) -> Result<(), fmt::Error> {
         s.chars().map(move |c| self.print_char(c)).last();

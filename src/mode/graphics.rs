@@ -55,10 +55,11 @@
 //!
 //! [embedded_graphics]: https://crates.io/crates/embedded_graphics
 
-use generic_array::GenericArray;
-use typenum::Unsigned;
 use crate::displaysize::DisplaySize;
 use display_interface::{DisplayError, WriteOnlyDataCommand};
+use generic_array::GenericArray;
+use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
+use typenum::Unsigned;
 
 use crate::{
     brightness::Brightness, displayrotation::DisplayRotation, mode::displaymode::DisplayModeTrait,
@@ -150,8 +151,14 @@ where
         match self.properties.get_rotation() {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
                 self.properties.set_draw_area(
-                    (disp_min_x + DSIZE::OffsetX::U8, disp_min_y + DSIZE::OffsetY::U8),
-                    (disp_max_x + DSIZE::OffsetX::U8, disp_max_y + DSIZE::OffsetY::U8),
+                    (
+                        disp_min_x + DSIZE::OffsetX::U8,
+                        disp_min_y + DSIZE::OffsetY::U8,
+                    ),
+                    (
+                        disp_max_x + DSIZE::OffsetX::U8,
+                        disp_max_y + DSIZE::OffsetY::U8,
+                    ),
                 )?;
 
                 self.properties.bounded_draw(
@@ -163,8 +170,14 @@ where
             }
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
                 self.properties.set_draw_area(
-                    (disp_min_y + DSIZE::OffsetY::U8, disp_min_x + DSIZE::OffsetX::U8),
-                    (disp_max_y + DSIZE::OffsetY::U8, disp_max_x + DSIZE::OffsetX::U8),
+                    (
+                        disp_min_y + DSIZE::OffsetY::U8,
+                        disp_min_x + DSIZE::OffsetX::U8,
+                    ),
+                    (
+                        disp_max_y + DSIZE::OffsetY::U8,
+                        disp_max_x + DSIZE::OffsetX::U8,
+                    ),
                 )?;
 
                 self.properties.bounded_draw(

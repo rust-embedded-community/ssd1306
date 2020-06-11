@@ -1,8 +1,10 @@
 //! Display size
 
-use generic_array::ArrayLength;
 use super::command::Command;
-use typenum::{Unsigned, U0, U16, U28, U32, U40, U48, U64, U72, U96, U128, U192, U360, U384, U512, U1024};
+use generic_array::ArrayLength;
+use typenum::{
+    Unsigned, U0, U1024, U128, U16, U192, U28, U32, U360, U384, U40, U48, U512, U64, U72, U96,
+};
 
 pub trait DisplaySize {
     type Width: Unsigned;

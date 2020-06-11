@@ -58,15 +58,13 @@
 
 use display_interface::WriteOnlyDataCommand;
 
-use crate::{
-    displayrotation::DisplayRotation, displaysize::*, properties::DisplayProperties,
-};
+use crate::{displayrotation::DisplayRotation, displaysize::*, properties::DisplayProperties};
 
 /// Builder struct. Driver options and interface are set using its methods.
 #[derive(Clone, Copy)]
-pub struct Builder<DSIZE=DisplaySize128x64>
+pub struct Builder<DSIZE = DisplaySize128x64>
 where
-    DSIZE: DisplaySize
+    DSIZE: DisplaySize,
 {
     rotation: DisplayRotation,
     _size: core::marker::PhantomData<DSIZE>,
@@ -83,7 +81,7 @@ where
 
 impl<DSIZE> Builder<DSIZE>
 where
-    DSIZE: DisplaySize
+    DSIZE: DisplaySize,
 {
     /// Create new builder with a default size of 128 x 64 pixels and no rotation.
     pub fn new() -> Self {

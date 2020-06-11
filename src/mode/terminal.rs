@@ -25,8 +25,8 @@
 //! }
 //! ```
 
-use typenum::{Unsigned, U128, U64, U24, U45, U48};
 use display_interface::{DisplayError, WriteOnlyDataCommand};
+use typenum::{Unsigned, U128, U24, U45, U48, U64};
 
 use crate::{
     brightness::Brightness,
@@ -194,7 +194,6 @@ where
 {
     /// Clear the display and reset the cursor to the top left corner
     pub fn clear(&mut self) -> Result<(), TerminalModeError> {
-
         // The number of characters that can fit on the display at once (w * h / (8 * 8))
         let numchars = DSIZE::CharNum::U8;
 

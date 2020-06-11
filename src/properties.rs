@@ -1,5 +1,4 @@
 //! Container to store and set display properties
-use typenum::Unsigned;
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::{
     brightness::Brightness,
@@ -8,6 +7,7 @@ use crate::{
     displaysize::DisplaySize,
 };
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
+use typenum::Unsigned;
 
 /// Display properties struct
 pub struct DisplayProperties<DI, DSIZE> {
@@ -22,10 +22,7 @@ where
     DSIZE: DisplaySize,
 {
     /// Create new DisplayProperties instance
-    pub fn new(
-        iface: DI,
-        display_rotation: DisplayRotation,
-    ) -> DisplayProperties<DI, DSIZE> {
+    pub fn new(iface: DI, display_rotation: DisplayRotation) -> DisplayProperties<DI, DSIZE> {
         DisplayProperties {
             iface,
             display_rotation,
@@ -42,7 +39,7 @@ impl<DI, DSIZE> DisplayProperties<DI, DSIZE> {
     }
 }
 
-impl<DI, DSIZE> DisplayProperties<DI,DSIZE>
+impl<DI, DSIZE> DisplayProperties<DI, DSIZE>
 where
     DI: WriteOnlyDataCommand,
     DSIZE: DisplaySize,
@@ -188,8 +185,12 @@ where
     /// ```
     pub fn get_dimensions(&self) -> (u8, u8) {
         match self.display_rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (DSIZE::Width::U8, DSIZE::Height::U8),
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (DSIZE::Height::U8, DSIZE::Width::U8),
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                (DSIZE::Width::U8, DSIZE::Height::U8)
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                (DSIZE::Height::U8, DSIZE::Width::U8)
+            }
         }
     }
 

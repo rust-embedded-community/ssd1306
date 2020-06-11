@@ -55,6 +55,7 @@
 //!
 //! [embedded_graphics]: https://crates.io/crates/embedded_graphics
 
+use generic_array::GenericArray;
 use typenum::Unsigned;
 use crate::displaysize::DisplaySize;
 use display_interface::{DisplayError, WriteOnlyDataCommand};
@@ -71,7 +72,7 @@ where
     DSIZE: DisplaySize,
 {
     properties: DisplayProperties<DI, DSIZE>,
-    buffer: [u8; 1024],
+    buffer: GenericArray<u8, DSIZE::BufferSize>,
     min_x: u8,
     max_x: u8,
     min_y: u8,
@@ -86,7 +87,7 @@ where
     fn new(properties: DisplayProperties<DI, DSIZE>) -> Self {
         GraphicsMode {
             properties,
-            buffer: [0; 1024],
+            buffer: GenericArray::default(),
             min_x: 255,
             max_x: 0,
             min_y: 255,
@@ -107,7 +108,7 @@ where
 {
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
-        self.buffer = [0; 1024];
+        self.buffer = GenericArray::default();
 
         let (width, height) = self.get_dimensions();
         self.min_x = 0;

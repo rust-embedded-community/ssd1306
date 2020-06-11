@@ -1,13 +1,15 @@
 //! Display size
 
+use generic_array::ArrayLength;
 use super::command::Command;
-use typenum::{Unsigned, U0, U16, U28, U32, U40, U48, U64, U72, U96, U128};
+use typenum::{Unsigned, U0, U16, U28, U32, U40, U48, U64, U72, U96, U128, U192, U360, U384, U512, U1024};
 
 pub trait DisplaySize {
     type Width: Unsigned;
     type Height: Unsigned;
     type OffsetX: Unsigned;
     type OffsetY: Unsigned;
+    type BufferSize: ArrayLength<u8>;
 
     fn ComPinConfig() -> Command;
 }
@@ -18,6 +20,7 @@ impl DisplaySize for DisplaySize128x64 {
     type Height = U64;
     type OffsetX = U0;
     type OffsetY = U0;
+    type BufferSize = U1024;
 
     fn ComPinConfig() -> Command {
         Command::ComPinConfig(true, false)
@@ -30,6 +33,7 @@ impl DisplaySize for DisplaySize128x32 {
     type Height = U32;
     type OffsetX = U0;
     type OffsetY = U0;
+    type BufferSize = U512;
 
     fn ComPinConfig() -> Command {
         Command::ComPinConfig(false, false)
@@ -42,6 +46,7 @@ impl DisplaySize for DisplaySize96x16 {
     type Height = U16;
     type OffsetX = U0;
     type OffsetY = U0;
+    type BufferSize = U192;
 
     fn ComPinConfig() -> Command {
         Command::ComPinConfig(false, false)
@@ -54,6 +59,7 @@ impl DisplaySize for DisplaySize72x40 {
     type Height = U40;
     type OffsetX = U28;
     type OffsetY = U0;
+    type BufferSize = U360;
 
     fn ComPinConfig() -> Command {
         Command::ComPinConfig(true, false)
@@ -66,6 +72,7 @@ impl DisplaySize for DisplaySize64x48 {
     type Height = U48;
     type OffsetX = U32;
     type OffsetY = U0;
+    type BufferSize = U384;
 
     fn ComPinConfig() -> Command {
         Command::ComPinConfig(true, false)

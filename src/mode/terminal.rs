@@ -36,10 +36,8 @@ use crate::{
         terminal::TerminalModeError::{InterfaceError, OutOfBounds, Uninitialized},
     },
     properties::DisplayProperties,
-    Error,
 };
 use core::{cmp::min, fmt};
-use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 
 /// Contains the new row that the cursor has wrapped around to
 struct CursorWrapEvent(u8);
@@ -156,25 +154,6 @@ where
     /// Release display interface used by `TerminalMode`
     fn into_properties(self) -> DisplayProperties<DI> {
         self.properties
-    }
-}
-
-impl<DI> TerminalMode<DI> {
-    /// Reset display
-    pub fn reset<RST, DELAY, PinE>(
-        &mut self,
-        rst: &mut RST,
-        delay: &mut DELAY,
-    ) -> Result<(), Error<(), PinE>>
-    where
-        RST: OutputPin<Error = PinE>,
-        DELAY: DelayMs<u8>,
-    {
-        rst.set_high().map_err(Error::Pin)?;
-        delay.delay_ms(1);
-        rst.set_low().map_err(Error::Pin)?;
-        delay.delay_ms(10);
-        rst.set_high().map_err(Error::Pin)
     }
 }
 

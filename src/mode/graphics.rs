@@ -56,11 +56,10 @@
 //! [embedded_graphics]: https://crates.io/crates/embedded_graphics
 
 use display_interface::{DisplayError, WriteOnlyDataCommand};
-use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 
 use crate::{
     displayrotation::DisplayRotation, mode::displaymode::DisplayModeTrait,
-    properties::DisplayProperties, Error,
+    properties::DisplayProperties,
 };
 
 // TODO: Add to prelude
@@ -90,26 +89,6 @@ impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI> {
     /// Release display interface used by `GraphicsMode`
     fn into_properties(self) -> DisplayProperties<DI> {
         self.properties
-    }
-}
-
-impl<DI> GraphicsMode<DI> {
-    /// Reset display
-    // TODO: Move to a more appropriate place
-    pub fn reset<RST, DELAY, PinE>(
-        &mut self,
-        rst: &mut RST,
-        delay: &mut DELAY,
-    ) -> Result<(), Error<(), PinE>>
-    where
-        RST: OutputPin<Error = PinE>,
-        DELAY: DelayMs<u8>,
-    {
-        rst.set_high().map_err(Error::Pin)?;
-        delay.delay_ms(1);
-        rst.set_low().map_err(Error::Pin)?;
-        delay.delay_ms(10);
-        rst.set_high().map_err(Error::Pin)
     }
 }
 

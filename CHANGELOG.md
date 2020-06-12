@@ -12,7 +12,8 @@
 
 ### Changed
 
--**(breaking)** [#119](https://github.com/jamwaffles/ssd1306/pull/119) Remove `DisplayMode` and `RawMode`
+- **(breaking)** [#126](https://github.com/jamwaffles/ssd1306/pull/126) Moved `reset` method to `DisplayModeTrait`. If the prelude is not used, add either `use ssd1306::prelude::*` or `ssd1306::mode::displaymode::DisplayModeTrait` to your imports.
+- **(breaking)** [#119](https://github.com/jamwaffles/ssd1306/pull/119) Remove `DisplayMode` and `RawMode`
 - [#120](https://github.com/jamwaffles/ssd1306/pull/120) Update to v0.4 [`display-interface`](https://crates.io/crates/display-interface)
 - **(breaking)** [#118](https://github.com/jamwaffles/ssd1306/pull/118) Change `release` method to return the display interface instead of the `DisplayProperties`.
 - **(breaking)** [#116](https://github.com/jamwaffles/ssd1306/pull/116) Replace custom I2C and SPI interfaces by generic [`display-interface`](https://crates.io/crates/display-interface)

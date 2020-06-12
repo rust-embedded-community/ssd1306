@@ -59,7 +59,7 @@ use display_interface::{DisplayError, WriteOnlyDataCommand};
 
 use crate::{
     brightness::Brightness, displayrotation::DisplayRotation, mode::displaymode::DisplayModeTrait,
-    properties::DisplayProperties, Error,
+    properties::DisplayProperties,
 };
 
 // TODO: Add to prelude
@@ -230,8 +230,8 @@ where
     }
 
     /// Change the display brightness.
-    pub fn change_brightness(&mut self, brightness: Brightness) -> Result<(), DisplayError> {
-        self.properties.change_brightness(brightness)
+    pub fn set_brightness(&mut self, brightness: Brightness) -> Result<(), DisplayError> {
+        self.properties.set_brightness(brightness)
     }
 }
 

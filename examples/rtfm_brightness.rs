@@ -169,7 +169,7 @@ const APP: () = {
                 };
 
                 // Send the new brightness value to the display
-                display.change_brightness(*brightness).unwrap();
+                display.set_brightness(*brightness).unwrap();
             }
         }
 

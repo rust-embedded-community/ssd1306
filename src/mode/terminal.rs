@@ -260,7 +260,7 @@ where
 
     /// Change the display brightness.
     pub fn set_brightness(&mut self, brightness: Brightness) -> Result<(), TerminalModeError> {
-        self.properties.change_brightness(brightness).terminal_err()
+        self.properties.set_brightness(brightness).terminal_err()
     }
 
     /// Get the current cursor position, in character coordinates.

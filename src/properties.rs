@@ -84,7 +84,7 @@ where
             DisplaySize::Display64x48 => Command::ComPinConfig(true, false).send(&mut self.iface),
         }?;
 
-        self.change_brightness(Brightness::default())?;
+        self.set_brightness(Brightness::default())?;
         Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
         Command::AllOn(false).send(&mut self.iface)?;
         Command::Invert(false).send(&mut self.iface)?;

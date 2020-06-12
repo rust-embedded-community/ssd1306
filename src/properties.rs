@@ -169,7 +169,6 @@ where
     /// #
     /// let disp = DisplayProperties::new(
     ///     interface,
-    ///     DisplaySize::Display128x64,
     ///     DisplayRotation::Rotate0,
     /// );
     /// assert_eq!(disp.get_dimensions(), (128, 64));
@@ -177,7 +176,6 @@ where
     /// # let interface = StubInterface;
     /// let rotated_disp = DisplayProperties::new(
     ///     interface,
-    ///     DisplaySize::Display128x64,
     ///     DisplayRotation::Rotate90,
     /// );
     /// assert_eq!(rotated_disp.get_dimensions(), (64, 128));

@@ -33,7 +33,7 @@
 //! let interface = I2CDIBuilder::new().init(i2c);
 //! Builder::new()
 //!     .with_rotation(DisplayRotation::Rotate180)
-//!     .size(DisplaySize::Display128x32)
+//!     .size::<DisplaySize128x32>()
 //!     .connect(interface);
 //! ```
 //!

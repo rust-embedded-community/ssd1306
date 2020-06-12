@@ -160,7 +160,7 @@ impl<T> IntoTerminalModeResult<T> for Result<T, DisplayError> {
 
 // TODO: Add to prelude
 /// Terminal mode handler
-pub struct TerminalMode<DI, DSIZE>
+pub struct TerminalMode<DI, DSIZE = DisplaySize128x64>
 where
     DSIZE: TerminalDisplaySize,
 {

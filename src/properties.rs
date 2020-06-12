@@ -4,13 +4,13 @@ use crate::{
     brightness::Brightness,
     command::{AddrMode, Command, VcomhLevel},
     displayrotation::DisplayRotation,
-    displaysize::DisplaySize,
+    displaysize::{DisplaySize, DisplaySize128x64},
 };
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 use typenum::Unsigned;
 
 /// Display properties struct
-pub struct DisplayProperties<DI, DSIZE> {
+pub struct DisplayProperties<DI, DSIZE=DisplaySize128x64> {
     iface: DI,
     display_rotation: DisplayRotation,
     addr_mode: AddrMode,

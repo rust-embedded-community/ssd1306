@@ -55,7 +55,7 @@
 //!
 //! [embedded_graphics]: https://crates.io/crates/embedded_graphics
 
-use crate::displaysize::DisplaySize;
+use crate::displaysize::{DisplaySize, DisplaySize128x64};
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 use generic_array::GenericArray;
 use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
@@ -68,7 +68,7 @@ use crate::{
 
 // TODO: Add to prelude
 /// Graphics mode handler
-pub struct GraphicsMode<DI, DSIZE>
+pub struct GraphicsMode<DI, DSIZE=DisplaySize128x64>
 where
     DSIZE: DisplaySize,
 {

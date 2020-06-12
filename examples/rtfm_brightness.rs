@@ -1,4 +1,5 @@
-//! Same as the rtfm_brightness example, but when the logo hits one of the sides, change brightness.
+//! Cycle the screen brightness through 5 predefined brightness levels when the "DVD" logo hits one 
+//! of the sides of the display.
 //!
 //! For best results, run with the `--release` flag.
 

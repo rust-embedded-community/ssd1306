@@ -259,7 +259,7 @@ where
     }
 
     /// Change the display brightness.
-    pub fn change_brightness(&mut self, brightness: Brightness) -> Result<(), TerminalModeError> {
+    pub fn set_brightness(&mut self, brightness: Brightness) -> Result<(), TerminalModeError> {
         self.properties.change_brightness(brightness).terminal_err()
     }
 

@@ -8,7 +8,7 @@
 
 ### Added
 
-- [#121](https://github.com/jamwaffles/ssd1306/pull/121) Brightness control
+- [#121](https://github.com/jamwaffles/ssd1306/pull/121) Added brightness control with the `set_brightness()` method.
 - [#118](https://github.com/jamwaffles/ssd1306/pull/118) `DisplayModeTrait::into_properties()` new method that consumes the driver and returns the `DisplayProperties`
 
 ### Changed

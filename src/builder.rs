@@ -90,7 +90,6 @@ impl<DSIZE> Builder<DSIZE>
 where
     DSIZE: DisplaySize,
 {
-
     /// Set the size of the display. Supported sizes are defined by [DisplaySize].
     pub fn size<SIZE: DisplaySize>(self) -> Builder<SIZE> {
         Builder {

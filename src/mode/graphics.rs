@@ -58,8 +58,6 @@
 use crate::displaysize::{DisplaySize, DisplaySize128x64};
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 use generic_array::GenericArray;
-use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
-use typenum::Unsigned;
 
 use crate::{
     brightness::Brightness, displayrotation::DisplayRotation, mode::displaymode::DisplayModeTrait,
@@ -102,7 +100,7 @@ where
     }
 }
 
-impl<DI> GraphicsMode<DI>
+impl<DI, DSIZE> GraphicsMode<DI, DSIZE>
 where
     DSIZE: DisplaySize,
     DI: WriteOnlyDataCommand,
@@ -152,12 +150,12 @@ where
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
                 self.properties.set_draw_area(
                     (
-                        disp_min_x + DSIZE::OffsetX::U8,
-                        disp_min_y + DSIZE::OffsetY::U8,
+                        disp_min_x + DSIZE::OFFSETX,
+                        disp_min_y + DSIZE::OFFSETY,
                     ),
                     (
-                        disp_max_x + DSIZE::OffsetX::U8,
-                        disp_max_y + DSIZE::OffsetY::U8,
+                        disp_max_x + DSIZE::OFFSETX,
+                        disp_max_y + DSIZE::OFFSETY,
                     ),
                 )?;
 
@@ -171,12 +169,12 @@ where
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
                 self.properties.set_draw_area(
                     (
-                        disp_min_y + DSIZE::OffsetY::U8,
-                        disp_min_x + DSIZE::OffsetX::U8,
+                        disp_min_y + DSIZE::OFFSETY,
+                        disp_min_x + DSIZE::OFFSETX,
                     ),
                     (
-                        disp_max_y + DSIZE::OffsetY::U8,
-                        disp_max_x + DSIZE::OffsetX::U8,
+                        disp_max_y + DSIZE::OFFSETY,
+                        disp_max_x + DSIZE::OFFSETX,
                     ),
                 )?;
 
@@ -197,13 +195,13 @@ where
 
         let (idx, bit) = match display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                let idx = ((y as usize) / 8 * DSIZE::Width::U8 as usize) + (x as usize);
+                let idx = ((y as usize) / 8 * DSIZE::WIDTH as usize) + (x as usize);
                 let bit = y % 8;
 
                 (idx, bit)
             }
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                let idx = ((x as usize) / 8 * DSIZE::Width::U8 as usize) + (y as usize);
+                let idx = ((x as usize) / 8 * DSIZE::WIDTH as usize) + (y as usize);
                 let bit = x % 8;
 
                 (idx, bit)

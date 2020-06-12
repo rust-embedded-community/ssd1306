@@ -7,7 +7,6 @@ use crate::{
     displaysize::{DisplaySize, DisplaySize128x64},
 };
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
-use typenum::Unsigned;
 
 /// Display properties struct
 pub struct DisplayProperties<DI, DSIZE=DisplaySize128x64> {
@@ -56,7 +55,7 @@ where
 
         Command::DisplayOn(false).send(&mut self.iface)?;
         Command::DisplayClockDiv(0x8, 0x0).send(&mut self.iface)?;
-        Command::Multiplex(DSIZE::Height::U8 - 1).send(&mut self.iface)?;
+        Command::Multiplex(DSIZE::HEIGHT - 1).send(&mut self.iface)?;
         Command::DisplayOffset(0).send(&mut self.iface)?;
         Command::StartLine(0).send(&mut self.iface)?;
         // TODO: Ability to turn charge pump on/off
@@ -65,7 +64,7 @@ where
 
         self.set_rotation(display_rotation)?;
 
-        DSIZE::ComPinConfig().send(&mut self.iface)?;
+        DSIZE::com_pin_config().send(&mut self.iface)?;
 
         self.set_brightness(Brightness::default())?;
         Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
@@ -186,10 +185,10 @@ where
     pub fn get_dimensions(&self) -> (u8, u8) {
         match self.display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                (DSIZE::Width::U8, DSIZE::Height::U8)
+                (DSIZE::WIDTH, DSIZE::HEIGHT)
             }
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                (DSIZE::Height::U8, DSIZE::Width::U8)
+                (DSIZE::HEIGHT, DSIZE::WIDTH)
             }
         }
     }

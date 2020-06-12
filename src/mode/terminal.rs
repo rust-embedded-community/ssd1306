@@ -26,7 +26,6 @@
 //! ```
 
 use display_interface::{DisplayError, WriteOnlyDataCommand};
-use typenum::{Unsigned, U128, U24, U45, U48, U64};
 
 use crate::{
     brightness::Brightness,
@@ -42,27 +41,28 @@ use crate::{
 use core::{cmp::min, fmt};
 
 pub trait TerminalDisplaySize: DisplaySize {
-    type CharNum: Unsigned;
+    /// The number of characters that can fit on the display at once (w * h / (8 * 8))
+    const CHAR_NUM: u8;
 }
 
 impl TerminalDisplaySize for DisplaySize128x64 {
-    type CharNum = U128;
+    const CHAR_NUM: u8 = 128;
 }
 
 impl TerminalDisplaySize for DisplaySize128x32 {
-    type CharNum = U64;
+    const CHAR_NUM: u8 = 64;
 }
 
 impl TerminalDisplaySize for DisplaySize96x16 {
-    type CharNum = U24;
+    const CHAR_NUM: u8 = 24;
 }
 
 impl TerminalDisplaySize for DisplaySize72x40 {
-    type CharNum = U45;
+    const CHAR_NUM: u8 = 45;
 }
 
 impl TerminalDisplaySize for DisplaySize64x48 {
-    type CharNum = U48;
+    const CHAR_NUM: u8 = 48;
 }
 
 /// Contains the new row that the cursor has wrapped around to
@@ -187,15 +187,13 @@ where
     }
 }
 
-impl<DI> TerminalMode<DI>
+impl<DI, DSIZE> TerminalMode<DI, DSIZE>
 where
-    DSIZE: TerminalDisplaySize,
     DI: WriteOnlyDataCommand,
+    DSIZE: TerminalDisplaySize,
 {
     /// Clear the display and reset the cursor to the top left corner
     pub fn clear(&mut self) -> Result<(), TerminalModeError> {
-        // The number of characters that can fit on the display at once (w * h / (8 * 8))
-        let numchars = DSIZE::CharNum::U8;
 
         // Let the chip handle line wrapping so we can fill the screen with blanks faster
         self.properties
@@ -203,16 +201,16 @@ where
             .terminal_err()?;
         self.properties
             .set_draw_area(
-                (DSIZE::OffsetX::U8, DSIZE::OffsetY::U8),
+                (DSIZE::OFFSETX, DSIZE::OFFSETY),
                 (
-                    DSIZE::Width::U8 + DSIZE::OffsetX::U8,
-                    DSIZE::Height::U8 + DSIZE::OffsetY::U8,
+                    DSIZE::WIDTH + DSIZE::OFFSETX,
+                    DSIZE::HEIGHT + DSIZE::OFFSETY,
                 ),
             )
             .terminal_err()?;
 
         // Clear the display
-        for _ in 0..numchars {
+        for _ in 0..DSIZE::CHAR_NUM {
             self.properties.draw(&[0; 8]).terminal_err()?;
         }
 
@@ -309,11 +307,11 @@ where
     /// Reset the draw area and move pointer to the top left corner
     fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
         self.properties
-            .set_column(DSIZE::OffsetX::U8)
+            .set_column(DSIZE::OFFSETX)
             .terminal_err()?;
-        self.properties.set_row(DSIZE::OffsetY::U8).terminal_err()?;
+        self.properties.set_row(DSIZE::OFFSETY).terminal_err()?;
         // Initialise the counter when we know it's valid
-        self.cursor = Some(Cursor::new(DSIZE::Width::U8, DSIZE::Height::U8));
+        self.cursor = Some(Cursor::new(DSIZE::WIDTH, DSIZE::HEIGHT));
 
         Ok(())
     }

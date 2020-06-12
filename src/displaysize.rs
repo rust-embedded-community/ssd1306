@@ -2,81 +2,73 @@
 
 use super::command::Command;
 use generic_array::ArrayLength;
-use typenum::{
-    Unsigned, U0, U1024, U128, U16, U192, U28, U32, U360, U384, U40, U48, U512, U64, U72, U96,
-};
+use typenum::{U1024, U192, U360, U384, U512};
 
 pub trait DisplaySize {
-    type Width: Unsigned;
-    type Height: Unsigned;
-    type OffsetX: Unsigned;
-    type OffsetY: Unsigned;
+    const WIDTH: u8;
+    const HEIGHT: u8;
+    const OFFSETX: u8 = 0;
+    const OFFSETY: u8 = 0;
     type BufferSize: ArrayLength<u8>;
 
-    fn ComPinConfig() -> Command;
+    fn com_pin_config() -> Command;
 }
 
 pub struct DisplaySize128x64;
 impl DisplaySize for DisplaySize128x64 {
-    type Width = U128;
-    type Height = U64;
-    type OffsetX = U0;
-    type OffsetY = U0;
+    const WIDTH: u8 = 128;
+    const HEIGHT: u8 = 64;
     type BufferSize = U1024;
 
-    fn ComPinConfig() -> Command {
+    fn com_pin_config() -> Command {
         Command::ComPinConfig(true, false)
     }
 }
 
 pub struct DisplaySize128x32;
 impl DisplaySize for DisplaySize128x32 {
-    type Width = U128;
-    type Height = U32;
-    type OffsetX = U0;
-    type OffsetY = U0;
+    const WIDTH: u8 = 128;
+    const HEIGHT: u8 = 32;
     type BufferSize = U512;
 
-    fn ComPinConfig() -> Command {
+    fn com_pin_config() -> Command {
         Command::ComPinConfig(false, false)
     }
 }
 
 pub struct DisplaySize96x16;
 impl DisplaySize for DisplaySize96x16 {
-    type Width = U96;
-    type Height = U16;
-    type OffsetX = U0;
-    type OffsetY = U0;
+    const WIDTH: u8 = 96;
+    const HEIGHT: u8 = 16;
     type BufferSize = U192;
 
-    fn ComPinConfig() -> Command {
+    fn com_pin_config() -> Command {
         Command::ComPinConfig(false, false)
     }
 }
 
 pub struct DisplaySize72x40;
 impl DisplaySize for DisplaySize72x40 {
-    type Width = U72;
-    type Height = U40;
-    type OffsetX = U28;
-    type OffsetY = U0;
+    const WIDTH: u8 = 72;
+    const HEIGHT: u8 = 40;
+    const OFFSETX: u8 = 28;
+    const OFFSETY: u8 = 0;
     type BufferSize = U360;
 
-    fn ComPinConfig() -> Command {
+    fn com_pin_config() -> Command {
         Command::ComPinConfig(true, false)
     }
 }
 
 pub struct DisplaySize64x48;
 impl DisplaySize for DisplaySize64x48 {
-    type Width = U64;
-    type Height = U48;
-    type OffsetX = U32;
-    type OffsetY = U0;
+    const WIDTH: u8 = 64;
+    const HEIGHT: u8 = 48;
+    const OFFSETX: u8 = 32;
+    const OFFSETY: u8 = 0;
     type BufferSize = U384;
 
-    fn ComPinConfig() -> Command {
+    fn com_pin_config() -> Command {
         Command::ComPinConfig(true, false)
     }
 }

@@ -167,14 +167,14 @@ where
     /// # let interface = StubInterface;
     /// use ssd1306::prelude::*;
     /// #
-    /// let disp = DisplayProperties::new(
+    /// let disp: DisplayProperties<_, DisplaySize128x64> = DisplayProperties::new(
     ///     interface,
     ///     DisplayRotation::Rotate0,
     /// );
     /// assert_eq!(disp.get_dimensions(), (128, 64));
     ///
     /// # let interface = StubInterface;
-    /// let rotated_disp = DisplayProperties::new(
+    /// let rotated_disp: DisplayProperties<_, DisplaySize128x64> = DisplayProperties::new(
     ///     interface,
     ///     DisplayRotation::Rotate90,
     /// );

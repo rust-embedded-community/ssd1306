@@ -58,7 +58,7 @@
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 
 use crate::{
-    displayrotation::DisplayRotation, mode::displaymode::DisplayModeTrait,
+    brightness::Brightness, displayrotation::DisplayRotation, mode::displaymode::DisplayModeTrait,
     properties::DisplayProperties,
 };
 
@@ -227,6 +227,11 @@ where
     /// of its memory even while off.
     pub fn display_on(&mut self, on: bool) -> Result<(), DisplayError> {
         self.properties.display_on(on)
+    }
+
+    /// Change the display brightness.
+    pub fn set_brightness(&mut self, brightness: Brightness) -> Result<(), DisplayError> {
+        self.properties.set_brightness(brightness)
     }
 }
 

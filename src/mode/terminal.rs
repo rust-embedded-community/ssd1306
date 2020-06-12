@@ -28,6 +28,7 @@
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 
 use crate::{
+    brightness::Brightness,
     command::AddrMode,
     displayrotation::DisplayRotation,
     displaysize::DisplaySize,
@@ -255,6 +256,11 @@ where
     /// of its memory even while off.
     pub fn display_on(&mut self, on: bool) -> Result<(), TerminalModeError> {
         self.properties.display_on(on).terminal_err()
+    }
+
+    /// Change the display brightness.
+    pub fn set_brightness(&mut self, brightness: Brightness) -> Result<(), TerminalModeError> {
+        self.properties.set_brightness(brightness).terminal_err()
     }
 
     /// Get the current cursor position, in character coordinates.

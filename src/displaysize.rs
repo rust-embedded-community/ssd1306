@@ -3,6 +3,7 @@
 // These are not instantiated, so no need to implement Copy
 #![allow(missing_copy_implementations)]
 
+use display_interface::{DisplayError, WriteOnlyDataCommand};
 use super::command::Command;
 use generic_array::ArrayLength;
 use typenum::{U1024, U192, U360, U384, U512};
@@ -28,11 +29,11 @@ pub trait DisplaySize {
     /// width * height / 8
     type BufferSize: ArrayLength<u8>;
 
-    /// Returns the command to set up com hardware configuration
+    /// Send resolution-dependent configuration to the display
     ///
     /// See [`Command::ComPinConfig`](../command/enum.Command.html#variant.ComPinConfig)
     /// for more information
-    fn com_pin_config() -> Command;
+    fn configure(iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError>;
 }
 
 /// Size information for the common 128x64 variants
@@ -42,8 +43,8 @@ impl DisplaySize for DisplaySize128x64 {
     const HEIGHT: u8 = 64;
     type BufferSize = U1024;
 
-    fn com_pin_config() -> Command {
-        Command::ComPinConfig(true, false)
+    fn configure(iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
+        Command::ComPinConfig(true, false).send(iface)
     }
 }
 
@@ -54,8 +55,8 @@ impl DisplaySize for DisplaySize128x32 {
     const HEIGHT: u8 = 32;
     type BufferSize = U512;
 
-    fn com_pin_config() -> Command {
-        Command::ComPinConfig(false, false)
+    fn configure(iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
+        Command::ComPinConfig(false, false).send(iface)
     }
 }
 
@@ -66,8 +67,8 @@ impl DisplaySize for DisplaySize96x16 {
     const HEIGHT: u8 = 16;
     type BufferSize = U192;
 
-    fn com_pin_config() -> Command {
-        Command::ComPinConfig(false, false)
+    fn configure(iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
+        Command::ComPinConfig(false, false).send(iface)
     }
 }
 
@@ -80,8 +81,8 @@ impl DisplaySize for DisplaySize72x40 {
     const OFFSETY: u8 = 0;
     type BufferSize = U360;
 
-    fn com_pin_config() -> Command {
-        Command::ComPinConfig(true, false)
+    fn configure(iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
+        Command::ComPinConfig(true, false).send(iface)
     }
 }
 
@@ -94,7 +95,7 @@ impl DisplaySize for DisplaySize64x48 {
     const OFFSETY: u8 = 0;
     type BufferSize = U384;
 
-    fn com_pin_config() -> Command {
-        Command::ComPinConfig(true, false)
+    fn configure(iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
+        Command::ComPinConfig(true, false).send(iface)
     }
 }

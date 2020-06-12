@@ -64,7 +64,7 @@ where
 
         self.set_rotation(display_rotation)?;
 
-        DSIZE::com_pin_config().send(&mut self.iface)?;
+        DSIZE::configure(&mut self.iface)?;
 
         self.set_brightness(Brightness::default())?;
         Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;

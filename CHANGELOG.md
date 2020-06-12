@@ -8,6 +8,7 @@
 
 ### Added
 
+- [#124](https://github.com/jamwaffles/ssd1306/pull/124) Added type parameter to optimize `GraphicsMode` for draw speed instead of flush time.
 - [#121](https://github.com/jamwaffles/ssd1306/pull/121) Added brightness control with the `set_brightness()` method.
 - [#118](https://github.com/jamwaffles/ssd1306/pull/118) `DisplayModeTrait::into_properties()` new method that consumes the driver and returns the `DisplayProperties`
 

@@ -40,6 +40,8 @@ use crate::{
 };
 use core::{cmp::min, fmt};
 
+/// Extends the [`DisplaySize`](../../displaysize/trait.DisplaySize.html) trait
+/// to include number of characters that can fit on the display.
 pub trait TerminalDisplaySize: DisplaySize {
     /// The number of characters that can fit on the display at once (w * h / (8 * 8))
     const CHAR_NUM: u8;

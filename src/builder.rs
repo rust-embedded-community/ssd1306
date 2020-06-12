@@ -70,19 +70,13 @@ where
     _size: core::marker::PhantomData<DSIZE>,
 }
 
-impl<DSIZE> Default for Builder<DSIZE>
-where
-    DSIZE: DisplaySize,
-{
+impl Default for Builder {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<DSIZE> Builder<DSIZE>
-where
-    DSIZE: DisplaySize,
-{
+impl Builder {
     /// Create new builder with a default size of 128 x 64 pixels and no rotation.
     pub fn new() -> Self {
         Self {
@@ -90,6 +84,12 @@ where
             _size: core::marker::PhantomData,
         }
     }
+}
+
+impl<DSIZE> Builder<DSIZE>
+where
+    DSIZE: DisplaySize,
+{
 
     /// Set the size of the display. Supported sizes are defined by [DisplaySize].
     pub fn size<SIZE: DisplaySize>(self) -> Builder<SIZE> {

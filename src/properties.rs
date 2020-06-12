@@ -9,7 +9,7 @@ use crate::{
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 
 /// Display properties struct
-pub struct DisplayProperties<DI, DSIZE=DisplaySize128x64> {
+pub struct DisplayProperties<DI, DSIZE = DisplaySize128x64> {
     iface: DI,
     display_rotation: DisplayRotation,
     addr_mode: AddrMode,
@@ -184,12 +184,8 @@ where
     /// ```
     pub fn get_dimensions(&self) -> (u8, u8) {
         match self.display_rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                (DSIZE::WIDTH, DSIZE::HEIGHT)
-            }
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                (DSIZE::HEIGHT, DSIZE::WIDTH)
-            }
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (DSIZE::WIDTH, DSIZE::HEIGHT),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (DSIZE::HEIGHT, DSIZE::WIDTH),
         }
     }
 

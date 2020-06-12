@@ -196,7 +196,6 @@ where
 {
     /// Clear the display and reset the cursor to the top left corner
     pub fn clear(&mut self) -> Result<(), TerminalModeError> {
-
         // Let the chip handle line wrapping so we can fill the screen with blanks faster
         self.properties
             .change_mode(AddrMode::Horizontal)
@@ -308,9 +307,7 @@ where
 
     /// Reset the draw area and move pointer to the top left corner
     fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
-        self.properties
-            .set_column(DSIZE::OFFSETX)
-            .terminal_err()?;
+        self.properties.set_column(DSIZE::OFFSETX).terminal_err()?;
         self.properties.set_row(DSIZE::OFFSETY).terminal_err()?;
         // Initialise the counter when we know it's valid
         self.cursor = Some(Cursor::new(DSIZE::WIDTH, DSIZE::HEIGHT));

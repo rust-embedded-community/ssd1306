@@ -66,7 +66,7 @@ use crate::{
 
 // TODO: Add to prelude
 /// Graphics mode handler
-pub struct GraphicsMode<DI, DSIZE=DisplaySize128x64>
+pub struct GraphicsMode<DI, DSIZE = DisplaySize128x64>
 where
     DSIZE: DisplaySize,
 {
@@ -149,14 +149,8 @@ where
         match self.properties.get_rotation() {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
                 self.properties.set_draw_area(
-                    (
-                        disp_min_x + DSIZE::OFFSETX,
-                        disp_min_y + DSIZE::OFFSETY,
-                    ),
-                    (
-                        disp_max_x + DSIZE::OFFSETX,
-                        disp_max_y + DSIZE::OFFSETY,
-                    ),
+                    (disp_min_x + DSIZE::OFFSETX, disp_min_y + DSIZE::OFFSETY),
+                    (disp_max_x + DSIZE::OFFSETX, disp_max_y + DSIZE::OFFSETY),
                 )?;
 
                 self.properties.bounded_draw(
@@ -168,14 +162,8 @@ where
             }
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
                 self.properties.set_draw_area(
-                    (
-                        disp_min_y + DSIZE::OFFSETY,
-                        disp_min_x + DSIZE::OFFSETX,
-                    ),
-                    (
-                        disp_max_y + DSIZE::OFFSETY,
-                        disp_max_x + DSIZE::OFFSETX,
-                    ),
+                    (disp_min_y + DSIZE::OFFSETY, disp_min_x + DSIZE::OFFSETX),
+                    (disp_max_y + DSIZE::OFFSETY, disp_max_x + DSIZE::OFFSETX),
                 )?;
 
                 self.properties.bounded_draw(

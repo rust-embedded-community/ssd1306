@@ -12,7 +12,6 @@ use typenum::{U1024, U192, U360, U384, U512};
 /// This trait describes information related to a particular display.
 /// This includes resolution, offset and framebuffer size.
 pub trait DisplaySize {
-
     /// Width in pixels
     const WIDTH: u8;
 

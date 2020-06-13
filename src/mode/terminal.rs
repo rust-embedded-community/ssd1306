@@ -200,6 +200,8 @@ where
         self.properties
             .change_mode(AddrMode::Horizontal)
             .terminal_err()?;
+        let (display_width, display_height) = display_size.dimensions();
+        let (display_x_offset, display_y_offset) = self.properties.display_offset;
         self.properties
             .set_draw_area(
                 (DSIZE::OFFSETX, DSIZE::OFFSETY),

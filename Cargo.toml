@@ -30,7 +30,7 @@ version = "0.6.0"
 [dev-dependencies]
 cortex-m = "0.6.2"
 cortex-m-rt = "0.6.12"
-cortex-m-rtfm = "0.5.1"
+cortex-m-rtic = "0.5.3"
 panic-halt = "0.2.0"
 
 # Used to load BMP images in various examples

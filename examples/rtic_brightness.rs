@@ -12,7 +12,7 @@ use embedded_graphics::{
     geometry::Point, image::Image, pixelcolor::BinaryColor, prelude::*, primitives::Rectangle,
 };
 use panic_halt as _;
-use rtfm::app;
+use rtic::app;
 use ssd1306::{prelude::*, Builder};
 use stm32f1xx_hal::{
     delay::Delay,
@@ -111,7 +111,7 @@ const APP: () = {
 
         let bmp = Bmp::from_slice(include_bytes!("dvd.bmp")).unwrap();
 
-        // Init the static resources to use them later through RTFM
+        // Init the static resources to use them later through RTIC
         init::LateResources {
             timer,
             display,

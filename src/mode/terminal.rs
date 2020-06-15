@@ -310,14 +310,15 @@ where
         if column >= width || row >= height {
             Err(OutOfBounds)
         } else {
+            let (display_x_offset, display_y_offset) = self.properties.display_offset;
             match self.properties.get_rotation() {
                 DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                    self.properties.set_column(column * 8).terminal_err()?;
-                    self.properties.set_row(row * 8).terminal_err()?;
+                    self.properties.set_column(display_x_offset + column * 8).terminal_err()?;
+                    self.properties.set_row(display_y_offset + row * 8).terminal_err()?;
                 }
                 DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                    self.properties.set_column(row * 8).terminal_err()?;
-                    self.properties.set_row(column * 8).terminal_err()?;
+                    self.properties.set_column(display_x_offset + row * 8).terminal_err()?;
+                    self.properties.set_row(display_y_offset + column * 8).terminal_err()?;
                 }
             }
             self.ensure_cursor()?.set_position(column, row);
@@ -327,10 +328,11 @@ where
 
     /// Reset the draw area and move pointer to the top left corner
     fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
-        self.properties.set_column(DSIZE::OFFSETX).terminal_err()?;
-        self.properties.set_row(DSIZE::OFFSETY).terminal_err()?;
         // Initialise the counter when we know it's valid
         self.cursor = Some(Cursor::new(DSIZE::WIDTH, DSIZE::HEIGHT));
+
+        // Reset cursor position
+        self.set_position(0, 0)?;
 
         Ok(())
     }

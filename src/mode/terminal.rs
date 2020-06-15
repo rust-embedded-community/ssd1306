@@ -253,9 +253,7 @@ where
                     }
                 };
 
-                self.properties
-                    .draw(&bitmap)
-                    .terminal_err()?;
+                self.properties.draw(&bitmap).terminal_err()?;
 
                 // Increment character counter and potentially wrap line
                 self.advance_cursor()?;

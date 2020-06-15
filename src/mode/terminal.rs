@@ -274,9 +274,12 @@ where
     }
 
     /// Set the display rotation
+    ///
+    /// This method resets the cursor but does not clear the screen.
     pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), TerminalModeError> {
-        // we don't need to touch the cursor because rotating 90º or 270º currently just flips
-        self.properties.set_rotation(rot).terminal_err()
+        self.properties.set_rotation(rot).terminal_err()?;
+        // Need to reset cursor position, otherwise coordinates can become invalid
+        self.reset_pos()
     }
 
     /// Turn the display on or off. The display can be drawn to and retains all

@@ -243,10 +243,20 @@ where
                 self.ensure_cursor()?.set_position(0, cur_line);
             }
             _ => {
-                // Send the pixel data to the display
+                let bitmap = match self.properties.get_rotation() {
+                    DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                        Self::char_to_bitmap(c)
+                    }
+                    DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                        let bitmap = Self::char_to_bitmap(c);
+                        Self::rotate_bitmap(bitmap)
+                    }
+                };
+
                 self.properties
-                    .draw(&Self::char_to_bitmap(c))
+                    .draw(&bitmap)
                     .terminal_err()?;
+
                 // Increment character counter and potentially wrap line
                 self.advance_cursor()?;
             }
@@ -439,6 +449,23 @@ where
             '}' => [0x00, 0x41, 0x36, 0x08, 0x00, 0x00, 0x00, 0x00],
             _ => [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
         }
+    }
+
+    fn rotate_bitmap(bitmap: [u8; 8]) -> [u8; 8] {
+        let mut rotated: [u8; 8] = [0; 8];
+
+        for col in 0..8 {
+            // source.msb is the top pixel
+            let source = bitmap[col];
+            for row in 0..8 {
+                let bit = source & 1 << row != 0;
+                if bit {
+                    rotated[row] |= 1 << col;
+                }
+            }
+        }
+
+        rotated
     }
 }
 

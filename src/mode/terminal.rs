@@ -313,12 +313,20 @@ where
             let (display_x_offset, display_y_offset) = self.properties.display_offset;
             match self.properties.get_rotation() {
                 DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                    self.properties.set_column(display_x_offset + column * 8).terminal_err()?;
-                    self.properties.set_row(display_y_offset + row * 8).terminal_err()?;
+                    self.properties
+                        .set_column(display_x_offset + column * 8)
+                        .terminal_err()?;
+                    self.properties
+                        .set_row(display_y_offset + row * 8)
+                        .terminal_err()?;
                 }
                 DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                    self.properties.set_column(display_x_offset + row * 8).terminal_err()?;
-                    self.properties.set_row(display_y_offset + column * 8).terminal_err()?;
+                    self.properties
+                        .set_column(display_x_offset + row * 8)
+                        .terminal_err()?;
+                    self.properties
+                        .set_row(display_y_offset + column * 8)
+                        .terminal_err()?;
                 }
             }
             self.ensure_cursor()?.set_position(column, row);

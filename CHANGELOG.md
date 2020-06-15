@@ -13,6 +13,7 @@
 
 ### Changed
 
+- **(breaking)** [#129](https://github.com/jamwaffles/ssd1306/pull/129) `TerminalMode::set_rotation` now resets the cursor position
 - **(breaking)** [#125](https://github.com/jamwaffles/ssd1306/pull/125) Redesigned display size handling.
 - **(breaking)** [#126](https://github.com/jamwaffles/ssd1306/pull/126) Moved `reset` method to `DisplayModeTrait`. If the prelude is not used, add either `use ssd1306::prelude::*` or `ssd1306::mode::displaymode::DisplayModeTrait` to your imports.
 - **(breaking)** [#119](https://github.com/jamwaffles/ssd1306/pull/119) Remove `DisplayMode` and `RawMode`
@@ -20,6 +21,10 @@
 - **(breaking)** [#118](https://github.com/jamwaffles/ssd1306/pull/118) Change `release` method to return the display interface instead of the `DisplayProperties`.
 - **(breaking)** [#116](https://github.com/jamwaffles/ssd1306/pull/116) Replace custom I2C and SPI interfaces by generic [`display-interface`](https://crates.io/crates/display-interface)
 - **(breaking)** [#113](https://github.com/jamwaffles/ssd1306/pull/113) Removed public `send_bounded_data` from DisplayInterface and implementations
+
+### Fixed
+
+- [#129](https://github.com/jamwaffles/ssd1306/pull/129) Fixed `Rotate90` and `Rotate270` rotation modes for `TerminalMode`
 
 ## [0.3.1] - 2020-03-21
 

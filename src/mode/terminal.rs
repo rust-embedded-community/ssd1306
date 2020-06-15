@@ -3,7 +3,6 @@
 //! This mode uses the 7x7 pixel [MarioChrome](https://github.com/techninja/MarioChron/) font to
 //! draw characters to the display without needing a framebuffer. It will write characters from top
 //! left to bottom right in an 8x8 pixel grid, restarting at the top left of the display once full.
-//! The display itself takes care of wrapping lines.
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::I2cStub;

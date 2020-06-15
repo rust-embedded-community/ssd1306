@@ -300,8 +300,16 @@ where
         if column >= width || row >= height {
             Err(OutOfBounds)
         } else {
-            self.properties.set_column(column * 8).terminal_err()?;
-            self.properties.set_row(row * 8).terminal_err()?;
+            match self.properties.get_rotation() {
+                DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                    self.properties.set_column(column * 8).terminal_err()?;
+                    self.properties.set_row(row * 8).terminal_err()?;
+                }
+                DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                    self.properties.set_column(row * 8).terminal_err()?;
+                    self.properties.set_row(column * 8).terminal_err()?;
+                }
+            }
             self.ensure_cursor()?.set_position(column, row);
             Ok(())
         }
@@ -320,9 +328,12 @@ where
     /// Advance the cursor, automatically wrapping lines and/or screens if necessary
     /// Takes in an already-unwrapped cursor to avoid re-unwrapping
     fn advance_cursor(&mut self) -> Result<(), TerminalModeError> {
-        if let Some(CursorWrapEvent(new_row)) = self.ensure_cursor()?.advance() {
-            self.properties.set_row(new_row * 8).terminal_err()?;
-        }
+        let cursor = self.ensure_cursor()?;
+
+        cursor.advance();
+        let (c, r) = cursor.get_position();
+        self.set_position(c, r)?;
+
         Ok(())
     }
 

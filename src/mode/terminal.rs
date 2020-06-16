@@ -30,7 +30,7 @@ use display_interface::{DisplayError, WriteOnlyDataCommand};
 use crate::{
     brightness::Brightness,
     command::AddrMode,
-    displayrotation::DisplayRotation,
+    displayrotation::*,
     displaysize::*,
     mode::{
         displaymode::DisplayModeTrait,
@@ -162,21 +162,24 @@ impl<T> IntoTerminalModeResult<T> for Result<T, DisplayError> {
 
 // TODO: Add to prelude
 /// Terminal mode handler
-pub struct TerminalMode<DI, DSIZE = DisplaySize128x64>
+pub struct TerminalMode<DI, DSIZE = DisplaySize128x64, DROTATION = DynamicRotation>
 where
     DSIZE: TerminalDisplaySize,
+    DROTATION: DisplayRotationType,
 {
-    properties: DisplayProperties<DI, DSIZE>,
+    properties: DisplayProperties<DI, DSIZE, DROTATION>,
     cursor: Option<Cursor>,
 }
 
-impl<DI, DSIZE> DisplayModeTrait<DI, DSIZE> for TerminalMode<DI, DSIZE>
+impl<DI, DSIZE, DROTATION> DisplayModeTrait<DI, DSIZE, DROTATION>
+    for TerminalMode<DI, DSIZE, DROTATION>
 where
     DI: WriteOnlyDataCommand,
     DSIZE: TerminalDisplaySize,
+    DROTATION: DisplayRotationType,
 {
     /// Create new TerminalMode instance
-    fn new(properties: DisplayProperties<DI, DSIZE>) -> Self {
+    fn new(properties: DisplayProperties<DI, DSIZE, DROTATION>) -> Self {
         TerminalMode {
             properties,
             cursor: None,
@@ -184,15 +187,16 @@ where
     }
 
     /// Release display interface used by `TerminalMode`
-    fn into_properties(self) -> DisplayProperties<DI, DSIZE> {
+    fn into_properties(self) -> DisplayProperties<DI, DSIZE, DROTATION> {
         self.properties
     }
 }
 
-impl<DI, DSIZE> TerminalMode<DI, DSIZE>
+impl<DI, DSIZE, DROTATION> TerminalMode<DI, DSIZE, DROTATION>
 where
     DI: WriteOnlyDataCommand,
     DSIZE: TerminalDisplaySize,
+    DROTATION: DisplayRotationType,
 {
     /// Clear the display and reset the cursor to the top left corner
     pub fn clear(&mut self) -> Result<(), TerminalModeError> {
@@ -262,12 +266,6 @@ where
             .terminal_err()?;
         self.reset_pos()?;
         Ok(())
-    }
-
-    /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), TerminalModeError> {
-        // we don't need to touch the cursor because rotating 90º or 270º currently just flips
-        self.properties.set_rotation(rot).terminal_err()
     }
 
     /// Turn the display on or off. The display can be drawn to and retains all
@@ -426,6 +424,20 @@ where
             '}' => [0x00, 0x41, 0x36, 0x08, 0x00, 0x00, 0x00, 0x00],
             _ => [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
         }
+    }
+}
+
+impl<DI, DSIZE> Rotatable for TerminalMode<DI, DSIZE, DynamicRotation>
+where
+    DI: WriteOnlyDataCommand,
+    DSIZE: TerminalDisplaySize,
+{
+    fn set_rotation(&mut self, rotation: DisplayRotation) -> Result<(), DisplayError> {
+        self.properties.set_rotation(rotation)
+    }
+
+    fn get_rotation(&self) -> DisplayRotation {
+        self.properties.get_rotation()
     }
 }
 

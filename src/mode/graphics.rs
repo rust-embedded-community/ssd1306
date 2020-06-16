@@ -55,21 +55,22 @@
 //!
 //! [embedded_graphics]: https://crates.io/crates/embedded_graphics
 
+use crate::displayrotation::*;
 use crate::displaysize::{DisplaySize, DisplaySize128x64};
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 use generic_array::GenericArray;
 
 use crate::{
-    brightness::Brightness, displayrotation::DisplayRotation, mode::displaymode::DisplayModeTrait,
-    properties::DisplayProperties,
+    brightness::Brightness, mode::displaymode::DisplayModeTrait, properties::DisplayProperties,
 };
 
 /// Graphics mode handler
-pub struct GraphicsMode<DI, DSIZE = DisplaySize128x64>
+pub struct GraphicsMode<DI, DSIZE = DisplaySize128x64, DROTATION = DynamicRotation>
 where
     DSIZE: DisplaySize,
+    DROTATION: DisplayRotationType,
 {
-    properties: DisplayProperties<DI, DSIZE>,
+    properties: DisplayProperties<DI, DSIZE, DROTATION>,
     buffer: GenericArray<u8, DSIZE::BufferSize>,
     min_x: u8,
     max_x: u8,
@@ -77,12 +78,14 @@ where
     max_y: u8,
 }
 
-impl<DI, DSIZE> DisplayModeTrait<DI, DSIZE> for GraphicsMode<DI, DSIZE>
+impl<DI, DSIZE, DROTATION> DisplayModeTrait<DI, DSIZE, DROTATION>
+    for GraphicsMode<DI, DSIZE, DROTATION>
 where
     DSIZE: DisplaySize,
+    DROTATION: DisplayRotationType,
 {
     /// Create new GraphicsMode instance
-    fn new(properties: DisplayProperties<DI, DSIZE>) -> Self {
+    fn new(properties: DisplayProperties<DI, DSIZE, DROTATION>) -> Self {
         GraphicsMode {
             properties,
             buffer: GenericArray::default(),
@@ -94,25 +97,26 @@ where
     }
 
     /// Release display interface used by `GraphicsMode`
-    fn into_properties(self) -> DisplayProperties<DI, DSIZE> {
+    fn into_properties(self) -> DisplayProperties<DI, DSIZE, DROTATION> {
         self.properties
     }
 }
 
-impl<DI, DSIZE> GraphicsMode<DI, DSIZE>
+impl<DI, DSIZE, DROTATION> GraphicsMode<DI, DSIZE, DROTATION>
 where
     DSIZE: DisplaySize,
     DI: WriteOnlyDataCommand,
+    DROTATION: DisplayRotationType,
 {
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
         self.buffer = GenericArray::default();
 
-        let (width, height) = self.get_dimensions();
+        // Let flush() clip these
         self.min_x = 0;
-        self.max_x = width - 1;
+        self.max_x = 254;
         self.min_y = 0;
-        self.max_y = height - 1;
+        self.max_y = 254;
     }
 
     /// Write out data to a display.
@@ -127,81 +131,48 @@ where
         let (width, height) = self.get_dimensions();
 
         // Determine which bytes need to be sent
-        let disp_min_x = self.min_x;
-        let disp_min_y = self.min_y;
+        let (disp_min_x, disp_min_y) = self.properties.transform(self.min_x, self.min_y);
+        let (disp_max_x, disp_max_y) = self.properties.transform(self.max_x, self.max_y);
 
-        let (disp_max_x, disp_max_y) = match self.properties.get_rotation() {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                ((self.max_x + 1).min(width), (self.max_y | 7).min(height))
-            }
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                ((self.max_x | 7).min(width), (self.max_y + 1).min(height))
-            }
-        };
+        let (disp_max_x, disp_max_y) = ((disp_max_x + 1).min(width), (disp_max_y | 7).min(height));
 
-        self.min_x = width - 1;
+        self.min_x = 255;
         self.max_x = 0;
-        self.min_y = width - 1;
+        self.min_y = 255;
         self.max_y = 0;
 
         // Tell the display to update only the part that has changed
-        match self.properties.get_rotation() {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                self.properties.set_draw_area(
-                    (disp_min_x + DSIZE::OFFSETX, disp_min_y + DSIZE::OFFSETY),
-                    (disp_max_x + DSIZE::OFFSETX, disp_max_y + DSIZE::OFFSETY),
-                )?;
+        self.properties.set_draw_area(
+            self.properties
+                .transform(disp_min_x + DSIZE::OFFSETX, disp_min_y + DSIZE::OFFSETY),
+            self.properties
+                .transform(disp_max_x + DSIZE::OFFSETX, disp_max_y + DSIZE::OFFSETY),
+        )?;
 
-                self.properties.bounded_draw(
-                    &self.buffer,
-                    width as usize,
-                    (disp_min_x, disp_min_y),
-                    (disp_max_x, disp_max_y),
-                )
-            }
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                self.properties.set_draw_area(
-                    (disp_min_y + DSIZE::OFFSETY, disp_min_x + DSIZE::OFFSETX),
-                    (disp_max_y + DSIZE::OFFSETY, disp_max_x + DSIZE::OFFSETX),
-                )?;
-
-                self.properties.bounded_draw(
-                    &self.buffer,
-                    height as usize,
-                    (disp_min_y, disp_min_x),
-                    (disp_max_y, disp_max_x),
-                )
-            }
-        }
+        self.properties.bounded_draw(
+            &self.buffer,
+            DSIZE::WIDTH as usize,
+            self.properties.transform(disp_min_x, disp_min_y),
+            self.properties.transform(disp_max_x, disp_max_y),
+        )
     }
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
-        let display_rotation = self.properties.get_rotation();
+        // umm... cast up and down, must cleanup
+        let (x, y) = self.properties.transform(x as u8, y as u8);
 
-        let (idx, bit) = match display_rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                let idx = ((y as usize) / 8 * DSIZE::WIDTH as usize) + (x as usize);
-                let bit = y % 8;
-
-                (idx, bit)
-            }
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                let idx = ((x as usize) / 8 * DSIZE::WIDTH as usize) + (y as usize);
-                let bit = x % 8;
-
-                (idx, bit)
-            }
-        };
+        let idx = ((y as usize) / 8 * DSIZE::WIDTH as usize) + (x as usize);
+        let bit = y % 8;
 
         if let Some(byte) = self.buffer.get_mut(idx) {
             // Keep track of max and min values
-            self.min_x = self.min_x.min(x as u8);
-            self.max_x = self.max_x.max(x as u8);
+            self.min_x = self.min_x.min(x);
+            self.max_x = self.max_x.max(x);
 
-            self.min_y = self.min_y.min(y as u8);
-            self.max_y = self.max_y.max(y as u8);
+            self.min_y = self.min_y.min(y);
+            self.max_y = self.max_y.max(y);
 
             // Set pixel value in byte
             // Ref this comment https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit#comment46654671_47990
@@ -221,11 +192,6 @@ where
         self.properties.get_dimensions()
     }
 
-    /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DisplayError> {
-        self.properties.set_rotation(rot)
-    }
-
     /// Turn the display on or off. The display can be drawn to and retains all
     /// of its memory even while off.
     pub fn display_on(&mut self, on: bool) -> Result<(), DisplayError> {
@@ -235,6 +201,20 @@ where
     /// Change the display brightness.
     pub fn set_brightness(&mut self, brightness: Brightness) -> Result<(), DisplayError> {
         self.properties.set_brightness(brightness)
+    }
+}
+
+impl<DI, DSIZE> Rotatable for GraphicsMode<DI, DSIZE, DynamicRotation>
+where
+    DI: WriteOnlyDataCommand,
+    DSIZE: DisplaySize,
+{
+    fn set_rotation(&mut self, rotation: DisplayRotation) -> Result<(), DisplayError> {
+        self.properties.set_rotation(rotation)
+    }
+
+    fn get_rotation(&self) -> DisplayRotation {
+        self.properties.get_rotation()
     }
 }
 
@@ -250,10 +230,11 @@ use embedded_graphics::{
 };
 
 #[cfg(feature = "graphics")]
-impl<DI, DSIZE> DrawTarget<BinaryColor> for GraphicsMode<DI, DSIZE>
+impl<DI, DSIZE, DROTATION> DrawTarget<BinaryColor> for GraphicsMode<DI, DSIZE, DROTATION>
 where
     DI: WriteOnlyDataCommand,
     DSIZE: DisplaySize,
+    DROTATION: DisplayRotationType,
 {
     type Error = DisplayError;
 

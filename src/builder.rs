@@ -72,16 +72,17 @@
 
 use display_interface::WriteOnlyDataCommand;
 
-use crate::{displayrotation::DisplayRotation, displaysize::*, properties::DisplayProperties};
+use crate::{displayrotation::*, displaysize::*, properties::DisplayProperties};
 
 /// Builder struct. Driver options and interface are set using its methods.
 #[derive(Clone, Copy)]
-pub struct Builder<DSIZE = DisplaySize128x64>
+pub struct Builder<DSIZE = DisplaySize128x64, DROTATION = DynamicRotation>
 where
     DSIZE: DisplaySize,
+    DROTATION: DisplayRotationType,
 {
     size: DSIZE,
-    rotation: DisplayRotation,
+    rotation: DROTATION,
 }
 
 impl Default for Builder {
@@ -95,17 +96,33 @@ impl Builder {
     pub fn new() -> Self {
         Self {
             size: DisplaySize128x64,
-            rotation: DisplayRotation::Rotate0,
+            rotation: DynamicRotation::default(),
         }
     }
 }
 
-impl<DSIZE> Builder<DSIZE>
+impl<DSIZE> Builder<DSIZE, DynamicRotation>
 where
     DSIZE: DisplaySize,
 {
+    /// Set the rotation of the display to one of four values. Defaults to no rotation. Note that
+    /// 90º and 270º rotations are not supported by
+    /// [`TerminalMode`](../mode/terminal/struct.TerminalMode.html).
+    pub fn with_rotation(self, rotation: DisplayRotation) -> Self {
+        Self {
+            rotation: DynamicRotation::with_rotation(rotation),
+            ..self
+        }
+    }
+}
+
+impl<DSIZE, DROTATION> Builder<DSIZE, DROTATION>
+where
+    DSIZE: DisplaySize,
+    DROTATION: DisplayRotationType,
+{
     /// Set the size of the display. Supported sizes are defined by [DisplaySize].
-    pub fn size<S: DisplaySize>(self, size: S) -> Builder<S> {
+    pub fn size<S: DisplaySize>(self, size: S) -> Builder<S, DROTATION> {
         Builder {
             size,
             rotation: self.rotation,
@@ -115,14 +132,17 @@ where
     /// Set the rotation of the display to one of four values. Defaults to no rotation. Note that
     /// 90º and 270º rotations are not supported by
     /// [`TerminalMode`](../mode/terminal/struct.TerminalMode.html).
-    pub fn with_rotation(self, rotation: DisplayRotation) -> Self {
-        Self { rotation, ..self }
+    pub fn with_fixed_rotation<R: DisplayRotationType>(self, rotation: R) -> Builder<DSIZE, R> {
+        Builder {
+            size: self.size,
+            rotation,
+        }
     }
 
     /// Finish the builder and use some interface communicate with the display
     ///
     /// This method consumes the builder and must come last in the method call chain
-    pub fn connect<I>(self, interface: I) -> DisplayProperties<I, DSIZE>
+    pub fn connect<I>(self, interface: I) -> DisplayProperties<I, DSIZE, DROTATION>
     where
         I: WriteOnlyDataCommand,
     {

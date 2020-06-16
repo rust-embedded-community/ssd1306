@@ -37,6 +37,8 @@ type Display = ssd1306::mode::graphics::GraphicsMode<
         >,
         gpio::gpiob::PB1<gpio::Output<gpio::PushPull>>,
     >,
+    DisplaySize128x64,
+    Rotate180,
 >;
 
 #[app(device = stm32f1xx_hal::pac, peripherals = true)]
@@ -94,8 +96,8 @@ const APP: () = {
         );
 
         let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
-        let mut display: GraphicsMode<_> = Builder::new()
-            .with_rotation(DisplayRotation::Rotate180)
+        let mut display: GraphicsMode<_, _, _> = Builder::new()
+            .with_fixed_rotation(Rotate180)
             .connect(interface)
             .into();
 

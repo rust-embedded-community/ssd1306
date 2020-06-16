@@ -3,49 +3,51 @@ use crate::mode::displaymode::DisplayModeTrait;
 use crate::{
     brightness::Brightness,
     command::{AddrMode, Command, VcomhLevel},
-    displayrotation::DisplayRotation,
+    displayrotation::*,
     displaysize::{DisplaySize, DisplaySize128x64},
 };
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 
 /// Display properties struct
-pub struct DisplayProperties<DI, DSIZE = DisplaySize128x64> {
+pub struct DisplayProperties<DI, DSIZE = DisplaySize128x64, DROTATION = DynamicRotation> {
     iface: DI,
-    display_rotation: DisplayRotation,
     addr_mode: AddrMode,
     size: DSIZE,
+    rotation: DROTATION,
 }
 
-impl<DI, DSIZE> DisplayProperties<DI, DSIZE>
+impl<DI, DSIZE, DROTATION> DisplayProperties<DI, DSIZE, DROTATION>
 where
     DSIZE: DisplaySize,
+    DROTATION: DisplayRotationType,
 {
     /// Create new DisplayProperties instance
     pub fn new(
         iface: DI,
         size: DSIZE,
-        display_rotation: DisplayRotation,
-    ) -> DisplayProperties<DI, DSIZE> {
+        rotation: DROTATION,
+    ) -> DisplayProperties<DI, DSIZE, DROTATION> {
         DisplayProperties {
             iface,
-            display_rotation,
             addr_mode: AddrMode::Page, // reset value
+            rotation,
             size,
         }
     }
 }
 
-impl<DI, DSIZE> DisplayProperties<DI, DSIZE> {
+impl<DI, DSIZE, DROTATION> DisplayProperties<DI, DSIZE, DROTATION> {
     /// Releases the display interface
     pub fn release(self) -> DI {
         self.iface
     }
 }
 
-impl<DI, DSIZE> DisplayProperties<DI, DSIZE>
+impl<DI, DSIZE, DROTATION> DisplayProperties<DI, DSIZE, DROTATION>
 where
     DI: WriteOnlyDataCommand,
     DSIZE: DisplaySize,
+    DROTATION: DisplayRotationType,
 {
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right.
@@ -55,8 +57,6 @@ where
 
     /// Initialise the display in one of the available addressing modes
     pub fn init_with_mode(&mut self, mode: AddrMode) -> Result<(), DisplayError> {
-        let display_rotation = self.display_rotation;
-
         Command::DisplayOn(false).send(&mut self.iface)?;
         Command::DisplayClockDiv(0x8, 0x0).send(&mut self.iface)?;
         Command::Multiplex(DSIZE::HEIGHT - 1).send(&mut self.iface)?;
@@ -67,7 +67,7 @@ where
         Command::AddressMode(mode).send(&mut self.iface)?;
 
         self.size.configure(&mut self.iface)?;
-        self.set_rotation(display_rotation)?;
+        self.rotation.configure(&mut self.iface)?;
 
         self.set_brightness(Brightness::default())?;
         Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
@@ -79,6 +79,10 @@ where
         self.addr_mode = mode;
 
         Ok(())
+    }
+
+    pub(crate) fn transform(&self, x: u8, y: u8) -> (u8, u8) {
+        self.rotation.transform(x, y)
     }
 
     /// Change the addressing mode
@@ -186,41 +190,7 @@ where
     /// assert_eq!(rotated_disp.get_dimensions(), (64, 128));
     /// ```
     pub fn get_dimensions(&self) -> (u8, u8) {
-        match self.display_rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (DSIZE::WIDTH, DSIZE::HEIGHT),
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (DSIZE::HEIGHT, DSIZE::WIDTH),
-        }
-    }
-
-    /// Get the display rotation
-    pub fn get_rotation(&self) -> DisplayRotation {
-        self.display_rotation
-    }
-
-    /// Set the display rotation
-    pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), DisplayError> {
-        self.display_rotation = display_rotation;
-
-        match display_rotation {
-            DisplayRotation::Rotate0 => {
-                Command::SegmentRemap(true).send(&mut self.iface)?;
-                Command::ReverseComDir(true).send(&mut self.iface)?;
-            }
-            DisplayRotation::Rotate90 => {
-                Command::SegmentRemap(false).send(&mut self.iface)?;
-                Command::ReverseComDir(true).send(&mut self.iface)?;
-            }
-            DisplayRotation::Rotate180 => {
-                Command::SegmentRemap(false).send(&mut self.iface)?;
-                Command::ReverseComDir(false).send(&mut self.iface)?;
-            }
-            DisplayRotation::Rotate270 => {
-                Command::SegmentRemap(true).send(&mut self.iface)?;
-                Command::ReverseComDir(false).send(&mut self.iface)?;
-            }
-        };
-
-        Ok(())
+        self.rotation.transform(DSIZE::WIDTH, DSIZE::HEIGHT)
     }
 
     /// Turn the display on or off. The display can be drawn to and retains all
@@ -242,10 +212,24 @@ where
     }
 
     /// Change into any mode implementing DisplayModeTrait
-    pub fn into<NMODE: DisplayModeTrait<DI, DSIZE>>(self) -> NMODE
+    pub fn into<NMODE: DisplayModeTrait<DI, DSIZE, DROTATION>>(self) -> NMODE
     where
         DI: WriteOnlyDataCommand,
     {
         NMODE::new(self)
+    }
+}
+
+impl<DI, DSIZE> Rotatable for DisplayProperties<DI, DSIZE, DynamicRotation>
+where
+    DI: WriteOnlyDataCommand,
+    DSIZE: DisplaySize,
+{
+    fn set_rotation(&mut self, rotation: DisplayRotation) -> Result<(), DisplayError> {
+        self.rotation.set_rotation(rotation, &mut self.iface)
+    }
+
+    fn get_rotation(&self) -> DisplayRotation {
+        self.rotation.get_rotation()
     }
 }

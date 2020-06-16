@@ -64,7 +64,6 @@ use crate::{
     properties::DisplayProperties,
 };
 
-// TODO: Add to prelude
 /// Graphics mode handler
 pub struct GraphicsMode<DI, DSIZE = DisplaySize128x64>
 where

@@ -64,6 +64,7 @@ use crate::{
     properties::DisplayProperties,
 };
 
+// TODO: Add to prelude
 /// Graphics mode handler
 pub struct GraphicsMode<DI, DSIZE = DisplaySize128x64>
 where
@@ -139,9 +140,9 @@ where
             }
         };
 
-        self.min_x = width - 1;
+        self.min_x = 255;
         self.max_x = 0;
-        self.min_y = width - 1;
+        self.min_y = 255;
         self.max_y = 0;
 
         // Tell the display to update only the part that has changed

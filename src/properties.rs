@@ -13,7 +13,7 @@ pub struct DisplayProperties<DI, DSIZE = DisplaySize128x64> {
     iface: DI,
     display_rotation: DisplayRotation,
     addr_mode: AddrMode,
-    _size: core::marker::PhantomData<DSIZE>,
+    size: DSIZE,
 }
 
 impl<DI, DSIZE> DisplayProperties<DI, DSIZE>
@@ -21,12 +21,16 @@ where
     DSIZE: DisplaySize,
 {
     /// Create new DisplayProperties instance
-    pub fn new(iface: DI, display_rotation: DisplayRotation) -> DisplayProperties<DI, DSIZE> {
+    pub fn new(
+        iface: DI,
+        size: DSIZE,
+        display_rotation: DisplayRotation,
+    ) -> DisplayProperties<DI, DSIZE> {
         DisplayProperties {
             iface,
             display_rotation,
             addr_mode: AddrMode::Page, // reset value
-            _size: core::marker::PhantomData,
+            size,
         }
     }
 }
@@ -62,9 +66,8 @@ where
         Command::ChargePump(true).send(&mut self.iface)?;
         Command::AddressMode(mode).send(&mut self.iface)?;
 
+        self.size.configure(&mut self.iface)?;
         self.set_rotation(display_rotation)?;
-
-        DSIZE::configure(&mut self.iface)?;
 
         self.set_brightness(Brightness::default())?;
         Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
@@ -167,15 +170,17 @@ where
     /// # let interface = StubInterface;
     /// use ssd1306::prelude::*;
     /// #
-    /// let disp: DisplayProperties<_, DisplaySize128x64> = DisplayProperties::new(
+    /// let disp = DisplayProperties::new(
     ///     interface,
+    ///     DisplaySize128x64,
     ///     DisplayRotation::Rotate0,
     /// );
     /// assert_eq!(disp.get_dimensions(), (128, 64));
     ///
     /// # let interface = StubInterface;
-    /// let rotated_disp: DisplayProperties<_, DisplaySize128x64> = DisplayProperties::new(
+    /// let rotated_disp = DisplayProperties::new(
     ///     interface,
+    ///     DisplaySize128x64,
     ///     DisplayRotation::Rotate90,
     /// );
     /// assert_eq!(rotated_disp.get_dimensions(), (64, 128));

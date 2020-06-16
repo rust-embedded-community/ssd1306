@@ -33,7 +33,7 @@
 //! let interface = I2CDIBuilder::new().init(i2c);
 //! Builder::new()
 //!     .with_rotation(DisplayRotation::Rotate180)
-//!     .size::<DisplaySize128x32>()
+//!     .size(DisplaySize128x32)
 //!     .connect(interface);
 //! ```
 //!
@@ -66,8 +66,8 @@ pub struct Builder<DSIZE = DisplaySize128x64>
 where
     DSIZE: DisplaySize,
 {
+    size: DSIZE,
     rotation: DisplayRotation,
-    _size: core::marker::PhantomData<DSIZE>,
 }
 
 impl Default for Builder {
@@ -80,8 +80,8 @@ impl Builder {
     /// Create new builder with a default size of 128 x 64 pixels and no rotation.
     pub fn new() -> Self {
         Self {
+            size: DisplaySize128x64,
             rotation: DisplayRotation::Rotate0,
-            _size: core::marker::PhantomData,
         }
     }
 }
@@ -91,10 +91,10 @@ where
     DSIZE: DisplaySize,
 {
     /// Set the size of the display. Supported sizes are defined by [DisplaySize].
-    pub fn size<SIZE: DisplaySize>(self) -> Builder<SIZE> {
+    pub fn size<S: DisplaySize>(self, size: S) -> Builder<S> {
         Builder {
+            size,
             rotation: self.rotation,
-            _size: core::marker::PhantomData,
         }
     }
 
@@ -112,7 +112,7 @@ where
     where
         I: WriteOnlyDataCommand,
     {
-        DisplayProperties::new(interface, self.rotation)
+        DisplayProperties::new(interface, self.size, self.rotation)
     }
 }
 

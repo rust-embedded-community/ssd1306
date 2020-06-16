@@ -66,7 +66,7 @@ fn main() -> ! {
 
     let interface = I2CDIBuilder::new().init(i2c);
     let mut disp: GraphicsMode<_, _> = Builder::new()
-        .size::<DisplaySize128x32>()
+        .size(DisplaySize128x32)
         .connect(interface)
         .into();
     disp.init().unwrap();

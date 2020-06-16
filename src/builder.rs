@@ -31,7 +31,21 @@
 //! use ssd1306::{prelude::*, Builder, I2CDIBuilder};
 //!
 //! let interface = I2CDIBuilder::new().init(i2c);
-//! Builder::new()
+//! let di: DisplayProperties<_> = Builder::new()
+//!     .with_rotation(DisplayRotation::Rotate180)
+//!     .connect(interface);
+//! ```
+//!
+//! When using a display other than the 128 x 64, you need to specify the display size in the
+//! second type parameter:
+//!
+//! ```rust
+//! # use ssd1306::test_helpers::{PinStub, I2cStub};
+//! # let i2c = I2cStub;
+//! use ssd1306::{prelude::*, Builder, I2CDIBuilder};
+//!
+//! let interface = I2CDIBuilder::new().init(i2c);
+//! let di: DisplayProperties<_, _> = Builder::new()
 //!     .with_rotation(DisplayRotation::Rotate180)
 //!     .size(DisplaySize128x32)
 //!     .connect(interface);

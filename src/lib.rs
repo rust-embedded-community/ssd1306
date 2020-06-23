@@ -144,9 +144,9 @@ extern crate embedded_hal as hal;
 
 pub mod brightness;
 pub mod builder;
-mod command;
+pub mod command;
 pub mod displayrotation;
-mod displaysize;
+pub mod displaysize;
 pub mod mode;
 pub mod prelude;
 pub mod properties;

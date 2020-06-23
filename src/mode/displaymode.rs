@@ -5,12 +5,12 @@ use crate::Error;
 use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 
 /// Trait with core functionality for display mode switching
-pub trait DisplayModeTrait<DI>: Sized {
+pub trait DisplayModeTrait<DI, DSIZE>: Sized {
     /// Allocate all required data and initialise display for mode
-    fn new(properties: DisplayProperties<DI>) -> Self;
+    fn new(properties: DisplayProperties<DI, DSIZE>) -> Self;
 
     /// Deconstruct object and retrieve DisplayProperties
-    fn into_properties(self) -> DisplayProperties<DI>;
+    fn into_properties(self) -> DisplayProperties<DI, DSIZE>;
 
     /// Release display interface
     fn release(self) -> DI {

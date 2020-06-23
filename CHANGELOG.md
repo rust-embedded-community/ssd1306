@@ -13,6 +13,7 @@
 
 ### Changed
 
+- **(breaking)** [#125](https://github.com/jamwaffles/ssd1306/pull/125) Redesigned display size handling.
 - **(breaking)** [#126](https://github.com/jamwaffles/ssd1306/pull/126) Moved `reset` method to `DisplayModeTrait`. If the prelude is not used, add either `use ssd1306::prelude::*` or `ssd1306::mode::displaymode::DisplayModeTrait` to your imports.
 - **(breaking)** [#119](https://github.com/jamwaffles/ssd1306/pull/119) Remove `DisplayMode` and `RawMode`
 - [#120](https://github.com/jamwaffles/ssd1306/pull/120) Update to v0.4 [`display-interface`](https://crates.io/crates/display-interface)

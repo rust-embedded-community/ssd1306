@@ -1,31 +1,105 @@
 //! Display size
 
-// TODO: Add to prelude
-/// Display size enumeration
-#[derive(Clone, Copy)]
-pub enum DisplaySize {
-    /// 128 by 64 pixels
-    Display128x64,
-    /// 128 by 32 pixels
-    Display128x32,
-    /// 96 by 16 pixels
-    Display96x16,
-    /// 70 by 42 pixels
-    Display72x40,
-    /// 64 by 48 pixels
-    Display64x48,
+use super::command::Command;
+use display_interface::{DisplayError, WriteOnlyDataCommand};
+use generic_array::{
+    typenum::{U1024, U192, U360, U384, U512},
+    ArrayLength,
+};
+
+/// Display information
+///
+/// This trait describes information related to a particular display.
+/// This includes resolution, offset and framebuffer size.
+pub trait DisplaySize {
+    /// Width in pixels
+    const WIDTH: u8;
+
+    /// Height in pixels
+    const HEIGHT: u8;
+
+    /// Horizontal offset in pixels
+    const OFFSETX: u8 = 0;
+
+    /// Vertical offset in pixels
+    const OFFSETY: u8 = 0;
+
+    /// Size of framebuffer. Because the display is monocrome, this is
+    /// width * height / 8
+    type BufferSize: ArrayLength<u8>;
+
+    /// Send resolution-dependent configuration to the display
+    ///
+    /// See [`Command::ComPinConfig`](../command/enum.Command.html#variant.ComPinConfig)
+    /// for more information
+    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError>;
 }
 
-impl DisplaySize {
-    /// Get integral dimensions from DisplaySize
-    // TODO: Use whatever vec2 impl I decide to use here
-    pub fn dimensions(self) -> (u8, u8) {
-        match self {
-            DisplaySize::Display128x64 => (128, 64),
-            DisplaySize::Display128x32 => (128, 32),
-            DisplaySize::Display96x16 => (96, 16),
-            DisplaySize::Display72x40 => (72, 40),
-            DisplaySize::Display64x48 => (64, 48),
-        }
+/// Size information for the common 128x64 variants
+#[derive(Debug, Copy, Clone)]
+pub struct DisplaySize128x64;
+impl DisplaySize for DisplaySize128x64 {
+    const WIDTH: u8 = 128;
+    const HEIGHT: u8 = 64;
+    type BufferSize = U1024;
+
+    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
+        Command::ComPinConfig(true, false).send(iface)
+    }
+}
+
+/// Size information for the common 128x32 variants
+#[derive(Debug, Copy, Clone)]
+pub struct DisplaySize128x32;
+impl DisplaySize for DisplaySize128x32 {
+    const WIDTH: u8 = 128;
+    const HEIGHT: u8 = 32;
+    type BufferSize = U512;
+
+    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
+        Command::ComPinConfig(false, false).send(iface)
+    }
+}
+
+/// Size information for the common 96x16 variants
+#[derive(Debug, Copy, Clone)]
+pub struct DisplaySize96x16;
+impl DisplaySize for DisplaySize96x16 {
+    const WIDTH: u8 = 96;
+    const HEIGHT: u8 = 16;
+    type BufferSize = U192;
+
+    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
+        Command::ComPinConfig(false, false).send(iface)
+    }
+}
+
+/// Size information for the common 72x40 variants
+#[derive(Debug, Copy, Clone)]
+pub struct DisplaySize72x40;
+impl DisplaySize for DisplaySize72x40 {
+    const WIDTH: u8 = 72;
+    const HEIGHT: u8 = 40;
+    const OFFSETX: u8 = 28;
+    const OFFSETY: u8 = 0;
+    type BufferSize = U360;
+
+    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
+        Command::ComPinConfig(true, false).send(iface)
+    }
+}
+
+/// Size information for the common 64x48 variants
+#[derive(Debug, Copy, Clone)]
+pub struct DisplaySize64x48;
+impl DisplaySize for DisplaySize64x48 {
+    const WIDTH: u8 = 64;
+    const HEIGHT: u8 = 48;
+    const OFFSETX: u8 = 32;
+    const OFFSETY: u8 = 0;
+    type BufferSize = U384;
+
+    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
+        Command::ComPinConfig(true, false).send(iface)
     }
 }

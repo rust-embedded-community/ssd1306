@@ -31,9 +31,24 @@
 //! use ssd1306::{prelude::*, Builder, I2CDIBuilder};
 //!
 //! let interface = I2CDIBuilder::new().init(i2c);
-//! Builder::new()
+//! let di: DisplayProperties<_> = Builder::new()
 //!     .with_rotation(DisplayRotation::Rotate180)
-//!     .size(DisplaySize::Display128x32)
+//!     .connect(interface);
+//! ```
+//!
+//! The builder defaults to a display size of 128 x 64px. To use a display with a different size,
+//! call the [`size`](#method.size) method. Supported sizes can be found in the
+//! [`displaysize`](../displaysize/index.html) module or in the [prelude](../prelude/index.html).
+//!
+//! ```rust
+//! # use ssd1306::test_helpers::{PinStub, I2cStub};
+//! # let i2c = I2cStub;
+//! use ssd1306::{prelude::*, Builder, I2CDIBuilder};
+//!
+//! let interface = I2CDIBuilder::new().init(i2c);
+//! let di: DisplayProperties<_, _> = Builder::new()
+//!     .with_rotation(DisplayRotation::Rotate180)
+//!     .size(DisplaySize128x32)
 //!     .connect(interface);
 //! ```
 //!
@@ -58,14 +73,15 @@
 
 use display_interface::WriteOnlyDataCommand;
 
-use crate::{
-    displayrotation::DisplayRotation, displaysize::DisplaySize, properties::DisplayProperties,
-};
+use crate::{displayrotation::DisplayRotation, displaysize::*, properties::DisplayProperties};
 
 /// Builder struct. Driver options and interface are set using its methods.
 #[derive(Clone, Copy)]
-pub struct Builder {
-    display_size: DisplaySize,
+pub struct Builder<DSIZE = DisplaySize128x64>
+where
+    DSIZE: DisplaySize,
+{
+    size: DSIZE,
     rotation: DisplayRotation,
 }
 
@@ -79,16 +95,21 @@ impl Builder {
     /// Create new builder with a default size of 128 x 64 pixels and no rotation.
     pub fn new() -> Self {
         Self {
-            display_size: DisplaySize::Display128x64,
+            size: DisplaySize128x64,
             rotation: DisplayRotation::Rotate0,
         }
     }
+}
 
+impl<DSIZE> Builder<DSIZE>
+where
+    DSIZE: DisplaySize,
+{
     /// Set the size of the display. Supported sizes are defined by [DisplaySize].
-    pub fn size(self, display_size: DisplaySize) -> Self {
-        Self {
-            display_size,
-            ..self
+    pub fn size<S: DisplaySize>(self, size: S) -> Builder<S> {
+        Builder {
+            size,
+            rotation: self.rotation,
         }
     }
 
@@ -102,11 +123,11 @@ impl Builder {
     /// Finish the builder and use some interface communicate with the display
     ///
     /// This method consumes the builder and must come last in the method call chain
-    pub fn connect<I>(self, interface: I) -> DisplayProperties<I>
+    pub fn connect<I>(self, interface: I) -> DisplayProperties<I, DSIZE>
     where
         I: WriteOnlyDataCommand,
     {
-        DisplayProperties::new(interface, self.display_size, self.rotation)
+        DisplayProperties::new(interface, self.size, self.rotation)
     }
 }
 

@@ -1,12 +1,11 @@
 //! Display size
 
-// No need to implement Copy
-#![allow(missing_copy_implementations)]
-
 use super::command::Command;
 use display_interface::{DisplayError, WriteOnlyDataCommand};
-use generic_array::ArrayLength;
-use typenum::{U1024, U192, U360, U384, U512};
+use generic_array::{
+    typenum::{U1024, U192, U360, U384, U512},
+    ArrayLength,
+};
 
 /// Display information
 ///
@@ -37,6 +36,7 @@ pub trait DisplaySize {
 }
 
 /// Size information for the common 128x64 variants
+#[derive(Debug, Copy, Clone)]
 pub struct DisplaySize128x64;
 impl DisplaySize for DisplaySize128x64 {
     const WIDTH: u8 = 128;
@@ -49,6 +49,7 @@ impl DisplaySize for DisplaySize128x64 {
 }
 
 /// Size information for the common 128x32 variants
+#[derive(Debug, Copy, Clone)]
 pub struct DisplaySize128x32;
 impl DisplaySize for DisplaySize128x32 {
     const WIDTH: u8 = 128;
@@ -61,6 +62,7 @@ impl DisplaySize for DisplaySize128x32 {
 }
 
 /// Size information for the common 96x16 variants
+#[derive(Debug, Copy, Clone)]
 pub struct DisplaySize96x16;
 impl DisplaySize for DisplaySize96x16 {
     const WIDTH: u8 = 96;
@@ -73,6 +75,7 @@ impl DisplaySize for DisplaySize96x16 {
 }
 
 /// Size information for the common 72x40 variants
+#[derive(Debug, Copy, Clone)]
 pub struct DisplaySize72x40;
 impl DisplaySize for DisplaySize72x40 {
     const WIDTH: u8 = 72;
@@ -87,6 +90,7 @@ impl DisplaySize for DisplaySize72x40 {
 }
 
 /// Size information for the common 64x48 variants
+#[derive(Debug, Copy, Clone)]
 pub struct DisplaySize64x48;
 impl DisplaySize for DisplaySize64x48 {
     const WIDTH: u8 = 64;

@@ -36,8 +36,9 @@
 //!     .connect(interface);
 //! ```
 //!
-//! When using a display other than the 128 x 64, you need to specify the display size in the
-//! second type parameter:
+//! The builder defaults to a display size of 128 x 64px. To use a display with a different size,
+//! call the [`size`](#method.size) method. Supported sizes can be found in the
+//! [`displaysize`](../displaysize/index.html) module or in the [prelude](../prelude/index.html).
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::{PinStub, I2cStub};

@@ -199,8 +199,6 @@ where
         self.properties
             .change_mode(AddrMode::Horizontal)
             .terminal_err()?;
-        let (display_width, display_height) = display_size.dimensions();
-        let (display_x_offset, display_y_offset) = self.properties.display_offset;
         self.properties
             .set_draw_area(
                 (DSIZE::OFFSETX, DSIZE::OFFSETY),
@@ -310,22 +308,21 @@ where
         if column >= width || row >= height {
             Err(OutOfBounds)
         } else {
-            let (display_x_offset, display_y_offset) = self.properties.display_offset;
             match self.properties.get_rotation() {
                 DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
                     self.properties
-                        .set_column(display_x_offset + column * 8)
+                        .set_column(DSIZE::OFFSETX + column * 8)
                         .terminal_err()?;
                     self.properties
-                        .set_row(display_y_offset + row * 8)
+                        .set_row(DSIZE::OFFSETY + row * 8)
                         .terminal_err()?;
                 }
                 DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
                     self.properties
-                        .set_column(display_x_offset + row * 8)
+                        .set_column(DSIZE::OFFSETX + row * 8)
                         .terminal_err()?;
                     self.properties
-                        .set_row(display_y_offset + column * 8)
+                        .set_row(DSIZE::OFFSETY + column * 8)
                         .terminal_err()?;
                 }
             }

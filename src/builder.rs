@@ -160,7 +160,10 @@ impl I2CDIBuilder {
     /// Finish the builder and return an initialised display interface for further use
     ///
     /// This method consumes the builder and must come last in the method call chain
-    pub fn init<I: hal::blocking::i2c::Write>(self, i2c: I) -> impl WriteOnlyDataCommand {
+    pub fn init<I: hal::blocking::i2c::Write>(
+        self,
+        i2c: I,
+    ) -> display_interface_i2c::I2CInterface<I> {
         display_interface_i2c::I2CInterface::new(i2c, self.i2c_addr, 0x40)
     }
 }

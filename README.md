@@ -4,11 +4,25 @@ in rust
 
 ## Quick start
 
-> docker pull ragnaroek/rust-raspberry:1.39.0
->
-> ./build.sh
+The easiest way to build this sample is with [Cross](https://github.com/rust-embedded/cross). 
 
-Then scp the release file to your raspi.
+```
+cross build --release --target armv7-unknown-linux-gnueabihf
+```
+
+> That assumes Raspberry Pi 2/3/4 running a 32 bit kernel
+
+After the build finishes, copy it to your Raspberry Pi
+
+```
+scp target/armv7-unknown-linux-gnueabihf/release/raspi-oled user@ip:/home/user
+```
+
+Then SSH to your Pi and run it
+
+```
+sudo ./raspi-oled
+```
 
 ## Example
 

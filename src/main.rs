@@ -9,8 +9,18 @@ use machine_ip;
 use ssd1306::{mode::GraphicsMode, Builder};
 use std::thread::sleep;
 use std::time::Duration;
+extern crate ctrlc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 fn main() {
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+    })
+    .expect("Error setting Ctrl-C handler");
+
     let i2c = I2cdev::new("/dev/i2c-1").unwrap();
 
     let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
@@ -18,7 +28,7 @@ fn main() {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    loop {
+    while running.load(Ordering::SeqCst) {
         disp.draw(
             Line::new(Point::new(8, 16 + 16), Point::new(8 + 16, 16 + 16))
                 .stroke(Some(BinaryColor::On))
@@ -68,4 +78,6 @@ fn main() {
         sleep(Duration::from_secs(2));
         disp.clear();
     }
+    disp.clear();
+    disp.flush().unwrap();
 }

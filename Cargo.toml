@@ -11,3 +11,4 @@ embedded-graphics = "0.6.0-alpha.2"
 linux-embedded-hal = "0.2.2"
 machine-ip = "0.2.1"
 ssd1306 = "0.3.0-alpha.2"
+ctrlc = { version = "3.0", features = ["termination"] }

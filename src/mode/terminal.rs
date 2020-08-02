@@ -3,7 +3,6 @@
 //! This mode uses the 7x7 pixel [MarioChrome](https://github.com/techninja/MarioChron/) font to
 //! draw characters to the display without needing a framebuffer. It will write characters from top
 //! left to bottom right in an 8x8 pixel grid, restarting at the top left of the display once full.
-//! The display itself takes care of wrapping lines.
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::I2cStub;
@@ -241,10 +240,18 @@ where
                 self.ensure_cursor()?.set_position(0, cur_line);
             }
             _ => {
-                // Send the pixel data to the display
-                self.properties
-                    .draw(&Self::char_to_bitmap(c))
-                    .terminal_err()?;
+                let bitmap = match self.properties.get_rotation() {
+                    DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                        Self::char_to_bitmap(c)
+                    }
+                    DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                        let bitmap = Self::char_to_bitmap(c);
+                        Self::rotate_bitmap(bitmap)
+                    }
+                };
+
+                self.properties.draw(&bitmap).terminal_err()?;
+
                 // Increment character counter and potentially wrap line
                 self.advance_cursor()?;
             }
@@ -265,9 +272,12 @@ where
     }
 
     /// Set the display rotation
+    ///
+    /// This method resets the cursor but does not clear the screen.
     pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), TerminalModeError> {
-        // we don't need to touch the cursor because rotating 90º or 270º currently just flips
-        self.properties.set_rotation(rot).terminal_err()
+        self.properties.set_rotation(rot).terminal_err()?;
+        // Need to reset cursor position, otherwise coordinates can become invalid
+        self.reset_pos()
     }
 
     /// Turn the display on or off. The display can be drawn to and retains all
@@ -298,8 +308,24 @@ where
         if column >= width || row >= height {
             Err(OutOfBounds)
         } else {
-            self.properties.set_column(column * 8).terminal_err()?;
-            self.properties.set_row(row * 8).terminal_err()?;
+            match self.properties.get_rotation() {
+                DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                    self.properties
+                        .set_column(DSIZE::OFFSETX + column * 8)
+                        .terminal_err()?;
+                    self.properties
+                        .set_row(DSIZE::OFFSETY + row * 8)
+                        .terminal_err()?;
+                }
+                DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                    self.properties
+                        .set_column(DSIZE::OFFSETX + row * 8)
+                        .terminal_err()?;
+                    self.properties
+                        .set_row(DSIZE::OFFSETY + column * 8)
+                        .terminal_err()?;
+                }
+            }
             self.ensure_cursor()?.set_position(column, row);
             Ok(())
         }
@@ -307,10 +333,11 @@ where
 
     /// Reset the draw area and move pointer to the top left corner
     fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
-        self.properties.set_column(DSIZE::OFFSETX).terminal_err()?;
-        self.properties.set_row(DSIZE::OFFSETY).terminal_err()?;
         // Initialise the counter when we know it's valid
         self.cursor = Some(Cursor::new(DSIZE::WIDTH, DSIZE::HEIGHT));
+
+        // Reset cursor position
+        self.set_position(0, 0)?;
 
         Ok(())
     }
@@ -318,9 +345,12 @@ where
     /// Advance the cursor, automatically wrapping lines and/or screens if necessary
     /// Takes in an already-unwrapped cursor to avoid re-unwrapping
     fn advance_cursor(&mut self) -> Result<(), TerminalModeError> {
-        if let Some(CursorWrapEvent(new_row)) = self.ensure_cursor()?.advance() {
-            self.properties.set_row(new_row * 8).terminal_err()?;
-        }
+        let cursor = self.ensure_cursor()?;
+
+        cursor.advance();
+        let (c, r) = cursor.get_position();
+        self.set_position(c, r)?;
+
         Ok(())
     }
 
@@ -426,6 +456,23 @@ where
             '}' => [0x00, 0x41, 0x36, 0x08, 0x00, 0x00, 0x00, 0x00],
             _ => [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
         }
+    }
+
+    fn rotate_bitmap(bitmap: [u8; 8]) -> [u8; 8] {
+        let mut rotated: [u8; 8] = [0; 8];
+
+        for col in 0..8 {
+            // source.msb is the top pixel
+            let source = bitmap[col];
+            for row in 0..8 {
+                let bit = source & 1 << row != 0;
+                if bit {
+                    rotated[row] |= 1 << col;
+                }
+            }
+        }
+
+        rotated
     }
 }
 

@@ -1,6 +1,6 @@
 use embedded_graphics::{
     fonts::{Font6x8, Text},
-    image::Image,
+    image::{Image, ImageRaw},
     pixelcolor::BinaryColor,
     prelude::*,
     primitives::{Circle, Line, Rectangle},
@@ -37,7 +37,7 @@ fn main() {
         .stroke_width(1)
         .build();
 
-    let textStyle = TextStyleBuilder::new(Font6x8)
+    let text_style = TextStyleBuilder::new(Font6x8)
         .text_color(BinaryColor::On)
         .background_color(BinaryColor::Off)
         .build();
@@ -70,7 +70,7 @@ fn main() {
             &format!("IP: {}", local_addr.to_string()),
             Point::new(0, 56),
         )
-        .into_styled(textStyle)
+        .into_styled(text_style)
         .into_iter()
         .draw(&mut disp);
 
@@ -80,13 +80,14 @@ fn main() {
 
         disp.clear();
 
-        // let im: Image<BinaryColor> =
-        //     Image::new(include_bytes!("rust.raw"), 64, 64).translate(Point::new(32, 0));
-        // disp.draw(im.into_iter());
-        // disp.flush().unwrap();
+        let raw: ImageRaw<BinaryColor> = ImageRaw::new(include_bytes!("./rust.raw"), 64, 64);
 
-        // sleep(Duration::from_secs(2));
-        // disp.clear();
+        let im = Image::new(&raw, Point::new(32, 0));
+        im.draw(&mut disp).unwrap();
+        disp.flush().unwrap();
+
+        sleep(Duration::from_secs(2));
+        disp.clear();
     }
     disp.clear();
     disp.flush().unwrap();

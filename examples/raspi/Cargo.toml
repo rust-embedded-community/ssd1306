@@ -7,8 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-embedded-graphics = "0.6.0-alpha.2"
-linux-embedded-hal = "0.2.2"
+embedded-graphics = "0.6.0"
+linux-embedded-hal = "0.3.0"
 machine-ip = "0.2.1"
-ssd1306 = "0.3.0-alpha.2"
+ssd1306 = "0.4.0"
 ctrlc = { version = "3.0", features = ["termination"] }

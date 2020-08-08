@@ -1,12 +1,15 @@
-use embedded_graphics::fonts::Font6x8;
-use embedded_graphics::image::Image;
-use embedded_graphics::pixelcolor::BinaryColor;
-use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line, Rectangle};
-use embedded_graphics::Drawing;
+use embedded_graphics::{
+    fonts::{Font6x8, Text},
+    image::Image,
+    pixelcolor::BinaryColor,
+    prelude::*,
+    primitives::{Circle, Line, Rectangle},
+    style::{PrimitiveStyleBuilder, TextStyleBuilder},
+    DrawTarget,
+};
 use linux_embedded_hal::I2cdev;
 use machine_ip;
-use ssd1306::{mode::GraphicsMode, Builder};
+use ssd1306::{mode::GraphicsMode, Builder, I2CDIBuilder};
 use std::thread::sleep;
 use std::time::Duration;
 extern crate ctrlc;
@@ -23,60 +26,67 @@ fn main() {
 
     let i2c = I2cdev::new("/dev/i2c-1").unwrap();
 
-    let mut disp: GraphicsMode<_> = Builder::new().connect_i2c(i2c).into();
+    let interface = I2CDIBuilder::new().init(i2c);
+    let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
 
     disp.init().unwrap();
     disp.flush().unwrap();
 
+    let style = PrimitiveStyleBuilder::new()
+        .stroke_color(BinaryColor::On)
+        .stroke_width(1)
+        .build();
+
+    let textStyle = TextStyleBuilder::new(Font6x8)
+        .text_color(BinaryColor::On)
+        .background_color(BinaryColor::Off)
+        .build();
+
     while running.load(Ordering::SeqCst) {
-        disp.draw(
-            Line::new(Point::new(8, 16 + 16), Point::new(8 + 16, 16 + 16))
-                .stroke(Some(BinaryColor::On))
-                .into_iter(),
-        );
-        disp.draw(
-            Line::new(Point::new(8, 16 + 16), Point::new(8 + 8, 16))
-                .stroke(Some(BinaryColor::On))
-                .into_iter(),
-        );
-        disp.draw(
-            Line::new(Point::new(8 + 16, 16 + 16), Point::new(8 + 8, 16))
-                .stroke(Some(BinaryColor::On))
-                .into_iter(),
-        );
-
-        disp.draw(
-            Rectangle::new(Point::new(48, 16), Point::new(48 + 16, 16 + 16))
-                .stroke(Some(BinaryColor::On))
-                .into_iter(),
-        );
-
-        disp.draw(
-            Circle::new(Point::new(96, 16 + 8), 8)
-                .stroke(Some(BinaryColor::On))
-                .into_iter(),
-        );
+        Line::new(Point::new(8, 16 + 16), Point::new(8 + 16, 16 + 16))
+            .into_styled(style)
+            .into_iter()
+            .draw(&mut disp);
+        Line::new(Point::new(8, 16 + 16), Point::new(8 + 8, 16))
+            .into_styled(style)
+            .into_iter()
+            .draw(&mut disp);
+        Line::new(Point::new(8 + 16, 16 + 16), Point::new(8 + 8, 16))
+            .into_styled(style)
+            .into_iter()
+            .draw(&mut disp);
+        Rectangle::new(Point::new(48, 16), Point::new(48 + 16, 16 + 16))
+            .into_styled(style)
+            .into_iter()
+            .draw(&mut disp);
+        Circle::new(Point::new(96, 16 + 8), 8)
+            .into_styled(style)
+            .into_iter()
+            .draw(&mut disp);
 
         let local_addr = machine_ip::get().unwrap();
 
-        disp.draw(
-            Font6x8::render_str(&format!("IP: {}", local_addr.to_string()))
-                .translate(Point::new(0, 56))
-                .into_iter(),
-        );
+        Text::new(
+            &format!("IP: {}", local_addr.to_string()),
+            Point::new(0, 56),
+        )
+        .into_styled(textStyle)
+        .into_iter()
+        .draw(&mut disp);
+
         disp.flush().unwrap();
 
         sleep(Duration::from_secs(2));
 
         disp.clear();
 
-        let im: Image<BinaryColor> =
-            Image::new(include_bytes!("../rust.raw"), 64, 64).translate(Point::new(32, 0));
-        disp.draw(im.into_iter());
-        disp.flush().unwrap();
+        // let im: Image<BinaryColor> =
+        //     Image::new(include_bytes!("rust.raw"), 64, 64).translate(Point::new(32, 0));
+        // disp.draw(im.into_iter());
+        // disp.flush().unwrap();
 
-        sleep(Duration::from_secs(2));
-        disp.clear();
+        // sleep(Duration::from_secs(2));
+        // disp.clear();
     }
     disp.clear();
     disp.flush().unwrap();

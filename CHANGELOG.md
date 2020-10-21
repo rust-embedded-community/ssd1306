@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+- [#137](https://github.com/jamwaffles/ssd1306/pull/137) Replaced `TerminalMode` font with a new, more consistent one. This now uses the `ATIx550_8x8` font from the `romfonts` project.
+
 ## [0.4.0] - 2020-08-03
 
 ### Added
@@ -110,9 +112,9 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
+
 [unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.4.0...HEAD
 [0.4.0]: https://github.com/jamwaffles/ssd1306/compare/v0.3.1...v0.4.0
-
 [0.3.1]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.4...v0.3.0
 [0.3.0-alpha.4]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0-alpha.3...v0.3.0-alpha.4

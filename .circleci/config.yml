@@ -95,14 +95,13 @@ workflows:
   version: 2
   build_all:
     <<: *build_jobs
-
-  # Build every day
-  nightly:
-    <<: *build_jobs
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"
-          filters:
-            branches:
-              only:
-                - master
+  # # Build every day
+  # nightly:
+  #   <<: *build_jobs
+  #   triggers:
+  #     - schedule:
+  #         cron: "0 0 * * *"
+  #         filters:
+  #           branches:
+  #             only:
+  #               - master

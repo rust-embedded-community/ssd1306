@@ -46,6 +46,7 @@
 //! use ssd1306::{prelude::*, Builder, I2CDIBuilder};
 //!
 //! let interface = I2CDIBuilder::new().init(i2c);
+//! // Note that, when changing display size, you need to use `DisplayProperties<_, _>`
 //! let di: DisplayProperties<_, _> = Builder::new()
 //!     .with_rotation(DisplayRotation::Rotate180)
 //!     .size(DisplaySize128x32)
@@ -120,7 +121,24 @@ where
 
     /// Finish the builder and use some interface communicate with the display
     ///
-    /// This method consumes the builder and must come last in the method call chain
+    /// This method consumes the builder and must come last in the method call chain.
+    ///
+    /// Note that, display size is encoded into the type of the `Builder` and the display structures
+    /// (`DisplayProperties`, `GraphicsMode` and `TerminalMode`) as well. This means that, when you
+    /// are not using the default display size, you need to specify a second type parameter on these
+    /// structs.
+    ///
+    /// ```rust
+    /// # use ssd1306::test_helpers::{PinStub, I2cStub};
+    /// # let i2c = I2cStub;
+    /// use ssd1306::{prelude::*, Builder, I2CDIBuilder};
+    ///
+    /// let interface = I2CDIBuilder::new().init(i2c);
+    /// // Note that, when changing display size, you need to use `DisplayProperties<_, _>`
+    /// let di: DisplayProperties<_, _> = Builder::new()
+    ///     .size(DisplaySize128x32)
+    ///     .connect(interface);
+    /// ```
     pub fn connect<I>(self, interface: I) -> DisplayProperties<I, DSIZE>
     where
         I: WriteOnlyDataCommand,
@@ -157,7 +175,7 @@ impl I2CDIBuilder {
 
     /// Finish the builder and return an initialised display interface for further use
     ///
-    /// This method consumes the builder and must come last in the method call chain
+    /// This method consumes the builder and must come last in the method call chain.
     pub fn init<I: hal::blocking::i2c::Write>(
         self,
         i2c: I,

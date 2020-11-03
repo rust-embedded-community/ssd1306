@@ -242,6 +242,24 @@ where
     }
 
     /// Change into any mode implementing DisplayModeTrait
+    ///
+    /// Note that, display size is encoded into the type of the `DisplayProperties` and the display
+    /// mode structures (`GraphicsMode` and `TerminalMode`) as well. This means that, when you
+    /// are not using the default display size, you need to specify a second type parameter on these
+    /// structs.
+    ///
+    /// ```rust
+    /// # use ssd1306::test_helpers::{PinStub, I2cStub};
+    /// # let i2c = I2cStub;
+    /// use ssd1306::{mode::GraphicsMode, prelude::*, Builder, I2CDIBuilder};
+    ///
+    /// let interface = I2CDIBuilder::new().init(i2c);
+    /// // Note that, when changing display size, you need to use `GraphicsMode<_, _>`
+    /// let di: GraphicsMode<_, _> = Builder::new()
+    ///     .size(DisplaySize128x32)
+    ///     .connect(interface)
+    ///     .into();
+    /// ```
     pub fn into<NMODE: DisplayModeTrait<DI, DSIZE>>(self) -> NMODE
     where
         DI: WriteOnlyDataCommand,

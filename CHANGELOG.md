@@ -8,6 +8,7 @@
 
 ### Changed
 
+- [#141](https://github.com/jamwaffles/ssd1306/pull/141) Brightness for 72x40 display.
 - **(breaking)** [#139] Removed default display size type parameters.
 
 ## [0.4.1] - 2020-12-01

@@ -8,6 +8,8 @@
 
 ## [0.4.1] - 2020-12-01
 
+### Changed
+
 - [#137](https://github.com/jamwaffles/ssd1306/pull/137) Replaced `TerminalMode` font with a new, more consistent one. This now uses the `zxpix` font from <https://jared.geek.nz/2014/jan/custom-fonts-for-microcontrollers>.
 
 ## [0.4.0] - 2020-08-03

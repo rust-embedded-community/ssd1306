@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- **(breaking)** [#139] Removed default display size type parameters.
+
 ## [0.4.1] - 2020-12-01
 
 ### Changed

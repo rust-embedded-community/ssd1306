@@ -70,7 +70,7 @@ fn main() -> ! {
     );
 
     let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
-    let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
+    let mut disp: GraphicsMode<_, _> = Builder::new().connect(interface).into();
 
     disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();

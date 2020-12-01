@@ -11,7 +11,7 @@
 //! use ssd1306::{mode::TerminalMode, Builder, I2CDIBuilder};
 //!
 //! let interface = I2CDIBuilder::new().init(i2c);
-//! let mut display: TerminalMode<_> = Builder::new().connect(interface).into();
+//! let mut display: TerminalMode<_, _> = Builder::new().connect(interface).into();
 //!
 //! display.init().unwrap();
 //! display.clear().unwrap();
@@ -161,7 +161,7 @@ impl<T> IntoTerminalModeResult<T> for Result<T, DisplayError> {
 
 // TODO: Add to prelude
 /// Terminal mode handler
-pub struct TerminalMode<DI, DSIZE = DisplaySize128x64>
+pub struct TerminalMode<DI, DSIZE>
 where
     DSIZE: TerminalDisplaySize,
 {

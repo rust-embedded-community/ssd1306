@@ -15,7 +15,7 @@
 //! let i2c = I2cInterface;
 //!
 //! let interface = I2CDIBuilder::new().init(i2c);
-//! let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
+//! let mut disp: GraphicsMode<_, _> = Builder::new().connect(interface).into();
 //! disp.init();
 //!
 //! disp.set_pixel(10, 20, 1);
@@ -36,7 +36,7 @@
 //! let i2c = I2cInterface;
 //!
 //! let interface = I2CDIBuilder::new().init(i2c);
-//! let mut disp: TerminalMode<_> = Builder::new().connect(interface).into();
+//! let mut disp: TerminalMode<_, _> = Builder::new().connect(interface).into();
 //!
 //! disp.print_char('A');
 //! ```
@@ -64,7 +64,7 @@
 //! use ssd1306::{mode::TerminalMode, prelude::*, Builder, I2CDIBuilder};
 //!
 //! let interface = I2CDIBuilder::new().init(i2c);
-//! let mut disp: TerminalMode<_> = Builder::new().connect(interface).into();
+//! let mut disp: TerminalMode<_, _> = Builder::new().connect(interface).into();
 //! disp.init().unwrap();
 //! let _ = disp.clear();
 //!
@@ -94,7 +94,7 @@
 //! use ssd1306::{mode::GraphicsMode, prelude::*, Builder, I2CDIBuilder};
 //!
 //! let interface = I2CDIBuilder::new().init(i2c);
-//! let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
+//! let mut disp: GraphicsMode<_, _> = Builder::new().connect(interface).into();
 //!
 //! disp.init().unwrap();
 //!

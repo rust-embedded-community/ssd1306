@@ -60,7 +60,7 @@ fn main() -> ! {
     );
 
     let interface = I2CDIBuilder::new().init(i2c);
-    let mut disp: TerminalMode<_> = Builder::new().connect(interface).into();
+    let mut disp: TerminalMode<_, _> = Builder::new().connect(interface).into();
     disp.init().unwrap();
     let _ = disp.clear();
 

@@ -31,7 +31,7 @@
 //! use ssd1306::{prelude::*, Builder, I2CDIBuilder};
 //!
 //! let interface = I2CDIBuilder::new().init(i2c);
-//! let di: DisplayProperties<_> = Builder::new()
+//! let di: DisplayProperties<_, _> = Builder::new()
 //!     .with_rotation(DisplayRotation::Rotate180)
 //!     .connect(interface);
 //! ```
@@ -46,7 +46,6 @@
 //! use ssd1306::{prelude::*, Builder, I2CDIBuilder};
 //!
 //! let interface = I2CDIBuilder::new().init(i2c);
-//! // Note that, when changing display size, you need to use `DisplayProperties<_, _>`
 //! let di: DisplayProperties<_, _> = Builder::new()
 //!     .with_rotation(DisplayRotation::Rotate180)
 //!     .size(DisplaySize128x32)
@@ -64,7 +63,7 @@
 //! use ssd1306::{prelude::*, Builder};
 //!
 //! let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
-//! let display: TerminalMode<_> = Builder::new().connect(interface).into();
+//! let display: TerminalMode<_, _> = Builder::new().connect(interface).into();
 //! ```
 //!
 //! [`I2CDIBuilder`]: ./struct.I2CDIBuilder.html
@@ -123,18 +122,12 @@ where
     ///
     /// This method consumes the builder and must come last in the method call chain.
     ///
-    /// Note that, display size is encoded into the type of the `Builder` and the display structures
-    /// (`DisplayProperties`, `GraphicsMode` and `TerminalMode`) as well. This means that, when you
-    /// are not using the default display size, you need to specify a second type parameter on these
-    /// structs.
-    ///
     /// ```rust
     /// # use ssd1306::test_helpers::{PinStub, I2cStub};
     /// # let i2c = I2cStub;
     /// use ssd1306::{prelude::*, Builder, I2CDIBuilder};
     ///
     /// let interface = I2CDIBuilder::new().init(i2c);
-    /// // Note that, when changing display size, you need to use `DisplayProperties<_, _>`
     /// let di: DisplayProperties<_, _> = Builder::new()
     ///     .size(DisplaySize128x32)
     ///     .connect(interface);

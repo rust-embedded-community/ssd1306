@@ -13,7 +13,7 @@
 //! use ssd1306::{mode::GraphicsMode, prelude::*, Builder, I2CDIBuilder};
 //!
 //! let interface = I2CDIBuilder::new().init(i2c);
-//! let mut display: GraphicsMode<_> = Builder::new().connect(interface).into();
+//! let mut display: GraphicsMode<_, _> = Builder::new().connect(interface).into();
 //!
 //! display.init().unwrap();
 //!
@@ -55,7 +55,7 @@
 //!
 //! [embedded_graphics]: https://crates.io/crates/embedded_graphics
 
-use crate::displaysize::{DisplaySize, DisplaySize128x64};
+use crate::displaysize::DisplaySize;
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 use generic_array::GenericArray;
 
@@ -66,7 +66,7 @@ use crate::{
 
 // TODO: Add to prelude
 /// Graphics mode handler
-pub struct GraphicsMode<DI, DSIZE = DisplaySize128x64>
+pub struct GraphicsMode<DI, DSIZE>
 where
     DSIZE: DisplaySize,
 {

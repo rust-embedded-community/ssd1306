@@ -70,7 +70,7 @@ fn main() -> ! {
     );
 
     let interface = I2CDIBuilder::new().init(i2c);
-    let mut disp: GraphicsMode<_> = Builder::new()
+    let mut disp: GraphicsMode<_, _> = Builder::new()
         // Set initial rotation at 90 degrees clockwise
         .with_rotation(DisplayRotation::Rotate90)
         .connect(interface)

@@ -4,12 +4,12 @@ use crate::{
     brightness::Brightness,
     command::{AddrMode, Command, VcomhLevel},
     displayrotation::DisplayRotation,
-    displaysize::{DisplaySize, DisplaySize128x64},
+    displaysize::DisplaySize,
 };
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 
 /// Display properties struct
-pub struct DisplayProperties<DI, DSIZE = DisplaySize128x64> {
+pub struct DisplayProperties<DI, DSIZE> {
     iface: DI,
     display_rotation: DisplayRotation,
     addr_mode: AddrMode,
@@ -242,6 +242,18 @@ where
     }
 
     /// Change into any mode implementing DisplayModeTrait
+    ///
+    /// ```rust
+    /// # use ssd1306::test_helpers::{PinStub, I2cStub};
+    /// # let i2c = I2cStub;
+    /// use ssd1306::{mode::GraphicsMode, prelude::*, Builder, I2CDIBuilder};
+    ///
+    /// let interface = I2CDIBuilder::new().init(i2c);
+    /// let di: GraphicsMode<_, _> = Builder::new()
+    ///     .size(DisplaySize128x32)
+    ///     .connect(interface)
+    ///     .into();
+    /// ```
     pub fn into<NMODE: DisplayModeTrait<DI, DSIZE>>(self) -> NMODE
     where
         DI: WriteOnlyDataCommand,

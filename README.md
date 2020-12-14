@@ -71,7 +71,7 @@ fn main() -> ! {
     );
 
     let interface = I2CDIBuilder::new().init(i2c);
-    let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
+    let mut disp: GraphicsMode<_, _> = Builder::new().connect(interface).into();
 
     disp.init().unwrap();
 

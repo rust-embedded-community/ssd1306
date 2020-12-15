@@ -28,9 +28,10 @@ pub trait DisplaySize {
     /// width * height / 8
     type BufferSize: ArrayLength<u8>;
 
-    /// Send resolution-dependent configuration to the display
+    /// Send resolution and model-dependent configuration to the display
     ///
     /// See [`Command::ComPinConfig`](../command/enum.Command.html#variant.ComPinConfig)
+    /// and [`Command::InternalIref`](../command/enum.Command.html#variant.InternalIref)
     /// for more information
     fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError>;
 }
@@ -85,7 +86,8 @@ impl DisplaySize for DisplaySize72x40 {
     type BufferSize = U360;
 
     fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
-        Command::ComPinConfig(true, false).send(iface)
+        Command::ComPinConfig(true, false).send(iface)?;
+        Command::InternalIref(true, true).send(iface)
     }
 }
 

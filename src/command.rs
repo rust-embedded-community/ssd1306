@@ -86,6 +86,8 @@ pub enum Command {
     Noop,
     /// Enable charge pump
     ChargePump(bool),
+    /// Select external or internal I REF. Only for 72 x 40 display with SSD1306B driver
+    InternalIref(bool, bool),
 }
 
 impl Command {
@@ -160,6 +162,18 @@ impl Command {
             Command::VcomhDeselect(level) => ([0xDB, (level as u8) << 4, 0, 0, 0, 0, 0], 2),
             Command::Noop => ([0xE3, 0, 0, 0, 0, 0, 0], 1),
             Command::ChargePump(en) => ([0x8D, 0x10 | ((en as u8) << 2), 0, 0, 0, 0, 0], 2),
+            Command::InternalIref(en, current) => (
+                [
+                    0xAD,
+                    ((current as u8) << 5) | ((en as u8) << 4),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+                2,
+            ),
         };
 
         // Send command over the interface

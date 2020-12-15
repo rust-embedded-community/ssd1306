@@ -8,8 +8,11 @@
 
 ### Changed
 
-- [#141](https://github.com/jamwaffles/ssd1306/pull/141) Brightness for 72x40 display.
 - **(breaking)** [#139] Removed default display size type parameters.
+
+### Fixed
+
+- [#141](https://github.com/jamwaffles/ssd1306/pull/141) 72x40 displays can now be set to higher brightnesses, matching other sizes.
 
 ## [0.4.1] - 2020-12-01
 
@@ -121,8 +124,8 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.4.1...HEAD
 
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.4.1...HEAD
 [0.4.1]: https://github.com/jamwaffles/ssd1306/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/jamwaffles/ssd1306/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/jamwaffles/ssd1306/compare/v0.3.0...v0.3.1

@@ -10,7 +10,7 @@
 
 ### Changed
 
-- **(breaking)** [#139] Removed default display size type parameters.
+- **(breaking)** [#139](https://github.com/jamwaffles/ssd1306/pull/139) Removed default display size type parameters.
 
 ### Fixed
 
@@ -126,8 +126,8 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.4.2...HEAD
 
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.4.2...HEAD
 [0.4.2]: https://github.com/jamwaffles/ssd1306/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/jamwaffles/ssd1306/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/jamwaffles/ssd1306/compare/v0.3.1...v0.4.0

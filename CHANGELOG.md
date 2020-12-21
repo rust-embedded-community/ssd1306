@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.5.0] - 2020-12-21
+
 ## [0.4.2] - 2020-12-15
 
 ### Changed
@@ -126,8 +128,9 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.5.0...HEAD
 
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.4.2...HEAD
+[0.5.0]: https://github.com/jamwaffles/ssd1306/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/jamwaffles/ssd1306/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/jamwaffles/ssd1306/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/jamwaffles/ssd1306/compare/v0.3.1...v0.4.0

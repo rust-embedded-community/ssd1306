@@ -18,6 +18,12 @@ pub trait DisplaySize {
     /// Height in pixels
     const HEIGHT: u8;
 
+    /// Maximum width supported by the display driver
+    const DRIVER_COLS: u8 = 128;
+
+    /// Maximum height supported by the display driver
+    const DRIVER_ROWS: u8 = 64;
+
     /// Horizontal offset in pixels
     const OFFSETX: u8 = 0;
 

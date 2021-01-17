@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+- [#145](https://github.com/jamwaffles/ssd1306/pull/145) Fixed rotation for 96x16 and 72x40 displays.
+
 ## [0.5.1] - 2021-01-09
 
 ## [0.5.0] - 2020-12-21

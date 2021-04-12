@@ -35,6 +35,7 @@ type Display = Ssd1306<
                 gpio::gpioa::PA6<gpio::Input<gpio::Floating>>,
                 gpio::gpioa::PA7<gpio::Alternate<gpio::PushPull>>,
             ),
+            u8,
         >,
         gpio::gpiob::PB1<gpio::Output<gpio::PushPull>>,
     >,

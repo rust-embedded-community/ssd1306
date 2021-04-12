@@ -30,7 +30,7 @@ optional = true
 version = "0.6.0"
 
 [dev-dependencies]
-cortex-m = "0.6.2"
+cortex-m = "0.7.2"
 cortex-m-rt = "0.6.12"
 cortex-m-rtic = "0.5.3"
 panic-halt = "0.2.0"
@@ -43,12 +43,12 @@ features = [ "graphics" ]
 
 # Used by the noise_i2c examples
 [dev-dependencies.rand]
-version = "0.7.3"
+version = "0.8.3"
 default-features = false
 features = [ "small_rng" ]
 
 [dev-dependencies.stm32f1xx-hal]
-version = "0.5.3"
+version = "0.7.0"
 features = [ "rt", "stm32f103" ]
 
 [features]

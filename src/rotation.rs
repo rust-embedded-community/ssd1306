@@ -1,7 +1,7 @@
 //! Display rotation
 
 /// Display rotation.
-#[derive(Clone, Copy)]
+#[derive(Copy, Clone, Debug)]
 pub enum DisplayRotation {
     /// No rotation, normal display
     Rotate0,

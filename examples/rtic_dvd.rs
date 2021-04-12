@@ -14,7 +14,7 @@ use embedded_graphics::{
 };
 use panic_halt as _;
 use rtic::app;
-use ssd1306::{prelude::*, Builder};
+use ssd1306::{prelude::*, Ssd1306};
 use stm32f1xx_hal::{
     delay::Delay,
     gpio,
@@ -25,7 +25,7 @@ use stm32f1xx_hal::{
 };
 use tinybmp::Bmp;
 
-type Display = ssd1306::mode::graphics::GraphicsMode<
+type Display = Ssd1306<
     SPIInterfaceNoCS<
         spi::Spi<
             SPI1,
@@ -39,6 +39,7 @@ type Display = ssd1306::mode::graphics::GraphicsMode<
         gpio::gpiob::PB1<gpio::Output<gpio::PushPull>>,
     >,
     DisplaySize128x64,
+    BufferedGraphicsMode<DisplaySize128x64>,
 >;
 
 #[app(device = stm32f1xx_hal::pac, peripherals = true)]
@@ -95,10 +96,12 @@ const APP: () = {
         );
 
         let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
-        let mut display: GraphicsMode<_, _> = Builder::new()
-            .with_rotation(DisplayRotation::Rotate180)
-            .connect(interface)
-            .into();
+        let mut display = Ssd1306::new(
+            interface,
+            DisplaySize128x64,
+            BufferedGraphicsMode::new(),
+            DisplayRotation::Rotate180,
+        );
 
         display.reset(&mut rst, &mut delay).unwrap();
         display.init().unwrap();

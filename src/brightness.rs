@@ -1,7 +1,7 @@
 //! Display brightness
 
 /// Struct that holds display brightness
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Brightness {
     pub(crate) precharge: u8,
     pub(crate) contrast: u8,

@@ -20,7 +20,7 @@
 use core::fmt::Write;
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use panic_halt as _;
-use ssd1306::{prelude::*, Builder, I2CDIBuilder};
+use ssd1306::{prelude::*, I2CDIBuilder, Ssd1306};
 use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
@@ -60,17 +60,22 @@ fn main() -> ! {
     );
 
     let interface = I2CDIBuilder::new().init(i2c);
-    let mut disp: TerminalMode<_, _> = Builder::new().connect(interface).into();
-    disp.init().unwrap();
-    let _ = disp.clear();
+    let mut display = Ssd1306::new(
+        interface,
+        DisplaySize128x64,
+        TerminalMode::new(),
+        DisplayRotation::Rotate0,
+    );
+    display.init().unwrap();
+    let _ = display.clear();
 
     /* Endless loop */
     loop {
         for c in 97..123 {
-            let _ = disp.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) });
+            let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) });
         }
         for c in 65..91 {
-            let _ = disp.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) });
+            let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) });
         }
     }
 }

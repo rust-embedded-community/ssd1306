@@ -1,10 +1,43 @@
-//! Operating modes for the SSD1306
-//!
-//! This driver can be used in different modes. A mode defines how the driver will behave, and what
-//! methods it exposes. Look at the modes below for more information on what they expose.
+mod buffered_graphics;
+mod terminal;
 
-pub mod displaymode;
-pub mod graphics;
-pub mod terminal;
+use crate::{command::AddrMode, rotation::DisplayRotation, size::DisplaySize, Ssd1306};
+pub use buffered_graphics::*;
+use display_interface::{DisplayError, WriteOnlyDataCommand};
+pub use terminal::*;
 
-pub use self::{graphics::GraphicsMode, terminal::TerminalMode};
+/// Common functions to all display modes.
+pub trait DisplayConfig {
+    /// Error.
+    type Error;
+
+    /// Set display rotation.
+    fn set_rotation(&mut self, rotation: DisplayRotation) -> Result<(), Self::Error>;
+
+    /// Initialise and configure the display for the given mode.
+    fn init(&mut self) -> Result<(), Self::Error>;
+}
+
+/// A display mode with no additional functionality beyond that provided by the display.
+#[derive(Debug, Copy, Clone)]
+pub struct NoMode;
+
+impl<DI, SIZE> DisplayConfig for Ssd1306<DI, SIZE, NoMode>
+where
+    DI: WriteOnlyDataCommand,
+    SIZE: DisplaySize,
+{
+    type Error = DisplayError;
+
+    /// Set the display rotation
+    ///
+    /// This method resets the cursor but does not clear the screen.
+    fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DisplayError> {
+        self.set_rotation(rot)
+    }
+
+    /// Initialise and clear the display in graphics mode.
+    fn init(&mut self) -> Result<(), DisplayError> {
+        self.init_with_addr_mode(AddrMode::Page)
+    }
+}

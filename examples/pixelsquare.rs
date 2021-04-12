@@ -23,7 +23,7 @@
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use panic_halt as _;
-use ssd1306::{prelude::*, Builder};
+use ssd1306::{prelude::*, Ssd1306};
 use stm32f1xx_hal::{
     delay::Delay,
     prelude::*,
@@ -70,36 +70,41 @@ fn main() -> ! {
     );
 
     let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
-    let mut disp: GraphicsMode<_, _> = Builder::new().connect(interface).into();
+    let mut display = Ssd1306::new(
+        interface,
+        DisplaySize128x64,
+        BufferedGraphicsMode::new(),
+        DisplayRotation::Rotate0,
+    );
 
-    disp.reset(&mut rst, &mut delay).unwrap();
-    disp.init().unwrap();
+    display.reset(&mut rst, &mut delay).unwrap();
+    display.init().unwrap();
 
     // Top side
-    disp.set_pixel(0, 0, 1);
-    disp.set_pixel(1, 0, 1);
-    disp.set_pixel(2, 0, 1);
-    disp.set_pixel(3, 0, 1);
+    display.set_pixel(0, 0, 1);
+    display.set_pixel(1, 0, 1);
+    display.set_pixel(2, 0, 1);
+    display.set_pixel(3, 0, 1);
 
     // Right side
-    disp.set_pixel(3, 0, 1);
-    disp.set_pixel(3, 1, 1);
-    disp.set_pixel(3, 2, 1);
-    disp.set_pixel(3, 3, 1);
+    display.set_pixel(3, 0, 1);
+    display.set_pixel(3, 1, 1);
+    display.set_pixel(3, 2, 1);
+    display.set_pixel(3, 3, 1);
 
     // Bottom side
-    disp.set_pixel(0, 3, 1);
-    disp.set_pixel(1, 3, 1);
-    disp.set_pixel(2, 3, 1);
-    disp.set_pixel(3, 3, 1);
+    display.set_pixel(0, 3, 1);
+    display.set_pixel(1, 3, 1);
+    display.set_pixel(2, 3, 1);
+    display.set_pixel(3, 3, 1);
 
     // Left side
-    disp.set_pixel(0, 0, 1);
-    disp.set_pixel(0, 1, 1);
-    disp.set_pixel(0, 2, 1);
-    disp.set_pixel(0, 3, 1);
+    display.set_pixel(0, 0, 1);
+    display.set_pixel(0, 1, 1);
+    display.set_pixel(0, 2, 1);
+    display.set_pixel(0, 3, 1);
 
-    disp.flush().unwrap();
+    display.flush().unwrap();
 
     loop {}
 }

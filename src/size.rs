@@ -36,8 +36,8 @@ pub trait DisplaySize {
 
     /// Send resolution and model-dependent configuration to the display
     ///
-    /// See [`Command::ComPinConfig`](../command/enum.Command.html#variant.ComPinConfig)
-    /// and [`Command::InternalIref`](../command/enum.Command.html#variant.InternalIref)
+    /// See [`Command::ComPinConfig`](crate::Command::ComPinConfig)
+    /// and [`Command::InternalIref`](crate::Command::InternalIref)
     /// for more information
     fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError>;
 }

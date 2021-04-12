@@ -28,5 +28,3 @@ cargo clean --doc
 cargo clean --doc --target $TARGET
 
 cargo doc --all-features --target $TARGET
-
-linkchecker target/$TARGET/doc/ssd1306/index.html

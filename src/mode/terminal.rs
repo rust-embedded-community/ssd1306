@@ -2,7 +2,7 @@ use crate::{command::AddrMode, mode::DisplayConfig, rotation::DisplayRotation, s
 use core::{cmp::min, fmt};
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 
-/// Extends the [`DisplaySize`](../../displaysize/trait.DisplaySize.html) trait
+/// Extends the [`DisplaySize`](crate::size::DisplaySize) trait
 /// to include number of characters that can fit on the display.
 pub trait TerminalDisplaySize: DisplaySize {
     /// The number of characters that can fit on the display at once (w * h / (8 * 8))

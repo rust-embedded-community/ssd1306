@@ -6,7 +6,6 @@ target_steps: &target_steps
     - restore_cache:
         key: v3-ssd1306-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
     - run: rustup self update
-    - run: sudo apt install -qq linkchecker
     - run: rustup default ${RUST_VERSION:-stable}
     - run: rustup component add rustfmt
     - run: cargo update

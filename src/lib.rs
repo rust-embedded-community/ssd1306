@@ -7,8 +7,9 @@
 //!
 //! ## Draw some text to the display
 //!
-//! Uses [`BufferedGraphicsMode`] and [embedded_graphics](../embedded_graphics/index.html). [See the
-//! complete example here](https://github.com/jamwaffles/ssd1306/blob/master/examples/text_i2c.rs).
+//! Uses [`BufferedGraphicsMode`] and [embedded_graphics](https://docs.rs/embedded-graphics). [See
+//! the complete example
+//! here](https://github.com/jamwaffles/ssd1306/blob/master/examples/text_i2c.rs).
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::I2cStub;
@@ -76,9 +77,8 @@
 //! }
 //! ```
 //!
-//! [featureset]: https://github.com/jamwaffles/embedded-graphics#features
-//! [`BufferedGraphicsMode`]: crate::mode::BufferedGraphicsMode
-//! [`TerminalMode`]: crate::mode::TerminalMode
+//! [featureset]: https://github.com/jamwaffles/embedded-graphics#features [`BufferedGraphicsMode`]:
+//! crate::mode::BufferedGraphicsMode [`TerminalMode`]: crate::mode::TerminalMode
 
 #![no_std]
 #![deny(missing_debug_implementations)]
@@ -91,6 +91,7 @@
 #![deny(unstable_features)]
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
+#![deny(broken_intra_doc_links)]
 
 mod brightness;
 pub mod command;

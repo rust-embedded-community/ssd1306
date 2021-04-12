@@ -114,6 +114,7 @@ pub use crate::{
 };
 use command::{AddrMode, Command, VcomhLevel};
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
+use display_interface_spi::{SPIInterface, SPIInterfaceNoCS};
 use embedded_hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 use error::Error;
 use size::DisplaySize;
@@ -369,7 +370,10 @@ where
             .map(|s| &s[page_lower..page_upper])
             .try_for_each(|c| interface.send_data(U8(&c)))
     }
+}
 
+// SPI-only reset
+impl<SPI, DC, SIZE, MODE> Ssd1306<SPIInterfaceNoCS<SPI, DC>, SIZE, MODE> {
     /// Reset the display.
     pub fn reset<RST, DELAY, PinE>(
         &mut self,
@@ -380,10 +384,34 @@ where
         RST: OutputPin<Error = PinE>,
         DELAY: DelayMs<u8>,
     {
-        rst.set_high().map_err(Error::Pin)?;
-        delay.delay_ms(1);
-        rst.set_low().map_err(Error::Pin)?;
-        delay.delay_ms(10);
-        rst.set_high().map_err(Error::Pin)
+        inner_reset(rst, delay)
     }
+}
+
+// SPI-only reset
+impl<SPI, DC, CS, SIZE, MODE> Ssd1306<SPIInterface<SPI, DC, CS>, SIZE, MODE> {
+    /// Reset the display.
+    pub fn reset<RST, DELAY, PinE>(
+        &mut self,
+        rst: &mut RST,
+        delay: &mut DELAY,
+    ) -> Result<(), Error<(), PinE>>
+    where
+        RST: OutputPin<Error = PinE>,
+        DELAY: DelayMs<u8>,
+    {
+        inner_reset(rst, delay)
+    }
+}
+
+fn inner_reset<RST, DELAY, PinE>(rst: &mut RST, delay: &mut DELAY) -> Result<(), Error<(), PinE>>
+where
+    RST: OutputPin<Error = PinE>,
+    DELAY: DelayMs<u8>,
+{
+    rst.set_high().map_err(Error::Pin)?;
+    delay.delay_ms(1);
+    rst.set_low().map_err(Error::Pin)?;
+    delay.delay_ms(10);
+    rst.set_high().map_err(Error::Pin)
 }

@@ -77,8 +77,9 @@
 //! }
 //! ```
 //!
-//! [featureset]: https://github.com/jamwaffles/embedded-graphics#features [`BufferedGraphicsMode`]:
-//! crate::mode::BufferedGraphicsMode [`TerminalMode`]: crate::mode::TerminalMode
+//! [featureset]: https://github.com/jamwaffles/embedded-graphics#features
+//! [`BufferedGraphicsMode`]: crate::mode::BufferedGraphicsMode
+//! [`TerminalMode`]: crate::mode::TerminalMode
 
 #![no_std]
 #![deny(missing_debug_implementations)]

@@ -10,6 +10,7 @@
 
 - [#145](https://github.com/jamwaffles/ssd1306/pull/145) Fixed rotation for 96x16 and 72x40 displays.
 - [#147](https://github.com/jamwaffles/ssd1306/pull/147) Fixed display rotation in terminal mode.
+- **(breaking)** [#150](https://github.com/jamwaffles/ssd1306/pull/150) Restructure crate and API to make usage and maintenance simpler and easier.
 
 ## [0.5.1] - 2021-01-09
 

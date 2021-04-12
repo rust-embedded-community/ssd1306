@@ -20,9 +20,9 @@
 //!     prelude::*,
 //!     style::TextStyleBuilder,
 //! };
-//! use ssd1306::{prelude::*, BufferedGraphicsMode, Ssd1306, I2CDIBuilder};
+//! use ssd1306::{prelude::*, BufferedGraphicsMode, Ssd1306, I2CDisplayInterface};
 //!
-//! let interface = I2CDIBuilder::new().init(i2c);
+//! let interface = I2CDisplayInterface::new(i2c);
 //! let mut display = Ssd1306::new(
 //!     interface,
 //!     DisplaySize128x64,
@@ -55,9 +55,9 @@
 //! # use ssd1306::test_helpers::I2cStub;
 //! # let i2c = I2cStub;
 //! use core::fmt::Write;
-//! use ssd1306::{Ssd1306, TerminalMode, prelude::*, I2CDIBuilder};
+//! use ssd1306::{Ssd1306, TerminalMode, prelude::*, I2CDisplayInterface};
 //!
-//! let interface = I2CDIBuilder::new().init(i2c);
+//! let interface = I2CDisplayInterface::new(i2c);
 //!
 //! let mut display = Ssd1306::new(
 //!     interface,
@@ -97,7 +97,7 @@
 mod brightness;
 pub mod command;
 mod error;
-mod i2c_builder;
+mod i2c_interface;
 mod mode;
 pub mod prelude;
 mod rotation;
@@ -107,7 +107,7 @@ pub mod test_helpers;
 
 pub use crate::{
     brightness::Brightness,
-    i2c_builder::I2CDIBuilder,
+    i2c_interface::I2CDisplayInterface,
     mode::{BufferedGraphicsMode, NoMode, TerminalMode},
     rotation::DisplayRotation,
     size::{

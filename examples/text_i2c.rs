@@ -26,7 +26,7 @@ use embedded_graphics::{
     style::TextStyleBuilder,
 };
 use panic_halt as _;
-use ssd1306::{prelude::*, I2CDIBuilder, Ssd1306};
+use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
 use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
@@ -65,7 +65,7 @@ fn main() -> ! {
         1000,
     );
 
-    let interface = I2CDIBuilder::new().init(i2c);
+    let interface = I2CDisplayInterface::new(i2c);
     let mut display = Ssd1306::new(
         interface,
         DisplaySize128x64,

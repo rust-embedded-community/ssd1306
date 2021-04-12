@@ -36,8 +36,8 @@ where
         self.set_rotation(rot)
     }
 
-    /// Initialise and clear the display in graphics mode.
+    /// Initialise in horizontal addressing mode.
     fn init(&mut self) -> Result<(), DisplayError> {
-        self.init_with_addr_mode(AddrMode::Page)
+        self.init_with_addr_mode(AddrMode::Horizontal)
     }
 }

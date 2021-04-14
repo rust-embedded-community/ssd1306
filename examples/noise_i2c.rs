@@ -22,7 +22,7 @@
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use panic_halt as _;
 use rand::prelude::*;
-use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
+use ssd1306::{mode::NoMode, prelude::*, I2CDisplayInterface, Ssd1306};
 use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,

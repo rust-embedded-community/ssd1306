@@ -13,7 +13,7 @@ use embedded_graphics::{
 };
 use panic_halt as _;
 use rtic::app;
-use ssd1306::{prelude::*, Ssd1306};
+use ssd1306::{mode::BufferedGraphicsMode, prelude::*, Ssd1306};
 use stm32f1xx_hal::{
     delay::Delay,
     gpio,

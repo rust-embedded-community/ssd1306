@@ -1,4 +1,4 @@
-//! SSD1306 OLED display driver
+//! SSD1306 OLED display driver.
 //!
 //! This crate provides a driver interface to the popular SSD1306 monochrome OLED display driver. It
 //! supports I2C and SPI via the [`display_interface`](https://docs.rs/display_interface) crate.
@@ -6,7 +6,7 @@
 //! The main driver is created using [`Ssd1306::new`] which accepts an interface instance, display
 //! size, rotation and mode. The following display modes are supported:
 //!
-//! - [`NoMode`] - A simple mode with lower level methods available.
+//! - [`NoMode`](crate::mode::NoMode) - A simple mode with lower level methods available.
 //! - [`BufferedGraphicsMode`] - A framebuffered mode with additional methods and integration with
 //!   [embedded-graphics](https://docs.rs/embedded-graphics).
 //! - [`TerminalMode`] - A bufferless mode supporting drawing text to the display, as well as
@@ -32,7 +32,7 @@
 //!     prelude::*,
 //!     style::TextStyleBuilder,
 //! };
-//! use ssd1306::{prelude::*, BufferedGraphicsMode, Ssd1306, I2CDisplayInterface};
+//! use ssd1306::{mode::BufferedGraphicsMode, prelude::*, I2CDisplayInterface, Ssd1306};
 //!
 //! let interface = I2CDisplayInterface::new(i2c);
 //! let mut display = Ssd1306::new(
@@ -67,7 +67,7 @@
 //! # use ssd1306::test_helpers::I2cStub;
 //! # let i2c = I2cStub;
 //! use core::fmt::Write;
-//! use ssd1306::{Ssd1306, TerminalMode, prelude::*, I2CDisplayInterface};
+//! use ssd1306::{mode::TerminalMode, prelude::*, I2CDisplayInterface, Ssd1306};
 //!
 //! let interface = I2CDisplayInterface::new(i2c);
 //!
@@ -113,32 +113,26 @@ mod brightness;
 pub mod command;
 mod error;
 mod i2c_interface;
-mod mode;
+pub mod mode;
 pub mod prelude;
-mod rotation;
-mod size;
+pub mod rotation;
+pub mod size;
 #[doc(hidden)]
 pub mod test_helpers;
 
-pub use crate::{
-    brightness::Brightness,
-    i2c_interface::I2CDisplayInterface,
-    mode::{BufferedGraphicsMode, NoMode, TerminalMode},
-    rotation::DisplayRotation,
-    size::{
-        DisplaySize128x32, DisplaySize128x64, DisplaySize64x48, DisplaySize72x40, DisplaySize96x16,
-    },
-};
+pub use crate::i2c_interface::I2CDisplayInterface;
+use brightness::Brightness;
 use command::{AddrMode, Command, VcomhLevel};
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 use display_interface_spi::{SPIInterface, SPIInterfaceNoCS};
 use embedded_hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 use error::Error;
+use rotation::DisplayRotation;
 use size::DisplaySize;
 
 /// SSD1306 driver.
 ///
-/// Note that some methods are only available when the display is configured in a certain mode.
+/// Note that some methods are only available when the display is configured in a certain [`mode`].
 #[derive(Copy, Clone, Debug)]
 pub struct Ssd1306<DI, SIZE, MODE> {
     interface: DI,
@@ -241,7 +235,7 @@ where
     /// ```rust
     /// # use ssd1306::test_helpers::StubInterface;
     /// # let interface = StubInterface;
-    /// use ssd1306::{prelude::*, Ssd1306};
+    /// use ssd1306::{mode::TerminalMode, prelude::*, Ssd1306};
     ///
     /// let mut display = Ssd1306::new(
     ///     interface,

@@ -23,7 +23,7 @@
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use panic_halt as _;
-use ssd1306::{prelude::*, Ssd1306};
+use ssd1306::{mode::BufferedGraphicsMode, prelude::*, Ssd1306};
 use stm32f1xx_hal::{
     delay::Delay,
     prelude::*,

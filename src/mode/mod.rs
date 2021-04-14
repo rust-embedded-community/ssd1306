@@ -20,7 +20,7 @@ pub trait DisplayConfig {
     fn init(&mut self) -> Result<(), Self::Error>;
 }
 
-/// A display mode with no additional functionality beyond that provided by the display.
+/// A mode with no additional functionality beyond that provided by the base [`Ssd1306`] struct.
 #[derive(Debug, Copy, Clone)]
 pub struct NoMode;
 

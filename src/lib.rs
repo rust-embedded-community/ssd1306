@@ -1,5 +1,17 @@
 //! SSD1306 OLED display driver
 //!
+//! This crate provides a driver interface to the popular SSD1306 monochrome OLED display driver. It
+//! supports I2C and SPI via the [`display_interface`](https://docs.rs/display_interface) crate.
+//!
+//! The main driver is created using [`Ssd1306::new`] which accepts an interface instance, display
+//! size, rotation and mode. The following display modes are supported:
+//!
+//! - [`NoMode`] - A simple mode with lower level methods available.
+//! - [`BufferedGraphicsMode`] - A framebuffered mode with additional methods and integration with
+//!   [embedded-graphics](https://docs.rs/embedded-graphics).
+//! - [`TerminalMode`] - A bufferless mode supporting drawing text to the display, as well as
+//!   setting cursor positions like a simple terminal.
+//!
 //! # Examples
 //!
 //! Examples can be found in [the examples/
@@ -75,6 +87,9 @@
 //! for c in 65..91 {
 //!     let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) });
 //! }
+//!
+//! // The `write!()` macro is also supported
+//! write!(display, "Hello, {}", "world");
 //! ```
 //!
 //! [featureset]: https://github.com/jamwaffles/embedded-graphics#features
@@ -122,6 +137,8 @@ use error::Error;
 use size::DisplaySize;
 
 /// SSD1306 driver.
+///
+/// Note that some methods are only available when the display is configured in a certain mode.
 #[derive(Copy, Clone, Debug)]
 pub struct Ssd1306<DI, SIZE, MODE> {
     interface: DI,

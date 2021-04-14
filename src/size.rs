@@ -1,4 +1,4 @@
-//! Display size
+//! Display size.
 
 use super::command::Command;
 use display_interface::{DisplayError, WriteOnlyDataCommand};
@@ -7,7 +7,7 @@ use generic_array::{
     ArrayLength,
 };
 
-/// Display information
+/// Display information.
 ///
 /// This trait describes information related to a particular display.
 /// This includes resolution, offset and framebuffer size.

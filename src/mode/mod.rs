@@ -1,3 +1,5 @@
+//! Display modes.
+
 mod buffered_graphics;
 mod terminal;
 

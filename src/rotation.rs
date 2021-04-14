@@ -1,4 +1,4 @@
-//! Display rotation
+//! Display rotation.
 
 /// Display rotation.
 #[derive(Copy, Clone, Debug)]

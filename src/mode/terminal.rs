@@ -199,13 +199,18 @@ where
         self.properties
             .change_mode(AddrMode::Horizontal)
             .terminal_err()?;
+        let offset_x = match self.properties.get_rotation() {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate270 => DSIZE::OFFSETX,
+            DisplayRotation::Rotate180 | DisplayRotation::Rotate90 => {
+                // If segment remapping is flipped, we need to calculate
+                // the offset from the other edge of the display.
+                DSIZE::DRIVER_COLS - DSIZE::WIDTH - DSIZE::OFFSETX
+            }
+        };
         self.properties
             .set_draw_area(
-                (DSIZE::OFFSETX, DSIZE::OFFSETY),
-                (
-                    DSIZE::WIDTH + DSIZE::OFFSETX,
-                    DSIZE::HEIGHT + DSIZE::OFFSETY,
-                ),
+                (offset_x, DSIZE::OFFSETY),
+                (DSIZE::WIDTH + offset_x, DSIZE::HEIGHT + DSIZE::OFFSETY),
             )
             .terminal_err()?;
 
@@ -308,10 +313,18 @@ where
         if column >= width || row >= height {
             Err(OutOfBounds)
         } else {
+            let offset_x = match self.properties.get_rotation() {
+                DisplayRotation::Rotate0 | DisplayRotation::Rotate270 => DSIZE::OFFSETX,
+                DisplayRotation::Rotate180 | DisplayRotation::Rotate90 => {
+                    // If segment remapping is flipped, we need to calculate
+                    // the offset from the other edge of the display.
+                    DSIZE::DRIVER_COLS - DSIZE::WIDTH - DSIZE::OFFSETX
+                }
+            };
             match self.properties.get_rotation() {
                 DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
                     self.properties
-                        .set_column(DSIZE::OFFSETX + column * 8)
+                        .set_column(offset_x + column * 8)
                         .terminal_err()?;
                     self.properties
                         .set_row(DSIZE::OFFSETY + row * 8)
@@ -319,7 +332,7 @@ where
                 }
                 DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
                     self.properties
-                        .set_column(DSIZE::OFFSETX + row * 8)
+                        .set_column(offset_x + row * 8)
                         .terminal_err()?;
                     self.properties
                         .set_row(DSIZE::OFFSETY + column * 8)
@@ -334,7 +347,11 @@ where
     /// Reset the draw area and move pointer to the top left corner
     fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
         // Initialise the counter when we know it's valid
-        self.cursor = Some(Cursor::new(DSIZE::WIDTH, DSIZE::HEIGHT));
+        let (w, h) = match self.properties.get_rotation() {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (DSIZE::WIDTH, DSIZE::HEIGHT),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (DSIZE::HEIGHT, DSIZE::WIDTH),
+        };
+        self.cursor = Some(Cursor::new(w, h));
 
         // Reset cursor position
         self.set_position(0, 0)?;

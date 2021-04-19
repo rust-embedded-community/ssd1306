@@ -8,7 +8,7 @@ license = "MIT OR Apache-2.0"
 name = "ssd1306"
 readme = "README.md"
 repository = "https://github.com/jamwaffles/ssd1306"
-version = "0.5.1"
+version = "0.5.2"
 edition = "2018"
 
 exclude = [ "build.rs", "build.sh", "memory.x", "doc", "*.jpg", "*.png", "*.bmp" ]

@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.5.2] - 2021-04-19
+
 - [#145](https://github.com/jamwaffles/ssd1306/pull/145) Fixed rotation for 96x16 and 72x40 displays.
 - [#147](https://github.com/jamwaffles/ssd1306/pull/147) Fixed display rotation in terminal mode.
 
@@ -133,7 +135,8 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.5.1...HEAD
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/jamwaffles/ssd1306/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/jamwaffles/ssd1306/compare/v0.5.0...v0.5.1
 
 [0.5.0]: https://github.com/jamwaffles/ssd1306/compare/v0.4.2...v0.5.0

@@ -23,7 +23,7 @@
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use panic_halt as _;
-use ssd1306::{mode::BufferedGraphicsMode, prelude::*, Ssd1306};
+use ssd1306::{prelude::*, Ssd1306};
 use stm32f1xx_hal::{
     delay::Delay,
     prelude::*,
@@ -70,12 +70,8 @@ fn main() -> ! {
     );
 
     let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
-    let mut display = Ssd1306::new(
-        interface,
-        DisplaySize128x64,
-        BufferedGraphicsMode::new(),
-        DisplayRotation::Rotate0,
-    );
+    let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)
+        .into_buffered_graphics_mode();
 
     display.reset(&mut rst, &mut delay).unwrap();
     display.init().unwrap();

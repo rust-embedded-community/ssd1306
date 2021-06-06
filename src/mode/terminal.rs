@@ -170,10 +170,9 @@ where
     /// Clear the display and reset the cursor to the top left corner
     pub fn clear(&mut self) -> Result<(), TerminalModeError> {
         // Let the chip handle line wrapping so we can fill the screen with blanks faster
-        self.properties
-            .change_mode(AddrMode::Horizontal)
-            .terminal_err()?;
-        let offset_x = match self.properties.get_rotation() {
+        self.change_addr_mode(AddrMode::Horizontal).terminal_err()?;
+
+        let offset_x = match self.rotation() {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate270 => SIZE::OFFSETX,
             DisplayRotation::Rotate180 | DisplayRotation::Rotate90 => {
                 // If segment remapping is flipped, we need to calculate
@@ -181,12 +180,11 @@ where
                 SIZE::DRIVER_COLS - SIZE::WIDTH - SIZE::OFFSETX
             }
         };
-        self.properties
-            .set_draw_area(
-                (offset_x, SIZE::OFFSETY),
-                (SIZE::WIDTH + offset_x, SIZE::HEIGHT + SIZE::OFFSETY),
-            )
-            .terminal_err()?;
+        self.set_draw_area(
+            (offset_x, SIZE::OFFSETY),
+            (SIZE::WIDTH + offset_x, SIZE::HEIGHT + SIZE::OFFSETY),
+        )
+        .terminal_err()?;
 
         // Clear the display
         for _ in 0..SIZE::CHAR_NUM {
@@ -282,7 +280,7 @@ where
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (SIZE::WIDTH, SIZE::HEIGHT),
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (SIZE::HEIGHT, SIZE::WIDTH),
         };
-        self.cursor = Some(Cursor::new(w, h));
+        self.mode.cursor = Some(Cursor::new(w, h));
 
         // Reset cursor position
         self.set_position(0, 0)?;

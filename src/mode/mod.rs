@@ -22,18 +22,16 @@ pub trait DisplayConfig {
 
 /// A mode with no additional functionality beyond that provided by the base [`Ssd1306`] struct.
 #[derive(Debug, Copy, Clone)]
-pub struct NoMode;
+pub struct BasicMode;
 
-impl<DI, SIZE> DisplayConfig for Ssd1306<DI, SIZE, NoMode>
+impl<DI, SIZE> DisplayConfig for Ssd1306<DI, SIZE, BasicMode>
 where
     DI: WriteOnlyDataCommand,
     SIZE: DisplaySize,
 {
     type Error = DisplayError;
 
-    /// Set the display rotation
-    ///
-    /// This method resets the cursor but does not clear the screen.
+    /// Set the display rotation.
     fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DisplayError> {
         self.set_rotation(rot)
     }

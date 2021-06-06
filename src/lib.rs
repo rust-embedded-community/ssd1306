@@ -6,7 +6,7 @@
 //! The main driver is created using [`Ssd1306::new`] which accepts an interface instance, display
 //! size, rotation and mode. The following display modes are supported:
 //!
-//! - [`NoMode`](crate::mode::NoMode) - A simple mode with lower level methods available.
+//! - [`BasicMode`](crate::mode::BasicMode) - A simple mode with lower level methods available.
 //! - [`BufferedGraphicsMode`] - A framebuffered mode with additional methods and integration with
 //!   [embedded-graphics](https://docs.rs/embedded-graphics).
 //! - [`TerminalMode`] - A bufferless mode supporting drawing text to the display, as well as
@@ -38,9 +38,8 @@
 //! let mut display = Ssd1306::new(
 //!     interface,
 //!     DisplaySize128x64,
-//!     BufferedGraphicsMode::new(),
 //!     DisplayRotation::Rotate0,
-//! );
+//! ).into_buffered_graphics_mode();
 //! display.init().unwrap();
 //!
 //! let text_style = TextStyleBuilder::new(Font6x8)
@@ -74,9 +73,8 @@
 //! let mut display = Ssd1306::new(
 //!     interface,
 //!     DisplaySize128x64,
-//!     TerminalMode::new(),
 //!     DisplayRotation::Rotate0,
-//! );
+//! ).into_terminal_mode();
 //! display.init().unwrap();
 //! display.clear().unwrap();
 //!
@@ -121,12 +119,14 @@ pub mod size;
 pub mod test_helpers;
 
 pub use crate::i2c_interface::I2CDisplayInterface;
+use crate::mode::BasicMode;
 use brightness::Brightness;
 use command::{AddrMode, Command, VcomhLevel};
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 use display_interface_spi::{SPIInterface, SPIInterfaceNoCS};
 use embedded_hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 use error::Error;
+use mode::{BufferedGraphicsMode, TerminalMode};
 use rotation::DisplayRotation;
 use size::DisplaySize;
 
@@ -142,20 +142,54 @@ pub struct Ssd1306<DI, SIZE, MODE> {
     rotation: DisplayRotation,
 }
 
+impl<DI, SIZE> Ssd1306<DI, SIZE, BasicMode>
+where
+    DI: WriteOnlyDataCommand,
+    SIZE: DisplaySize,
+{
+    /// Create a basic SSD1306 interface.
+    ///
+    /// Use the `into_*_mode` methods to enable more functionality.
+    pub fn new(interface: DI, size: SIZE, rotation: DisplayRotation) -> Self {
+        Self {
+            interface,
+            size,
+            addr_mode: AddrMode::Page,
+            mode: BasicMode,
+            rotation,
+        }
+    }
+}
+
 impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE>
 where
     DI: WriteOnlyDataCommand,
     SIZE: DisplaySize,
 {
-    /// Create a new SSD1306 instance.
-    pub fn new(interface: DI, size: SIZE, mode: MODE, rotation: DisplayRotation) -> Self {
-        Self {
-            interface,
-            size,
-            addr_mode: AddrMode::Page,
+    /// Convert the display into another interface mode.
+    fn into_mode<MODE2>(self, mode: MODE2) -> Ssd1306<DI, SIZE, MODE2> {
+        Ssd1306 {
             mode,
-            rotation,
+            addr_mode: self.addr_mode,
+            interface: self.interface,
+            size: self.size,
+            rotation: self.rotation,
         }
+    }
+
+    /// Convert the display into a buffered graphics mode, supporting
+    /// [embedded-graphics](https://crates.io/crates/embedded-graphics).
+    ///
+    /// See [BufferedGraphicsMode] for more information.
+    pub fn into_buffered_graphics_mode(self) -> Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>> {
+        self.into_mode(BufferedGraphicsMode::new())
+    }
+
+    /// Convert the display into a text-only, terminal-like mode.
+    ///
+    /// See [TerminalMode] for more information.
+    pub fn into_terminal_mode(self) -> Ssd1306<DI, SIZE, TerminalMode> {
+        self.into_mode(TerminalMode::new())
     }
 
     /// Initialise the display in one of the available addressing modes.
@@ -191,17 +225,6 @@ where
         Command::AddressMode(mode).send(&mut self.interface)?;
         self.addr_mode = mode;
         Ok(())
-    }
-
-    /// Convert the display into another interface mode.
-    pub fn into_mode<MODE2>(self, mode: MODE2) -> Ssd1306<DI, SIZE, MODE2> {
-        Ssd1306 {
-            mode,
-            addr_mode: self.addr_mode,
-            interface: self.interface,
-            size: self.size,
-            rotation: self.rotation,
-        }
     }
 
     /// Send the data to the display for drawing at the current position in the framebuffer
@@ -240,18 +263,16 @@ where
     /// let mut display = Ssd1306::new(
     ///     interface,
     ///     DisplaySize128x64,
-    ///     TerminalMode::new(),
     ///     DisplayRotation::Rotate0,
-    /// );
+    /// ).into_terminal_mode();
     /// assert_eq!(display.dimensions(), (128, 64));
     ///
     /// # let interface = StubInterface;
     /// let mut rotated_display = Ssd1306::new(
     ///     interface,
     ///     DisplaySize128x64,
-    ///     TerminalMode::new(),
     ///     DisplayRotation::Rotate90,
-    /// );
+    /// ).into_terminal_mode();
     /// assert_eq!(rotated_display.dimensions(), (64, 128));
     /// ```
     pub fn dimensions(&self) -> (u8, u8) {

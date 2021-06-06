@@ -27,7 +27,7 @@ where
     SIZE: DisplaySize,
 {
     /// Create a new buffered graphics mode instance.
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             buffer: GenericArray::default(),
             min_x: 255,

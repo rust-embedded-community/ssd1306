@@ -97,12 +97,8 @@ const APP: () = {
         );
 
         let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
-        let mut display = Ssd1306::new(
-            interface,
-            DisplaySize128x64,
-            BufferedGraphicsMode::new(),
-            DisplayRotation::Rotate180,
-        );
+        let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate180)
+            .into_buffered_graphics_mode();
 
         display.reset(&mut rst, &mut delay).unwrap();
         display.init().unwrap();

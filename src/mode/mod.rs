@@ -24,6 +24,21 @@ pub trait DisplayConfig {
 #[derive(Debug, Copy, Clone)]
 pub struct BasicMode;
 
+impl<DI, SIZE> Ssd1306<DI, SIZE, BasicMode>
+where
+    DI: WriteOnlyDataCommand,
+    SIZE: DisplaySize,
+{
+    /// Clear the display.
+    pub fn clear(&mut self) -> Result<(), DisplayError> {
+        self.set_draw_area((0, 0), self.dimensions())?;
+
+        // TODO: If const generics allows this, replace `1024` with computed W x H value for current
+        // `SIZE`.
+        self.draw(&[0u8; 1024])
+    }
+}
+
 impl<DI, SIZE> DisplayConfig for Ssd1306<DI, SIZE, BasicMode>
 where
     DI: WriteOnlyDataCommand,

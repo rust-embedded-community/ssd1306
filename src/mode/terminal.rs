@@ -234,7 +234,7 @@ where
 
     /// Get the current cursor position, in character coordinates.
     /// This is the (column, row) that the next character will be written to.
-    pub fn get_position(&self) -> Result<(u8, u8), TerminalModeError> {
+    pub fn position(&self) -> Result<(u8, u8), TerminalModeError> {
         self.mode
             .cursor
             .as_ref()

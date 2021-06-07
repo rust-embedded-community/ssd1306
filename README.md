@@ -73,7 +73,7 @@ fn main() -> ! {
         .into_buffered_graphics_mode();
     display.init().unwrap();
 
-    let raw: ImageRaw<BinaryColor> = ImageRaw::new(include_bytes!("./rust.raw"), 64, 64);
+    let raw: ImageRaw<BinaryColor> = ImageRaw::new(include_bytes!("./rust.raw"), 64);
 
     let im = Image::new(&raw, Point::new(32, 0));
 
@@ -88,7 +88,6 @@ fn main() -> ! {
 fn HardFault(ef: &ExceptionFrame) -> ! {
     panic!("{:#?}", ef);
 }
-
 ```
 
 ## License

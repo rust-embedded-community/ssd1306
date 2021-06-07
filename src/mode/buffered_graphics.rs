@@ -2,6 +2,7 @@
 
 use crate::{command::AddrMode, rotation::DisplayRotation, size::DisplaySize, Ssd1306};
 use display_interface::{DisplayError, WriteOnlyDataCommand};
+use embedded_graphics::prelude::Dimensions;
 use generic_array::GenericArray;
 
 /// Buffered graphics mode.
@@ -185,33 +186,45 @@ where
 }
 
 #[cfg(feature = "graphics")]
-use embedded_graphics::{drawable, geometry::Size, pixelcolor::BinaryColor, DrawTarget};
+use embedded_graphics::{
+    draw_target::DrawTarget, geometry::OriginDimensions, geometry::Size, pixelcolor::BinaryColor,
+    Pixel,
+};
 
 use super::DisplayConfig;
 
 #[cfg(feature = "graphics")]
-impl<DI, SIZE> DrawTarget<BinaryColor> for Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
+impl<DI, SIZE> DrawTarget for Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
 where
     DI: WriteOnlyDataCommand,
     SIZE: DisplaySize,
 {
+    type Color = BinaryColor;
     type Error = DisplayError;
 
-    fn draw_pixel(&mut self, pixel: drawable::Pixel<BinaryColor>) -> Result<(), Self::Error> {
-        let drawable::Pixel(pos, color) = pixel;
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>,
+    {
+        let bb = self.bounding_box();
 
-        // Guard against negative values. All positive i32 values from `pos` can be represented in
-        // the `u32`s that `set_pixel()` accepts...
-        if pos.x < 0 || pos.y < 0 {
-            return Ok(());
-        }
-
-        // ... which makes the `as` coercions here safe.
-        self.set_pixel(pos.x as u32, pos.y as u32, color.is_on());
+        pixels
+            .into_iter()
+            .filter(|Pixel(pos, _color)| bb.contains(*pos))
+            .for_each(|Pixel(pos, color)| {
+                self.set_pixel(pos.x as u32, pos.y as u32, color.is_on())
+            });
 
         Ok(())
     }
+}
 
+#[cfg(feature = "graphics")]
+impl<DI, SIZE> OriginDimensions for Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
+where
+    DI: WriteOnlyDataCommand,
+    SIZE: DisplaySize,
+{
     fn size(&self) -> Size {
         let (w, h) = self.dimensions();
 

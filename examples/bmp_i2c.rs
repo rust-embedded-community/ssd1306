@@ -22,11 +22,7 @@
 #![no_main]
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
-use embedded_graphics::{
-    image::Image,
-    pixelcolor::{BinaryColor, Rgb565},
-    prelude::*,
-};
+use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
 use panic_halt as _;
 use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
 use stm32f1xx_hal::{
@@ -73,29 +69,15 @@ fn main() -> ! {
         .into_buffered_graphics_mode();
     display.init().unwrap();
 
-    let bmp =
-        Bmp::from_slice(include_bytes!("./rust-pride.bmp")).expect("Failed to load BMP image");
+    let bmp = Bmp::from_slice(include_bytes!("./rust.bmp")).expect("Failed to load BMP image");
 
-    // The image is an RGB565 encoded BMP, so specifying the type as `Image<Bmp, Rgb565>` will read
+    // The image is an RGB565 encoded BMP, so specifying the type as `Image<Bmp<Rgb565>>` will read
     // the pixels correctly
-    let im: Image<Bmp, Rgb565> = Image::new(&bmp, Point::new(32, 0));
+    let im: Image<Bmp<Rgb565>> = Image::new(&bmp, Point::new(32, 0));
 
-    // The display uses `BinaryColor` pixels (on/off only). Here, we `map()` over every pixel
-    // and naively convert the color to an on/off value. The logic below simply converts any
-    // color that's not black into an "on" pixel.
-    im.into_iter()
-        .map(|Pixel(position, color)| {
-            Pixel(
-                position,
-                if color != Rgb565::BLACK {
-                    BinaryColor::On
-                } else {
-                    BinaryColor::Off
-                },
-            )
-        })
-        .draw(&mut display)
-        .unwrap();
+    // We use the `color_converted` method here to automatically convert the RGB565 image data into
+    // BinaryColor values.
+    im.draw(&mut display.color_converted()).unwrap();
 
     display.flush().unwrap();
 

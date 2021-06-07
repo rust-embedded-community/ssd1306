@@ -6,6 +6,7 @@
 
 ## [Unreleased] - ReleaseDate
 
+- **(breaking)** [#150](https://github.com/jamwaffles/ssd1306/pull/150) `BufferedGraphicsMode::set_pixel` now accepts a `bool` instead of a `u8` for the pixel color value.
 - **(breaking)** [#150](https://github.com/jamwaffles/ssd1306/pull/150) Refactor the crate API to be more versatile and to make code clearer to understand.
 
   A graphics mode initialisation now looks like this:

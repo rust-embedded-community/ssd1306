@@ -150,7 +150,8 @@ where
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
-    pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
+    pub fn set_pixel(&mut self, x: u32, y: u32, value: bool) {
+        let value = value as u8;
         let rotation = self.rotation;
 
         let (idx, bit) = match rotation {
@@ -184,15 +185,7 @@ where
 }
 
 #[cfg(feature = "graphics")]
-use embedded_graphics::{
-    drawable,
-    geometry::Size,
-    pixelcolor::{
-        raw::{RawData, RawU1},
-        BinaryColor,
-    },
-    DrawTarget,
-};
+use embedded_graphics::{drawable, geometry::Size, pixelcolor::BinaryColor, DrawTarget};
 
 use super::DisplayConfig;
 
@@ -214,7 +207,7 @@ where
         }
 
         // ... which makes the `as` coercions here safe.
-        self.set_pixel(pos.x as u32, pos.y as u32, RawU1::from(color).into_inner());
+        self.set_pixel(pos.x as u32, pos.y as u32, color.is_on());
 
         Ok(())
     }

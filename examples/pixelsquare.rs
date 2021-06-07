@@ -77,28 +77,28 @@ fn main() -> ! {
     display.init().unwrap();
 
     // Top side
-    display.set_pixel(0, 0, 1);
-    display.set_pixel(1, 0, 1);
-    display.set_pixel(2, 0, 1);
-    display.set_pixel(3, 0, 1);
+    display.set_pixel(0, 0, true);
+    display.set_pixel(1, 0, true);
+    display.set_pixel(2, 0, true);
+    display.set_pixel(3, 0, true);
 
     // Right side
-    display.set_pixel(3, 0, 1);
-    display.set_pixel(3, 1, 1);
-    display.set_pixel(3, 2, 1);
-    display.set_pixel(3, 3, 1);
+    display.set_pixel(3, 0, true);
+    display.set_pixel(3, 1, true);
+    display.set_pixel(3, 2, true);
+    display.set_pixel(3, 3, true);
 
     // Bottom side
-    display.set_pixel(0, 3, 1);
-    display.set_pixel(1, 3, 1);
-    display.set_pixel(2, 3, 1);
-    display.set_pixel(3, 3, 1);
+    display.set_pixel(0, 3, true);
+    display.set_pixel(1, 3, true);
+    display.set_pixel(2, 3, true);
+    display.set_pixel(3, 3, true);
 
     // Left side
-    display.set_pixel(0, 0, 1);
-    display.set_pixel(0, 1, 1);
-    display.set_pixel(0, 2, 1);
-    display.set_pixel(0, 3, 1);
+    display.set_pixel(0, 0, true);
+    display.set_pixel(0, 1, true);
+    display.set_pixel(0, 2, true);
+    display.set_pixel(0, 3, true);
 
     display.flush().unwrap();
 

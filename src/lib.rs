@@ -342,8 +342,9 @@ where
         match self.addr_mode {
             AddrMode::Page => panic!("Device cannot be in Page mode to set draw area"),
             _ => {
-                Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.interface)?;
-                Command::PageAddress(start.1.into(), (end.1 - 1).into())
+                Command::ColumnAddress(start.0, end.0.saturating_sub(1))
+                    .send(&mut self.interface)?;
+                Command::PageAddress(start.1.into(), (end.1.saturating_sub(1)).into())
                     .send(&mut self.interface)?;
                 Ok(())
             }

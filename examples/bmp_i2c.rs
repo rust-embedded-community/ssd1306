@@ -69,8 +69,7 @@ fn main() -> ! {
         .into_buffered_graphics_mode();
     display.init().unwrap();
 
-    let bmp =
-        Bmp::from_slice(include_bytes!("./rust-pride.bmp")).expect("Failed to load BMP image");
+    let bmp = Bmp::from_slice(include_bytes!("./rust.bmp")).expect("Failed to load BMP image");
 
     // The image is an RGB565 encoded BMP, so specifying the type as `Image<Bmp<Rgb565>>` will read
     // the pixels correctly

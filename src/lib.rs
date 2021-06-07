@@ -221,7 +221,7 @@ where
     }
 
     /// Change the addressing mode
-    pub fn change_addr_mode(&mut self, mode: AddrMode) -> Result<(), DisplayError> {
+    pub fn set_addr_mode(&mut self, mode: AddrMode) -> Result<(), DisplayError> {
         Command::AddressMode(mode).send(&mut self.interface)?;
         self.addr_mode = mode;
         Ok(())
@@ -327,7 +327,7 @@ where
 
     /// Turn the display on or off. The display can be drawn to and retains all
     /// of its memory even while off.
-    pub fn display_on(&mut self, on: bool) -> Result<(), DisplayError> {
+    pub fn set_display_on(&mut self, on: bool) -> Result<(), DisplayError> {
         Command::DisplayOn(on).send(&mut self.interface)
     }
 

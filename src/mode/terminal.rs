@@ -170,7 +170,7 @@ where
     /// Clear the display and reset the cursor to the top left corner
     pub fn clear(&mut self) -> Result<(), TerminalModeError> {
         // Let the chip handle line wrapping so we can fill the screen with blanks faster
-        self.change_addr_mode(AddrMode::Horizontal).terminal_err()?;
+        self.set_addr_mode(AddrMode::Horizontal).terminal_err()?;
 
         let offset_x = match self.rotation() {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate270 => SIZE::OFFSETX,
@@ -192,7 +192,7 @@ where
         }
 
         // But for normal operation we manage the line wrapping
-        self.change_addr_mode(AddrMode::Page).terminal_err()?;
+        self.set_addr_mode(AddrMode::Page).terminal_err()?;
         self.reset_pos()?;
 
         Ok(())

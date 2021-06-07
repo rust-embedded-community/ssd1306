@@ -261,7 +261,7 @@ pub enum NFrames {
 }
 
 /// Address mode
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[allow(dead_code)]
 pub enum AddrMode {
     /// Horizontal mode

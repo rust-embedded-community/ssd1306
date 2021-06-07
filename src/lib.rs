@@ -334,34 +334,21 @@ where
     /// Set the position in the framebuffer of the display limiting where any sent data should be
     /// drawn. This method can be used for changing the affected area on the screen as well
     /// as (re-)setting the start point of the next `draw` call.
-    ///
-    /// # Panics
-    ///
-    /// Only works in Horizontal or Vertical addressing mode
     pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), DisplayError> {
-        match self.addr_mode {
-            AddrMode::Page => panic!("Device cannot be in Page mode to set draw area"),
-            _ => {
-                Command::ColumnAddress(start.0, end.0.saturating_sub(1))
-                    .send(&mut self.interface)?;
-                Command::PageAddress(start.1.into(), (end.1.saturating_sub(1)).into())
-                    .send(&mut self.interface)?;
-                Ok(())
-            }
+        Command::ColumnAddress(start.0, end.0.saturating_sub(1)).send(&mut self.interface)?;
+
+        if self.addr_mode != AddrMode::Page {
+            Command::PageAddress(start.1.into(), (end.1.saturating_sub(1)).into())
+                .send(&mut self.interface)?;
         }
+
+        Ok(())
     }
 
     /// Set the column address in the framebuffer of the display where any sent data should be
     /// drawn.
-    ///
-    /// # Panics
-    ///
-    /// Only works in Page addressing mode.
     pub fn set_column(&mut self, column: u8) -> Result<(), DisplayError> {
-        match self.addr_mode {
-            AddrMode::Page => Command::ColStart(column).send(&mut self.interface),
-            _ => panic!("Device must be in Page mode to set column"),
-        }
+        Command::ColStart(column).send(&mut self.interface)
     }
 
     /// Set the page address (row 8px high) in the framebuffer of the display where any sent data
@@ -369,15 +356,8 @@ where
     ///
     /// Note that the parameter is in pixels, but the page will be set to the start of the 8px
     /// row which contains the passed-in row.
-    ///
-    /// # Panics
-    ///
-    /// Only works in Page addressing mode.
     pub fn set_row(&mut self, row: u8) -> Result<(), DisplayError> {
-        match self.addr_mode {
-            AddrMode::Page => Command::PageStart(row.into()).send(&mut self.interface),
-            _ => panic!("Device must be in Page mode to set row"),
-        }
+        Command::PageStart(row.into()).send(&mut self.interface)
     }
 
     fn flush_buffer_chunks(

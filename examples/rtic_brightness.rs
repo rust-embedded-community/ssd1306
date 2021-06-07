@@ -6,10 +6,13 @@
 #![no_std]
 #![no_main]
 
-use core::convert::TryFrom;
 use display_interface_spi::SPIInterfaceNoCS;
 use embedded_graphics::{
-    geometry::Point, image::Image, pixelcolor::BinaryColor, prelude::*, primitives::Rectangle,
+    geometry::Point,
+    image::Image,
+    pixelcolor::{BinaryColor, Rgb565},
+    prelude::*,
+    primitives::{PrimitiveStyle, Rectangle},
 };
 use panic_halt as _;
 use rtic::app;
@@ -49,7 +52,7 @@ const APP: () = {
         timer: CountDownTimer<pac::TIM1>,
         top_left: Point,
         velocity: Point,
-        bmp: Bmp<'static>,
+        bmp: Bmp<Rgb565, 'static>,
         brightness: Brightness,
     }
 
@@ -135,13 +138,11 @@ const APP: () = {
             ..
         } = cx.resources;
 
-        let bottom_right = *top_left + Point::try_from(bmp.dimensions()).unwrap();
+        let bottom_right = *top_left + bmp.bounding_box().size;
 
         // Erase previous image position with a filled black rectangle
-        Rectangle::new(*top_left, bottom_right)
-            .into_styled(embedded_graphics::primitive_style!(
-                fill_color = BinaryColor::Off
-            ))
+        Rectangle::with_corners(*top_left, bottom_right)
+            .into_styled(PrimitiveStyle::with_fill(BinaryColor::Off))
             .draw(display)
             .unwrap();
 
@@ -178,7 +179,9 @@ const APP: () = {
         *top_left += *velocity;
 
         // Draw image at new position
-        Image::new(bmp, *top_left).draw(display).unwrap();
+        Image::new(bmp, *top_left)
+            .draw(&mut display.color_converted())
+            .unwrap();
 
         // Write changes to the display
         display.flush().unwrap();

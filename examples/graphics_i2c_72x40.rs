@@ -21,8 +21,7 @@ use cortex_m_rt::{entry, exception, ExceptionFrame};
 use embedded_graphics::{
     pixelcolor::BinaryColor,
     prelude::*,
-    primitives::{Circle, Rectangle, Triangle},
-    style::PrimitiveStyleBuilder,
+    primitives::{Circle, PrimitiveStyleBuilder, Rectangle, Triangle},
 };
 use panic_halt as _;
 use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
@@ -81,7 +80,7 @@ fn main() -> ! {
     // screen outline
     // default display size is 128x64 if you don't pass a _DisplaySize_
     // enum to the _Builder_ struct
-    Rectangle::new(Point::new(0, 0), Point::new(71, 39))
+    Rectangle::with_corners(Point::new(0, 0), Point::new(71, 39))
         .into_styled(style)
         .draw(&mut display)
         .unwrap();
@@ -101,7 +100,7 @@ fn main() -> ! {
     let offset = offset + Point::new(spacing, 0);
 
     // Draw a square
-    Rectangle::new(Point::new(0, 0), Point::new(size, size))
+    Rectangle::new(Point::new(0, 0), Size::new_equal(size as u32))
         .translate(offset)
         .into_styled(style)
         .draw(&mut display)
@@ -111,7 +110,7 @@ fn main() -> ! {
     let offset = offset + Point::new(spacing, 0);
 
     // Circle
-    Circle::new(Point::new(size / 2, size / 2), size as u32 / 2)
+    Circle::new(Point::zero(), size as u32)
         .translate(offset)
         .into_styled(style)
         .draw(&mut display)

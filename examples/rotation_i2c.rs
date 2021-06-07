@@ -80,7 +80,7 @@ fn main() -> ! {
 
     let (w, h) = display.dimensions();
 
-    let raw: ImageRaw<BinaryColor> = ImageRaw::new(include_bytes!("./rust.raw"), 64, 64);
+    let raw: ImageRaw<BinaryColor> = ImageRaw::new(include_bytes!("./rust.raw"), 64);
 
     let im = Image::new(
         &raw,

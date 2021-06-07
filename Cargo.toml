@@ -27,7 +27,7 @@ generic-array = "0.14.2"
 
 [dependencies.embedded-graphics]
 optional = true
-version = "0.6.0"
+version = "0.7.0"
 
 [dev-dependencies]
 cortex-m = "0.7.2"
@@ -35,12 +35,8 @@ cortex-m-rt = "0.6.12"
 cortex-m-rtic = "0.5.3"
 panic-halt = "0.2.0"
 cast = { version = "0.2.6", default-features = false }
-
 # Used to load BMP images in various examples
-[dev-dependencies.tinybmp]
-version = "0.2.2"
-# Enable embedded-graphics integration
-features = [ "graphics" ]
+tinybmp = "0.3.0"
 
 # Used by the noise_i2c examples
 [dev-dependencies.rand]

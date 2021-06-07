@@ -27,10 +27,10 @@
 //! # use ssd1306::test_helpers::I2cStub;
 //! # let i2c = I2cStub;
 //! use embedded_graphics::{
-//!     fonts::{Font6x8, Text},
+//!     mono_font::{ascii::FONT_6X10, MonoTextStyleBuilder},
 //!     pixelcolor::BinaryColor,
 //!     prelude::*,
-//!     style::TextStyleBuilder,
+//!     text::{Baseline, Text},
 //! };
 //! use ssd1306::{mode::BufferedGraphicsMode, prelude::*, I2CDisplayInterface, Ssd1306};
 //!
@@ -42,17 +42,18 @@
 //! ).into_buffered_graphics_mode();
 //! display.init().unwrap();
 //!
-//! let text_style = TextStyleBuilder::new(Font6x8)
+//! let text_style = MonoTextStyleBuilder::new()
+//!     .font(&FONT_6X10)
 //!     .text_color(BinaryColor::On)
 //!     .build();
 //!
-//! Text::new("Hello world!", Point::zero())
-//!     .into_styled(text_style)
-//!     .draw(&mut display);
+//! Text::with_baseline("Hello world!", Point::zero(), text_style, Baseline::Top)
+//!     .draw(&mut display)
+//!     .unwrap();
 //!
-//! Text::new("Hello Rust!", Point::new(0, 16))
-//!     .into_styled(text_style)
-//!     .draw(&mut display);
+//! Text::with_baseline("Hello Rust!", Point::new(0, 16), text_style, Baseline::Top)
+//!     .draw(&mut display)
+//!     .unwrap();
 //!
 //! display.flush().unwrap();
 //! ```

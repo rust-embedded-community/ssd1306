@@ -28,7 +28,7 @@ use embedded_graphics::{
     style::PrimitiveStyleBuilder,
 };
 use panic_halt as _;
-use ssd1306::{prelude::*, Builder};
+use ssd1306::{prelude::*, Ssd1306};
 use stm32f1xx_hal::{
     delay::Delay,
     prelude::*,
@@ -75,10 +75,11 @@ fn main() -> ! {
     );
 
     let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
-    let mut disp: GraphicsMode<_, _> = Builder::new().connect(interface).into();
+    let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)
+        .into_buffered_graphics_mode();
 
-    disp.reset(&mut rst, &mut delay).unwrap();
-    disp.init().unwrap();
+    display.reset(&mut rst, &mut delay).unwrap();
+    display.init().unwrap();
 
     let yoffset = 20;
 
@@ -92,7 +93,7 @@ fn main() -> ! {
     // enum to the _Builder_ struct
     Rectangle::new(Point::new(0, 0), Point::new(127, 63))
         .into_styled(style)
-        .draw(&mut disp)
+        .draw(&mut display)
         .unwrap();
 
     // triangle
@@ -102,22 +103,22 @@ fn main() -> ! {
         Point::new(16 + 8, yoffset),
     )
     .into_styled(style)
-    .draw(&mut disp)
+    .draw(&mut display)
     .unwrap();
 
     // square
     Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
         .into_styled(style)
-        .draw(&mut disp)
+        .draw(&mut display)
         .unwrap();
 
     // circle
     Circle::new(Point::new(96, yoffset + 8), 8)
         .into_styled(style)
-        .draw(&mut disp)
+        .draw(&mut display)
         .unwrap();
 
-    disp.flush().unwrap();
+    display.flush().unwrap();
 
     loop {}
 }

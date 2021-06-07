@@ -6,6 +6,24 @@
 
 ## [Unreleased] - ReleaseDate
 
+- **(breaking)** [#150](https://github.com/jamwaffles/ssd1306/pull/150) `BufferedGraphicsMode::set_pixel` now accepts a `bool` instead of a `u8` for the pixel color value.
+- **(breaking)** [#150](https://github.com/jamwaffles/ssd1306/pull/150) `display_on` is now called `set_display_on`.
+- **(breaking)** [#150](https://github.com/jamwaffles/ssd1306/pull/150) `TerminalMode::get_position` is now called `position` to conform with Rust API guidelines.
+- **(breaking)** [#150](https://github.com/jamwaffles/ssd1306/pull/150) Refactor the crate API to be more versatile and to make code clearer to understand.
+
+  A graphics mode initialisation now looks like this:
+
+  ```rust
+  use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
+
+  let interface = I2CDisplayInterface::new(i2c);
+
+  let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)
+      .into_buffered_graphics_mode();
+
+  display.init().unwrap();
+  ```
+
 ## [0.5.2] - 2021-04-19
 
 - [#145](https://github.com/jamwaffles/ssd1306/pull/145) Fixed rotation for 96x16 and 72x40 displays.
@@ -135,10 +153,10 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
+
 [unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.5.2...HEAD
 [0.5.2]: https://github.com/jamwaffles/ssd1306/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/jamwaffles/ssd1306/compare/v0.5.0...v0.5.1
-
 [0.5.0]: https://github.com/jamwaffles/ssd1306/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/jamwaffles/ssd1306/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/jamwaffles/ssd1306/compare/v0.4.0...v0.4.1

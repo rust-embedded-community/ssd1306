@@ -30,7 +30,7 @@ use embedded_graphics::{
     prelude::*,
 };
 use panic_halt as _;
-use ssd1306::{prelude::*, Builder, I2CDIBuilder};
+use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
 use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
@@ -69,19 +69,16 @@ fn main() -> ! {
         1000,
     );
 
-    let interface = I2CDIBuilder::new().init(i2c);
-    let mut disp: GraphicsMode<_, _> = Builder::new()
-        // Set initial rotation at 90 degrees clockwise
-        .with_rotation(DisplayRotation::Rotate90)
-        .connect(interface)
-        .into();
-    disp.init().unwrap();
+    let interface = I2CDisplayInterface::new(i2c);
+    let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate90)
+        .into_buffered_graphics_mode();
+    display.init().unwrap();
 
     // Contrived example to test builder and instance methods. Sets rotation to 270 degress
     // or 90 degress counterclockwise
-    disp.set_rotation(DisplayRotation::Rotate270).unwrap();
+    display.set_rotation(DisplayRotation::Rotate270).unwrap();
 
-    let (w, h) = disp.get_dimensions();
+    let (w, h) = display.dimensions();
 
     let raw: ImageRaw<BinaryColor> = ImageRaw::new(include_bytes!("./rust.raw"), 64, 64);
 
@@ -90,9 +87,9 @@ fn main() -> ! {
         Point::new(w as i32 / 2 - 64 / 2, h as i32 / 2 - 64 / 2),
     );
 
-    im.draw(&mut disp).unwrap();
+    im.draw(&mut display).unwrap();
 
-    disp.flush().unwrap();
+    display.flush().unwrap();
 
     loop {}
 }

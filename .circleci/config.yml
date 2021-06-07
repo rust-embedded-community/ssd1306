@@ -1,12 +1,11 @@
 target_steps: &target_steps
   docker:
-    - image: circleci/rust:1.41.0
+    - image: cimg/rust:1.51.0
   steps:
     - checkout
     - restore_cache:
-        key: v2-ssd1306-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
+        key: v3-ssd1306-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
     - run: rustup self update
-    - run: sudo apt install -qq linkchecker
     - run: rustup default ${RUST_VERSION:-stable}
     - run: rustup component add rustfmt
     - run: cargo update
@@ -20,10 +19,10 @@ target_steps: &target_steps
         fi
     - run: ./build.sh
     - save_cache:
-        key: v2-ssd1306-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
+        key: v3-ssd1306-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
         paths:
           - ./target
-          - /usr/local/cargo/registry
+          - /home/circleci/.cargo/registry
 
 version: 2
 jobs:

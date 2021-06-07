@@ -25,7 +25,7 @@ use embedded_graphics::{
     style::PrimitiveStyleBuilder,
 };
 use panic_halt as _;
-use ssd1306::{prelude::*, Builder, I2CDIBuilder};
+use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
 use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
@@ -64,9 +64,10 @@ fn main() -> ! {
         1000,
     );
 
-    let interface = I2CDIBuilder::new().init(i2c);
-    let mut disp: GraphicsMode<_, _> = Builder::new().connect(interface).into();
-    disp.init().unwrap();
+    let interface = I2CDisplayInterface::new(i2c);
+    let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)
+        .into_buffered_graphics_mode();
+    display.init().unwrap();
 
     let yoffset = 20;
 
@@ -80,7 +81,7 @@ fn main() -> ! {
     // enum to the _Builder_ struct
     Rectangle::new(Point::new(0, 0), Point::new(127, 63))
         .into_styled(style)
-        .draw(&mut disp)
+        .draw(&mut display)
         .unwrap();
 
     // triangle
@@ -90,22 +91,22 @@ fn main() -> ! {
         Point::new(16 + 8, yoffset),
     )
     .into_styled(style)
-    .draw(&mut disp)
+    .draw(&mut display)
     .unwrap();
 
     // square
     Rectangle::new(Point::new(52, yoffset), Point::new(52 + 16, 16 + yoffset))
         .into_styled(style)
-        .draw(&mut disp)
+        .draw(&mut display)
         .unwrap();
 
     // circle
     Circle::new(Point::new(96, yoffset + 8), 8)
         .into_styled(style)
-        .draw(&mut disp)
+        .draw(&mut display)
         .unwrap();
 
-    disp.flush().unwrap();
+    display.flush().unwrap();
 
     loop {}
 }

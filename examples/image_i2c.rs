@@ -30,7 +30,7 @@ use embedded_graphics::{
     prelude::*,
 };
 use panic_halt as _;
-use ssd1306::{prelude::*, Builder, I2CDIBuilder};
+use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
 use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
@@ -69,17 +69,18 @@ fn main() -> ! {
         1000,
     );
 
-    let interface = I2CDIBuilder::new().init(i2c);
-    let mut disp: GraphicsMode<_, _> = Builder::new().connect(interface).into();
-    disp.init().unwrap();
+    let interface = I2CDisplayInterface::new(i2c);
+    let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)
+        .into_buffered_graphics_mode();
+    display.init().unwrap();
 
     let raw: ImageRaw<BinaryColor> = ImageRaw::new(include_bytes!("./rust.raw"), 64, 64);
 
     let im = Image::new(&raw, Point::new(32, 0));
 
-    im.draw(&mut disp).unwrap();
+    im.draw(&mut display).unwrap();
 
-    disp.flush().unwrap();
+    display.flush().unwrap();
 
     loop {}
 }

@@ -22,7 +22,7 @@
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use panic_halt as _;
 use rand::prelude::*;
-use ssd1306::{prelude::*, Builder, I2CDIBuilder};
+use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
 use stm32f1xx_hal::{
     i2c::{BlockingI2c, DutyCycle, Mode},
     prelude::*,
@@ -61,11 +61,9 @@ fn main() -> ! {
         1000,
     );
 
-    let interface = I2CDIBuilder::new().init(i2c);
-    let mut disp: GraphicsMode<_, _> = Builder::new().connect(interface).into();
-    disp.init().unwrap();
-
-    let mut props = disp.into_properties();
+    let interface = I2CDisplayInterface::new(i2c);
+    let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0);
+    display.init().unwrap();
 
     let mut buf = [0x00u8; 1024];
 
@@ -74,7 +72,7 @@ fn main() -> ! {
     loop {
         rng.fill_bytes(&mut buf);
 
-        props.draw(&buf).unwrap();
+        display.draw(&buf).unwrap();
     }
 }
 

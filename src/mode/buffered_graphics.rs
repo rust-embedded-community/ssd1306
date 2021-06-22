@@ -2,7 +2,6 @@
 
 use crate::{command::AddrMode, rotation::DisplayRotation, size::DisplaySize, Ssd1306};
 use display_interface::{DisplayError, WriteOnlyDataCommand};
-use embedded_graphics::prelude::Dimensions;
 use generic_array::GenericArray;
 
 /// Buffered graphics mode.
@@ -186,8 +185,11 @@ where
 }
 
 #[cfg(feature = "graphics")]
-use embedded_graphics::{
-    draw_target::DrawTarget, geometry::OriginDimensions, geometry::Size, pixelcolor::BinaryColor,
+use embedded_graphics_core::{
+    draw_target::DrawTarget,
+    geometry::Size,
+    geometry::{Dimensions, OriginDimensions},
+    pixelcolor::BinaryColor,
     Pixel,
 };
 

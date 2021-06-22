@@ -19,38 +19,29 @@ circle-ci = { repository = "jamwaffles/ssd1306", branch = "master" }
 targets = [ "thumbv7m-none-eabi", "thumbv7em-none-eabihf" ]
 
 [dependencies]
-embedded-hal = "0.2.3"
-display-interface = "0.4"
-display-interface-i2c = "0.4"
-display-interface-spi = "0.4"
-generic-array = "0.14.2"
-
-[dependencies.embedded-graphics]
-optional = true
-version = "0.7.0"
+embedded-hal = "0.2.5"
+display-interface = "0.4.1"
+display-interface-i2c = "0.4.0"
+display-interface-spi = "0.4.1"
+generic-array = "0.14.4"
+embedded-graphics-core = { version = "0.3.2", optional = true }
 
 [dev-dependencies]
 cortex-m = "0.7.2"
-cortex-m-rt = "0.6.12"
-cortex-m-rtic = "0.5.3"
+cortex-m-rt = "0.6.14"
+cortex-m-rtic = "0.5.6"
 panic-halt = "0.2.0"
 cast = { version = "0.2.6", default-features = false }
 # Used to load BMP images in various examples
-tinybmp = "0.3.0"
-
+tinybmp = "0.3.1"
+embedded-graphics = "0.7.1"
 # Used by the noise_i2c examples
-[dev-dependencies.rand]
-version = "0.8.3"
-default-features = false
-features = [ "small_rng" ]
-
-[dev-dependencies.stm32f1xx-hal]
-version = "0.7.0"
-features = [ "rt", "stm32f103" ]
+rand = { version = "0.8.4", default-features = false, features = [ "small_rng" ] }
+stm32f1xx-hal = { version = "0.7.0", features = [ "rt", "stm32f103" ] }
 
 [features]
 default = ["graphics"]
-graphics = ["embedded-graphics"]
+graphics = ["embedded-graphics-core"]
 
 [profile.dev]
 codegen-units = 1

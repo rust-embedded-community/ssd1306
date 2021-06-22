@@ -8,7 +8,7 @@
 
 ### Changed
 
-- **(breaking)** [#154](https://github.com/jamwaffles/ssd1306/pull/154) Upgrade to `embedded-graphics` 0.7.
+- **(breaking)** [#156](https://github.com/jamwaffles/ssd1306/pull/156) Migrate from `embedded-graphics` to `embedded-graphics-core`.
 - **(breaking)** [#150](https://github.com/jamwaffles/ssd1306/pull/150) `BufferedGraphicsMode::set_pixel` now accepts a `bool` instead of a `u8` for the pixel color value.
 - **(breaking)** [#150](https://github.com/jamwaffles/ssd1306/pull/150) `display_on` is now called `set_display_on`.
 - **(breaking)** [#150](https://github.com/jamwaffles/ssd1306/pull/150) `TerminalMode::get_position` is now called `position` to conform with Rust API guidelines.

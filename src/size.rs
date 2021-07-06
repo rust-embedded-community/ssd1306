@@ -2,10 +2,18 @@
 
 use super::command::Command;
 use display_interface::{DisplayError, WriteOnlyDataCommand};
-use generic_array::{
-    typenum::{U1024, U192, U360, U384, U512},
-    ArrayLength,
-};
+
+/// Workaround trait, since `Default` is only implemented to arrays up to 32 of size
+pub trait NewZeroed {
+    /// Creates a new value with its memory set to zero
+    fn new_zeroed() -> Self;
+}
+
+impl<const N: usize> NewZeroed for [u8; N] {
+    fn new_zeroed() -> Self {
+        [0u8; N]
+    }
+}
 
 /// Display information.
 ///
@@ -32,7 +40,7 @@ pub trait DisplaySize {
 
     /// Size of framebuffer. Because the display is monocrome, this is
     /// width * height / 8
-    type BufferSize: ArrayLength<u8>;
+    type Buffer: AsMut<[u8]> + NewZeroed;
 
     /// Send resolution and model-dependent configuration to the display
     ///
@@ -48,7 +56,7 @@ pub struct DisplaySize128x64;
 impl DisplaySize for DisplaySize128x64 {
     const WIDTH: u8 = 128;
     const HEIGHT: u8 = 64;
-    type BufferSize = U1024;
+    type Buffer = [u8; 1024];
 
     fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
         Command::ComPinConfig(true, false).send(iface)
@@ -61,7 +69,7 @@ pub struct DisplaySize128x32;
 impl DisplaySize for DisplaySize128x32 {
     const WIDTH: u8 = 128;
     const HEIGHT: u8 = 32;
-    type BufferSize = U512;
+    type Buffer = [u8; 512];
 
     fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
         Command::ComPinConfig(false, false).send(iface)
@@ -74,7 +82,7 @@ pub struct DisplaySize96x16;
 impl DisplaySize for DisplaySize96x16 {
     const WIDTH: u8 = 96;
     const HEIGHT: u8 = 16;
-    type BufferSize = U192;
+    type Buffer = [u8; 192];
 
     fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
         Command::ComPinConfig(false, false).send(iface)
@@ -89,7 +97,7 @@ impl DisplaySize for DisplaySize72x40 {
     const HEIGHT: u8 = 40;
     const OFFSETX: u8 = 28;
     const OFFSETY: u8 = 0;
-    type BufferSize = U360;
+    type Buffer = [u8; 360];
 
     fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
         Command::ComPinConfig(true, false).send(iface)?;
@@ -105,7 +113,7 @@ impl DisplaySize for DisplaySize64x48 {
     const HEIGHT: u8 = 48;
     const OFFSETX: u8 = 32;
     const OFFSETY: u8 = 0;
-    type BufferSize = U384;
+    type Buffer = [u8; 384];
 
     fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
         Command::ComPinConfig(true, false).send(iface)

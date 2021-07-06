@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- **(breaking)** [#158](https://github.com/jamwaffles/ssd1306/pull/158) Migrate away from `generic-array` to a solution using const generics.
+
 ## [0.6.0] - 2021-06-22
 
 ### Changed

@@ -1,8 +1,12 @@
 //! Buffered graphics mode.
 
-use crate::{command::AddrMode, rotation::DisplayRotation, size::DisplaySize, Ssd1306};
+use crate::{
+    command::AddrMode,
+    rotation::DisplayRotation,
+    size::{DisplaySize, NewZeroed},
+    Ssd1306,
+};
 use display_interface::{DisplayError, WriteOnlyDataCommand};
-use generic_array::GenericArray;
 
 /// Buffered graphics mode.
 ///
@@ -15,7 +19,7 @@ pub struct BufferedGraphicsMode<SIZE>
 where
     SIZE: DisplaySize,
 {
-    buffer: GenericArray<u8, SIZE::BufferSize>,
+    buffer: SIZE::Buffer,
     min_x: u8,
     max_x: u8,
     min_y: u8,
@@ -29,7 +33,7 @@ where
     /// Create a new buffered graphics mode instance.
     pub(crate) fn new() -> Self {
         Self {
-            buffer: GenericArray::default(),
+            buffer: NewZeroed::new_zeroed(),
             min_x: 255,
             max_x: 0,
             min_y: 255,
@@ -66,7 +70,9 @@ where
 {
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
-        self.mode.buffer = GenericArray::default();
+        for b in self.mode.buffer.as_mut() {
+            *b = 0;
+        }
 
         let (width, height) = self.dimensions();
         self.mode.min_x = 0;
@@ -125,7 +131,7 @@ where
 
                 Self::flush_buffer_chunks(
                     &mut self.interface,
-                    &self.mode.buffer,
+                    self.mode.buffer.as_mut(),
                     width as usize,
                     (disp_min_x, disp_min_y),
                     (disp_max_x, disp_max_y),
@@ -139,7 +145,7 @@ where
 
                 Self::flush_buffer_chunks(
                     &mut self.interface,
-                    &self.mode.buffer,
+                    self.mode.buffer.as_mut(),
                     height as usize,
                     (disp_min_y, disp_min_x),
                     (disp_max_y, disp_max_x),
@@ -169,7 +175,7 @@ where
             }
         };
 
-        if let Some(byte) = self.mode.buffer.get_mut(idx) {
+        if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
             // Keep track of max and min values
             self.mode.min_x = self.mode.min_x.min(x as u8);
             self.mode.max_x = self.mode.max_x.max(x as u8);

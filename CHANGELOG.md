@@ -8,7 +8,7 @@
 
 ### Changed
 
-- **(breaking)** [#158](https://github.com/jamwaffles/ssd1306/pull/158) Migrate away from `generic-array` to a solution using const generics.
+- **(breaking)** [#158](https://github.com/jamwaffles/ssd1306/pull/158) Migrate away from `generic-array` to a solution using const generics. This raises the crate MSRV to 1.51.
 
 ## [0.6.0] - 2021-06-22
 

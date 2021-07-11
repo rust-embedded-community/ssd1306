@@ -16,6 +16,9 @@ Please consider [becoming a sponsor](https://github.com/sponsors/jamwaffles/) so
 
 ## [Examples](examples)
 
+This crate uses [`probe-run`](https://crates.io/crates/probe-run) to run the examples. Once set up,
+it should be as simple as `cargo run --example <example name> --release`.
+
 From [`examples/image_i2c.rs`](examples/image_i2c.rs):
 
 ```rust

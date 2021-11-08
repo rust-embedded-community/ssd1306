@@ -6,3 +6,6 @@ rustflags = [
 
 [build]
 target = "thumbv7m-none-eabi"
+
+[target.armv7-unknown-linux-gnueabihf]
+linker = "arm-linux-gnueabihf-gcc"

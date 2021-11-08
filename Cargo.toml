@@ -9,8 +9,8 @@ name = "ssd1306"
 readme = "README.md"
 repository = "https://github.com/jamwaffles/ssd1306"
 version = "0.7.0"
-edition = "2018"
-exclude = [ "build.rs", "build.sh", "memory.x", "doc", "*.jpg", "*.png", "*.bmp" ]
+edition = "2021"
+exclude = [ "build.rs", "memory.x", "doc", "*.jpg", "*.png", "*.bmp" ]
 
 [badges]
 circle-ci = { repository = "jamwaffles/ssd1306", branch = "master" }
@@ -31,12 +31,15 @@ cortex-m-rt = "0.6.14"
 cortex-m-rtic = "0.5.6"
 panic-halt = "0.2.0"
 cast = { version = "0.2.6", default-features = false }
-# Used to load BMP images in various examples
 tinybmp = "0.3.1"
 embedded-graphics = "0.7.1"
-# Used by the noise_i2c examples
 rand = { version = "0.8.4", default-features = false, features = [ "small_rng" ] }
 stm32f1xx-hal = { version = "0.7.0", features = [ "rt", "stm32f103" ] }
+linux-embedded-hal = "0.3.2"
+
+# Use by the raspberry pi example
+[target.armv7-unknown-linux-gnueabihf.dev-dependencies]
+linux-embedded-hal = "0.3.2"
 
 [features]
 default = ["graphics"]

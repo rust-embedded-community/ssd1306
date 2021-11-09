@@ -1,11 +1,13 @@
+[build]
+target = "thumbv7m-none-eabi"
+
+#STM32F103C8 examples
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
 runner = "probe-run --chip STM32F103C8"
 rustflags = [
   "-C", "link-arg=-Tlink.x",
 ]
 
-[build]
-target = "thumbv7m-none-eabi"
-
+#Raspberry pi examples
 [target.armv7-unknown-linux-gnueabihf]
 linker = "arm-linux-gnueabihf-gcc"

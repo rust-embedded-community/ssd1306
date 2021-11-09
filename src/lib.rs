@@ -106,7 +106,7 @@
 #![deny(unstable_features)]
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
-#![deny(broken_intra_doc_links)]
+#![deny(rustdoc::broken_intra_doc_links)]
 
 mod brightness;
 pub mod command;

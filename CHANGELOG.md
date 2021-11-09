@@ -5,6 +5,8 @@
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+- Switched to Rust version 2021 which was stabilized in Rust 1.56
+- Added Raspberry Pi example
 
 ## [0.7.0] - 2021-07-08
 

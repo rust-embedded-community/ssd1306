@@ -2,7 +2,7 @@ version: 2.1
 executors:
     rust-image:
         docker:
-            - image: cimg/rust:1.51.0
+            - image: cimg/rust:1.56.0
 commands:
     prepare:
         description: Prepare the rust image by updating rust and a
@@ -38,8 +38,6 @@ jobs:
             - prepare:
                 target: << parameters.target >>
             - run: cargo build --target << parameters.target >> --all-features --release
-            - run: cargo clean --doc
-            - run: cargo clean --doc --target << parameters.target >>
             - run: cargo doc --all-features --target << parameters.target >>
     build_STM32F103_examples:
         executor: rust-image

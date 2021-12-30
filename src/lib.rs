@@ -314,6 +314,33 @@ where
         Ok(())
     }
 
+    /// Set mirror/vertical flip.
+    pub fn set_mirror(&mut self, mirror: bool) -> Result<(), DisplayError> {
+        if mirror {
+            match self.rotation {
+                DisplayRotation::Rotate0 => {
+                    Command::SegmentRemap(false).send(&mut self.interface)?;
+                    Command::ReverseComDir(true).send(&mut self.interface)?;
+                }
+                DisplayRotation::Rotate90 => {
+                    Command::SegmentRemap(true).send(&mut self.interface)?;
+                    Command::ReverseComDir(true).send(&mut self.interface)?;
+                }
+                DisplayRotation::Rotate180 => {
+                    Command::SegmentRemap(true).send(&mut self.interface)?;
+                    Command::ReverseComDir(false).send(&mut self.interface)?;
+                }
+                DisplayRotation::Rotate270 => {
+                    Command::SegmentRemap(false).send(&mut self.interface)?;
+                    Command::ReverseComDir(false).send(&mut self.interface)?;
+                }
+            };
+        } else {
+            self.set_rotation(self.rotation)?;
+        }
+        Ok(())
+    }
+
     /// Change the display brightness.
     pub fn set_brightness(&mut self, brightness: Brightness) -> Result<(), DisplayError> {
         // Should be moved to Brightness::new once conditions can be used in const functions

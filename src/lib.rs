@@ -323,16 +323,16 @@ where
                     Command::ReverseComDir(true).send(&mut self.interface)?;
                 }
                 DisplayRotation::Rotate90 => {
-                    Command::SegmentRemap(true).send(&mut self.interface)?;
-                    Command::ReverseComDir(true).send(&mut self.interface)?;
+                    Command::SegmentRemap(false).send(&mut self.interface)?;
+                    Command::ReverseComDir(false).send(&mut self.interface)?;
                 }
                 DisplayRotation::Rotate180 => {
                     Command::SegmentRemap(true).send(&mut self.interface)?;
                     Command::ReverseComDir(false).send(&mut self.interface)?;
                 }
                 DisplayRotation::Rotate270 => {
-                    Command::SegmentRemap(false).send(&mut self.interface)?;
-                    Command::ReverseComDir(false).send(&mut self.interface)?;
+                    Command::SegmentRemap(true).send(&mut self.interface)?;
+                    Command::ReverseComDir(true).send(&mut self.interface)?;
                 }
             };
         } else {

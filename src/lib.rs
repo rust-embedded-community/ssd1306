@@ -314,7 +314,7 @@ where
         Ok(())
     }
 
-    /// Set mirror/vertical flip.
+    /// Set mirror enabled/disabled.
     pub fn set_mirror(&mut self, mirror: bool) -> Result<(), DisplayError> {
         if mirror {
             match self.rotation {

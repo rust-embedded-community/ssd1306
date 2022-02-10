@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#161](https://github.com/jamwaffles/ssd1306/pull/161) Added a `set_mirror` method to enable or disable display mirroring.
+
 ## [0.7.0] - 2021-07-08
 
 ### Changed

@@ -9,6 +9,7 @@
 ### Added
 
 - [#161](https://github.com/jamwaffles/ssd1306/pull/161) Added a `set_mirror` method to enable or disable display mirroring.
+- [#166](https://github.com/jamwaffles/ssd1306/pull/166) Added `DisplaySize` configuration for 64x32 displays
 
 ## [0.7.0] - 2021-07-08
 

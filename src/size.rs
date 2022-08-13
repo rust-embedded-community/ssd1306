@@ -119,3 +119,18 @@ impl DisplaySize for DisplaySize64x48 {
         Command::ComPinConfig(true, false).send(iface)
     }
 }
+
+/// Size information for the common 64x32 variants
+#[derive(Debug, Copy, Clone)]
+pub struct DisplaySize64x32;
+impl DisplaySize for DisplaySize64x32 {
+    const WIDTH: u8 = 64;
+    const HEIGHT: u8 = 32;
+    const OFFSETX: u8 = 32;
+    const OFFSETY: u8 = 0;
+    type Buffer = [u8; Self::WIDTH as usize * Self::HEIGHT as usize / 8];
+
+    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
+        Command::ComPinConfig(true, false).send(iface)
+    }
+}

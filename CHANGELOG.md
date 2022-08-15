@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.7.1] - 2022-08-15
+
 ### Added
 
 - [#161](https://github.com/jamwaffles/ssd1306/pull/161) Added a `set_mirror` method to enable or disable display mirroring.
@@ -169,7 +171,8 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.7.0...HEAD
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/jamwaffles/ssd1306/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/jamwaffles/ssd1306/compare/v0.6.0...v0.7.0
 
 [0.6.0]: https://github.com/jamwaffles/ssd1306/compare/v0.5.2...v0.6.0

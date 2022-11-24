@@ -125,11 +125,19 @@ use brightness::Brightness;
 use command::{AddrMode, Command, VcomhLevel};
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 use display_interface_spi::{SPIInterface, SPIInterfaceNoCS};
+use embedded_graphics::{
+    framebuffer::Framebuffer,
+    image::arrangement::Vertical,
+    pixelcolor::{raw::storage::Msb0, BinaryColor},
+};
 use embedded_hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 use error::Error;
 use mode::{BufferedGraphicsMode, TerminalMode};
 use rotation::DisplayRotation;
 use size::DisplaySize;
+
+type Ssd1306Framebuffer<const WIDTH: usize, const HEIGHT: usize, const N: usize> =
+    Framebuffer<Msb0<BinaryColor>, Vertical, WIDTH, HEIGHT, N>;
 
 /// SSD1306 driver.
 ///

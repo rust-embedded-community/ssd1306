@@ -23,7 +23,7 @@ embedded-hal = "0.2.5"
 display-interface = "0.4.1"
 display-interface-i2c = "0.4.0"
 display-interface-spi = "0.4.1"
-embedded-graphics-core = { version = "0.3.2", optional = true }
+embedded-graphics = "0.7.1"
 
 [dev-dependencies]
 cortex-m = "0.7.2"
@@ -38,10 +38,6 @@ embedded-graphics = "0.7.1"
 rand = { version = "0.8.4", default-features = false, features = [ "small_rng" ] }
 stm32f1xx-hal = { version = "0.7.0", features = [ "rt", "stm32f103" ] }
 
-[features]
-default = ["graphics"]
-graphics = ["embedded-graphics-core"]
-
 [profile.dev]
 codegen-units = 1
 incremental = false
@@ -50,3 +46,6 @@ incremental = false
 codegen-units = 1
 debug = true
 lto = true
+
+[patch.crates-io]
+embedded-graphics = { path = "../embedded-graphics" }

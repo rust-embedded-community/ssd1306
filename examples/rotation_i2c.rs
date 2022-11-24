@@ -73,6 +73,7 @@ fn main() -> ! {
     let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate90)
         .into_buffered_graphics_mode();
     display.init().unwrap();
+    display.flush().unwrap();
 
     // Contrived example to test builder and instance methods. Sets rotation to 270 degress
     // or 90 degress counterclockwise

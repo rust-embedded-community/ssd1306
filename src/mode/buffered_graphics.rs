@@ -1,16 +1,13 @@
 //! Buffered graphics mode.
 
 use crate::{
-    command::AddrMode,
-    mode::DisplayConfig,
-    rotation::DisplayRotation,
-    size::{DisplaySize, NewZeroed},
-    Ssd1306,
+    command::AddrMode, mode::DisplayConfig, rotation::DisplayRotation, size::DisplaySize, Ssd1306,
+    Ssd1306Framebuffer,
 };
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 use embedded_graphics::{
     draw_target::DrawTarget,
-    geometry::{Dimensions, OriginDimensions, Size},
+    geometry::{Dimensions, OriginDimensions, Point, Size},
     pixelcolor::BinaryColor,
     Pixel,
 };
@@ -40,7 +37,7 @@ where
     /// Create a new buffered graphics mode instance.
     pub(crate) fn new() -> Self {
         Self {
-            buffer: NewZeroed::new_zeroed(),
+            buffer: SIZE::new_buffer(),
             min_x: 255,
             max_x: 0,
             min_y: 255,
@@ -49,10 +46,11 @@ where
     }
 }
 
-impl<DI, SIZE> DisplayConfig for Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
+impl<const WIDTH: usize, const HEIGHT: usize, const N: usize, DI, SIZE> DisplayConfig
+    for Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
 where
     DI: WriteOnlyDataCommand,
-    SIZE: DisplaySize,
+    SIZE: DisplaySize<Buffer = Ssd1306Framebuffer<WIDTH, HEIGHT, N>>,
 {
     type Error = DisplayError;
 
@@ -70,16 +68,15 @@ where
     }
 }
 
-impl<DI, SIZE> Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
+impl<const WIDTH: usize, const HEIGHT: usize, const N: usize, DI, SIZE>
+    Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
 where
     DI: WriteOnlyDataCommand,
-    SIZE: DisplaySize,
+    SIZE: DisplaySize<Buffer = Ssd1306Framebuffer<WIDTH, HEIGHT, N>>,
 {
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
-        for b in self.mode.buffer.as_mut() {
-            *b = 0;
-        }
+        let _ = self.mode.buffer.clear(BinaryColor::Off);
 
         let (width, height) = self.dimensions();
         self.mode.min_x = 0;
@@ -138,7 +135,7 @@ where
 
                 Self::flush_buffer_chunks(
                     &mut self.interface,
-                    self.mode.buffer.as_mut(),
+                    self.mode.buffer.data(),
                     width as usize,
                     (disp_min_x, disp_min_y),
                     (disp_max_x, disp_max_y),
@@ -152,7 +149,7 @@ where
 
                 Self::flush_buffer_chunks(
                     &mut self.interface,
-                    self.mode.buffer.as_mut(),
+                    self.mode.buffer.data(),
                     height as usize,
                     (disp_min_y, disp_min_x),
                     (disp_max_y, disp_max_x),
@@ -164,43 +161,29 @@ where
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, value: bool) {
-        let value = value as u8;
-        let rotation = self.rotation;
-
-        let (idx, bit) = match rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                let idx = ((y as usize) / 8 * SIZE::WIDTH as usize) + (x as usize);
-                let bit = y % 8;
-
-                (idx, bit)
-            }
+        let pos = match self.rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => Point::new(x as i32, y as i32),
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                let idx = ((x as usize) / 8 * SIZE::WIDTH as usize) + (y as usize);
-                let bit = x % 8;
-
-                (idx, bit)
+                Point::new(y as i32, x as i32)
             }
         };
 
-        if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
-            // Keep track of max and min values
-            self.mode.min_x = self.mode.min_x.min(x as u8);
-            self.mode.max_x = self.mode.max_x.max(x as u8);
+        self.mode.buffer.set_pixel(pos, BinaryColor::from(value));
 
-            self.mode.min_y = self.mode.min_y.min(y as u8);
-            self.mode.max_y = self.mode.max_y.max(y as u8);
+        // Keep track of max and min values
+        self.mode.min_x = self.mode.min_x.min(x as u8);
+        self.mode.max_x = self.mode.max_x.max(x as u8);
 
-            // Set pixel value in byte
-            // Ref this comment https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit#comment46654671_47990
-            *byte = *byte & !(1 << bit) | (value << bit)
-        }
+        self.mode.min_y = self.mode.min_y.min(y as u8);
+        self.mode.max_y = self.mode.max_y.max(y as u8);
     }
 }
 
-impl<DI, SIZE> DrawTarget for Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
+impl<const WIDTH: usize, const HEIGHT: usize, const N: usize, DI, SIZE> DrawTarget
+    for Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
 where
     DI: WriteOnlyDataCommand,
-    SIZE: DisplaySize,
+    SIZE: DisplaySize<Buffer = Ssd1306Framebuffer<WIDTH, HEIGHT, N>>,
 {
     type Color = BinaryColor;
     type Error = DisplayError;

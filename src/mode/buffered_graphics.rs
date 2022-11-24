@@ -2,11 +2,18 @@
 
 use crate::{
     command::AddrMode,
+    mode::DisplayConfig,
     rotation::DisplayRotation,
     size::{DisplaySize, NewZeroed},
     Ssd1306,
 };
 use display_interface::{DisplayError, WriteOnlyDataCommand};
+use embedded_graphics::{
+    draw_target::DrawTarget,
+    geometry::{Dimensions, OriginDimensions, Size},
+    pixelcolor::BinaryColor,
+    Pixel,
+};
 
 /// Buffered graphics mode.
 ///
@@ -190,18 +197,6 @@ where
     }
 }
 
-#[cfg(feature = "graphics")]
-use embedded_graphics_core::{
-    draw_target::DrawTarget,
-    geometry::Size,
-    geometry::{Dimensions, OriginDimensions},
-    pixelcolor::BinaryColor,
-    Pixel,
-};
-
-use super::DisplayConfig;
-
-#[cfg(feature = "graphics")]
 impl<DI, SIZE> DrawTarget for Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
 where
     DI: WriteOnlyDataCommand,
@@ -227,7 +222,6 @@ where
     }
 }
 
-#[cfg(feature = "graphics")]
 impl<DI, SIZE> OriginDimensions for Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
 where
     DI: WriteOnlyDataCommand,

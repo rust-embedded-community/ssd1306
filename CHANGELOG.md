@@ -13,6 +13,7 @@
 ### Changed
 
 - **(breaking)** [#175](https://github.com/jamwaffles/ssd1306/pull/175) Increased MSRV to 1.57.0
+- **(breaking)** [#179](https://github.com/jamwaffles/ssd1306/pull/179) Changed `Ssd1306::reset` signature.
 
 ## [0.7.1] - 2022-08-15
 

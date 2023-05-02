@@ -202,6 +202,58 @@ where
     }
 }
 
+#[cfg(feature = "async")]
+impl<DI, SIZE> Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
+where
+    DI: display_interface::AsyncWriteOnlyDataCommand,
+    SIZE: DisplaySize,
+{
+    /// Write out data to a display.
+    ///
+    /// This only updates the parts of the display that have changed since the last flush.
+    pub async fn flush_async(&mut self) -> Result<(), DisplayError> {
+        // Nothing to do if no pixels have changed since the last update
+        if self.mode.max_x < self.mode.min_x || self.mode.max_y < self.mode.min_y {
+            return Ok(());
+        }
+
+        let (width, height) = self.dimensions();
+        let (disp_min, disp_max) = self.dirty_area(width, height);
+        let (area_start, area_end) = self.display_area(disp_min, disp_max);
+
+        self.mode.min_x = 255;
+        self.mode.max_x = 0;
+        self.mode.min_y = 255;
+        self.mode.max_y = 0;
+
+        // Tell the display to update only the part that has changed
+        self.set_draw_area_async(area_start, area_end).await?;
+
+        match self.rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                Self::flush_buffer_chunks_async(
+                    &mut self.interface,
+                    self.mode.buffer.as_mut(),
+                    width as usize,
+                    (disp_min.0, disp_min.1),
+                    (disp_max.0, disp_max.1),
+                )
+                .await
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                Self::flush_buffer_chunks_async(
+                    &mut self.interface,
+                    self.mode.buffer.as_mut(),
+                    height as usize,
+                    (disp_min.1, disp_min.0),
+                    (disp_max.1, disp_max.0),
+                )
+                .await
+            }
+        }
+    }
+}
+
 #[cfg(feature = "graphics")]
 use embedded_graphics_core::{
     draw_target::DrawTarget,

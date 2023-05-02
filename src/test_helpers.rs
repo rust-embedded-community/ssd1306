@@ -1,31 +1,39 @@
 //! Helpers for use in examples and tests
 
+use core::convert::Infallible;
+
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 use embedded_hal::{
-    blocking::{
-        i2c,
-        spi::{self, Transfer},
-    },
-    digital::v2::OutputPin,
+    digital::{self, OutputPin},
+    i2c, spi,
 };
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy)]
 pub struct SpiStub;
 
-impl spi::Write<u8> for SpiStub {
-    type Error = ();
+impl spi::ErrorType for SpiStub {
+    type Error = Infallible;
+}
 
-    fn write(&mut self, _buf: &[u8]) -> Result<(), ()> {
-        Ok(())
+impl spi::SpiDeviceWrite<u8> for SpiStub {
+    fn write_transaction(&mut self, _operations: &[&[u8]]) -> Result<(), Self::Error> {
+        todo!()
     }
 }
 
-impl Transfer<u8> for SpiStub {
-    type Error = ();
+impl spi::SpiDeviceRead<u8> for SpiStub {
+    fn read_transaction(&mut self, _operations: &mut [&mut [u8]]) -> Result<(), Self::Error> {
+        todo!()
+    }
+}
 
-    fn transfer<'a>(&mut self, buf: &'a mut [u8]) -> Result<&'a [u8], ()> {
-        Ok(buf)
+impl spi::SpiDevice<u8> for SpiStub {
+    fn transaction(
+        &mut self,
+        _operations: &mut [spi::Operation<'_, u8>],
+    ) -> Result<(), Self::Error> {
+        todo!()
     }
 }
 
@@ -33,11 +41,21 @@ impl Transfer<u8> for SpiStub {
 #[derive(Debug, Clone, Copy)]
 pub struct I2cStub;
 
-impl i2c::Write for I2cStub {
-    type Error = ();
+impl i2c::ErrorType for I2cStub {
+    type Error = Infallible;
+}
 
-    fn write(&mut self, _addr: u8, _buf: &[u8]) -> Result<(), ()> {
+impl i2c::I2c for I2cStub {
+    fn write(&mut self, _addr: u8, _buf: &[u8]) -> Result<(), Self::Error> {
         Ok(())
+    }
+
+    fn transaction(
+        &mut self,
+        _address: u8,
+        _operations: &mut [i2c::Operation<'_>],
+    ) -> Result<(), Self::Error> {
+        todo!()
     }
 }
 
@@ -45,14 +63,16 @@ impl i2c::Write for I2cStub {
 #[derive(Debug, Clone, Copy)]
 pub struct PinStub;
 
-impl OutputPin for PinStub {
-    type Error = ();
+impl digital::ErrorType for PinStub {
+    type Error = Infallible;
+}
 
-    fn set_high(&mut self) -> Result<(), ()> {
+impl OutputPin for PinStub {
+    fn set_high(&mut self) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn set_low(&mut self) -> Result<(), ()> {
+    fn set_low(&mut self) -> Result<(), Self::Error> {
         Ok(())
     }
 }

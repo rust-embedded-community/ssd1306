@@ -119,6 +119,8 @@ pub mod size;
 #[doc(hidden)]
 pub mod test_helpers;
 
+use core::convert::Infallible;
+
 pub use crate::i2c_interface::I2CDisplayInterface;
 use crate::mode::BasicMode;
 use brightness::Brightness;
@@ -412,43 +414,43 @@ where
 // SPI-only reset
 impl<SPI, DC, SIZE, MODE> Ssd1306<SPIInterfaceNoCS<SPI, DC>, SIZE, MODE> {
     /// Reset the display.
-    pub fn reset<RST, DELAY, PinE>(
+    pub fn reset<RST, DELAY>(
         &mut self,
         rst: &mut RST,
         delay: &mut DELAY,
-    ) -> Result<(), Error<(), PinE>>
+    ) -> Result<(), Error<Infallible, RST::Error>>
     where
-        RST: OutputPin<Error = PinE>,
+        RST: OutputPin,
         DELAY: DelayMs<u8>,
     {
-        inner_reset(rst, delay)
+        inner_reset(rst, delay).map_err(Error::Pin)
     }
 }
 
 // SPI-only reset
 impl<SPI, DC, CS, SIZE, MODE> Ssd1306<SPIInterface<SPI, DC, CS>, SIZE, MODE> {
     /// Reset the display.
-    pub fn reset<RST, DELAY, PinE>(
+    pub fn reset<RST, DELAY>(
         &mut self,
         rst: &mut RST,
         delay: &mut DELAY,
-    ) -> Result<(), Error<(), PinE>>
+    ) -> Result<(), Error<Infallible, RST::Error>>
     where
-        RST: OutputPin<Error = PinE>,
+        RST: OutputPin,
         DELAY: DelayMs<u8>,
     {
-        inner_reset(rst, delay)
+        inner_reset(rst, delay).map_err(Error::Pin)
     }
 }
 
-fn inner_reset<RST, DELAY, PinE>(rst: &mut RST, delay: &mut DELAY) -> Result<(), Error<(), PinE>>
+fn inner_reset<RST, DELAY>(rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
 where
-    RST: OutputPin<Error = PinE>,
+    RST: OutputPin,
     DELAY: DelayMs<u8>,
 {
-    rst.set_high().map_err(Error::Pin)?;
+    rst.set_high()?;
     delay.delay_ms(1);
-    rst.set_low().map_err(Error::Pin)?;
+    rst.set_low()?;
     delay.delay_ms(10);
-    rst.set_high().map_err(Error::Pin)
+    rst.set_high()
 }

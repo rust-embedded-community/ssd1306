@@ -112,14 +112,9 @@ impl core::fmt::Debug for TerminalModeError {
     }
 }
 
-// Cannot use From<_> due to coherence
-trait IntoTerminalModeResult<T> {
-    fn terminal_err(self) -> Result<T, TerminalModeError>;
-}
-
-impl<T> IntoTerminalModeResult<T> for Result<T, DisplayError> {
-    fn terminal_err(self) -> Result<T, TerminalModeError> {
-        self.map_err(TerminalModeError::InterfaceError)
+impl From<DisplayError> for TerminalModeError {
+    fn from(value: DisplayError) -> Self {
+        TerminalModeError::InterfaceError(value)
     }
 }
 
@@ -147,7 +142,7 @@ where
     ///
     /// This method resets the cursor but does not clear the screen.
     fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), TerminalModeError> {
-        self.set_rotation(rot).terminal_err()?;
+        self.set_rotation(rot)?;
         // Need to reset cursor position, otherwise coordinates can become invalid
         self.reset_pos()
     }
@@ -156,7 +151,7 @@ where
     /// column 0 on the left and column _(SIZE::Width::U8 - 1)_ on the right, but no automatic line
     /// wrapping.
     fn init(&mut self) -> Result<(), TerminalModeError> {
-        self.init_with_addr_mode(AddrMode::Page).terminal_err()?;
+        self.init_with_addr_mode(AddrMode::Page)?;
         self.reset_pos()?;
         Ok(())
     }
@@ -170,7 +165,7 @@ where
     /// Clear the display and reset the cursor to the top left corner
     pub fn clear(&mut self) -> Result<(), TerminalModeError> {
         // Let the chip handle line wrapping so we can fill the screen with blanks faster
-        self.set_addr_mode(AddrMode::Horizontal).terminal_err()?;
+        self.set_addr_mode(AddrMode::Horizontal)?;
 
         let offset_x = match self.rotation() {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate270 => SIZE::OFFSETX,
@@ -183,16 +178,15 @@ where
         self.set_draw_area(
             (offset_x, SIZE::OFFSETY),
             (SIZE::WIDTH + offset_x, SIZE::HEIGHT + SIZE::OFFSETY),
-        )
-        .terminal_err()?;
+        )?;
 
         // Clear the display
         for _ in 0..SIZE::CHAR_NUM {
-            self.draw(&[0; 8]).terminal_err()?;
+            self.draw(&[0; 8])?;
         }
 
         // But for normal operation we manage the line wrapping
-        self.set_addr_mode(AddrMode::Page).terminal_err()?;
+        self.set_addr_mode(AddrMode::Page)?;
         self.reset_pos()?;
 
         Ok(())
@@ -203,11 +197,11 @@ where
         match c {
             '\n' => {
                 let CursorWrapEvent(new_line) = self.ensure_cursor()?.advance_line();
-                self.set_column(0).terminal_err()?;
-                self.set_row(new_line * 8).terminal_err()?;
+                self.set_column(0)?;
+                self.set_row(new_line * 8)?;
             }
             '\r' => {
-                self.set_column(0).terminal_err()?;
+                self.set_column(0)?;
                 let (_, cur_line) = self.ensure_cursor()?.get_position();
                 self.ensure_cursor()?.set_position(0, cur_line);
             }
@@ -222,7 +216,7 @@ where
                     }
                 };
 
-                self.draw(&bitmap).terminal_err()?;
+                self.draw(&bitmap)?;
 
                 // Increment character counter and potentially wrap line
                 self.advance_cursor()?;
@@ -260,12 +254,12 @@ where
             };
             match self.rotation() {
                 DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                    self.set_column(offset_x + column * 8).terminal_err()?;
-                    self.set_row(SIZE::OFFSETY + row * 8).terminal_err()?;
+                    self.set_column(offset_x + column * 8)?;
+                    self.set_row(SIZE::OFFSETY + row * 8)?;
                 }
                 DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                    self.set_column(offset_x + row * 8).terminal_err()?;
-                    self.set_row(SIZE::OFFSETY + column * 8).terminal_err()?;
+                    self.set_column(offset_x + row * 8)?;
+                    self.set_row(SIZE::OFFSETY + column * 8)?;
                 }
             }
             self.ensure_cursor()?.set_position(column, row);

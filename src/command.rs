@@ -87,16 +87,16 @@ pub enum Command {
     ChargePump(bool),
     /// Select external or internal I REF. Only for 72 x 40 display with SSD1306B driver
     InternalIref(bool, bool),
+    /// Noop that isn't even sent through the interface.
+    ///
+    /// Prefer this over [`Command::Noop`] if you don't need to send anything to the display.
+    FastNoop,
 }
 
 impl Command {
-    /// Send command to SSD1306
-    pub fn send<DI>(self, iface: &mut DI) -> Result<(), DisplayError>
-    where
-        DI: WriteOnlyDataCommand,
-    {
-        // Transform command into a fixed size array of 7 u8 and the real length for sending
-        let (data, len) = match self {
+    /// Transform command into a fixed size array of 7 u8 and the real length for sending
+    fn bytes(self) -> Option<([u8; 7], usize)> {
+        let val = match self {
             Command::Contrast(val) => ([0x81, val, 0, 0, 0, 0, 0], 2),
             Command::AllOn(on) => ([0xA4 | (on as u8), 0, 0, 0, 0, 0, 0], 1),
             Command::Invert(inv) => ([0xA6 | (inv as u8), 0, 0, 0, 0, 0, 0], 1),
@@ -173,10 +173,23 @@ impl Command {
                 ],
                 2,
             ),
+            Command::FastNoop => return None,
         };
 
-        // Send command over the interface
-        iface.send_commands(U8(&data[0..len]))
+        Some(val)
+    }
+
+    /// Send command to SSD1306
+    pub fn send<DI>(self, iface: &mut DI) -> Result<(), DisplayError>
+    where
+        DI: WriteOnlyDataCommand,
+    {
+        if let Some((data, len)) = self.bytes() {
+            // Send command over the interface
+            iface.send_commands(U8(&data[0..len]))
+        } else {
+            Ok(())
+        }
     }
 }
 

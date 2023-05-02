@@ -47,7 +47,15 @@ pub trait DisplaySize {
     /// See [`Command::ComPinConfig`](crate::Command::ComPinConfig)
     /// and [`Command::InternalIref`](crate::Command::InternalIref)
     /// for more information
-    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError>;
+    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
+        for command in self.commands() {
+            command.send(iface)?;
+        }
+        Ok(())
+    }
+
+    /// Returns the set of resolution and model-dependent configuration commands
+    fn commands(&self) -> [Command; 2];
 }
 
 /// Size information for the common 128x64 variants
@@ -58,8 +66,8 @@ impl DisplaySize for DisplaySize128x64 {
     const HEIGHT: u8 = 64;
     type Buffer = [u8; Self::WIDTH as usize * Self::HEIGHT as usize / 8];
 
-    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
-        Command::ComPinConfig(true, false).send(iface)
+    fn commands(&self) -> [Command; 2] {
+        [Command::ComPinConfig(true, false), Command::FastNoop]
     }
 }
 
@@ -71,8 +79,8 @@ impl DisplaySize for DisplaySize128x32 {
     const HEIGHT: u8 = 32;
     type Buffer = [u8; Self::WIDTH as usize * Self::HEIGHT as usize / 8];
 
-    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
-        Command::ComPinConfig(false, false).send(iface)
+    fn commands(&self) -> [Command; 2] {
+        [Command::ComPinConfig(false, false), Command::FastNoop]
     }
 }
 
@@ -84,8 +92,8 @@ impl DisplaySize for DisplaySize96x16 {
     const HEIGHT: u8 = 16;
     type Buffer = [u8; Self::WIDTH as usize * Self::HEIGHT as usize / 8];
 
-    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
-        Command::ComPinConfig(false, false).send(iface)
+    fn commands(&self) -> [Command; 2] {
+        [Command::ComPinConfig(false, false), Command::FastNoop]
     }
 }
 
@@ -99,9 +107,11 @@ impl DisplaySize for DisplaySize72x40 {
     const OFFSETY: u8 = 0;
     type Buffer = [u8; Self::WIDTH as usize * Self::HEIGHT as usize / 8];
 
-    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
-        Command::ComPinConfig(true, false).send(iface)?;
-        Command::InternalIref(true, true).send(iface)
+    fn commands(&self) -> [Command; 2] {
+        [
+            Command::ComPinConfig(true, false),
+            Command::InternalIref(true, true),
+        ]
     }
 }
 
@@ -115,8 +125,8 @@ impl DisplaySize for DisplaySize64x48 {
     const OFFSETY: u8 = 0;
     type Buffer = [u8; Self::WIDTH as usize * Self::HEIGHT as usize / 8];
 
-    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
-        Command::ComPinConfig(true, false).send(iface)
+    fn commands(&self) -> [Command; 2] {
+        [Command::ComPinConfig(true, false), Command::FastNoop]
     }
 }
 
@@ -130,7 +140,7 @@ impl DisplaySize for DisplaySize64x32 {
     const OFFSETY: u8 = 0;
     type Buffer = [u8; Self::WIDTH as usize * Self::HEIGHT as usize / 8];
 
-    fn configure(&self, iface: &mut impl WriteOnlyDataCommand) -> Result<(), DisplayError> {
-        Command::ComPinConfig(true, false).send(iface)
+    fn commands(&self) -> [Command; 2] {
+        [Command::ComPinConfig(true, false), Command::FastNoop]
     }
 }

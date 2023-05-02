@@ -146,7 +146,6 @@ pub struct Ssd1306<DI, SIZE, MODE> {
 
 impl<DI, SIZE> Ssd1306<DI, SIZE, BasicMode>
 where
-    DI: WriteOnlyDataCommand,
     SIZE: DisplaySize,
 {
     /// Create a basic SSD1306 interface.
@@ -165,7 +164,6 @@ where
 
 impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE>
 where
-    DI: WriteOnlyDataCommand,
     SIZE: DisplaySize,
 {
     /// Convert the display into another interface mode.
@@ -194,65 +192,102 @@ where
         self.into_mode(TerminalMode::new())
     }
 
-    /// Initialise the display in one of the available addressing modes.
-    pub fn init_with_addr_mode(&mut self, mode: AddrMode) -> Result<(), DisplayError> {
-        let rotation = self.rotation;
+    fn rotation_commands(&self, rotation: DisplayRotation) -> [Command; 2] {
+        let (remap, reverse) = match rotation {
+            DisplayRotation::Rotate0 => (true, true),
+            DisplayRotation::Rotate90 => (false, true),
+            DisplayRotation::Rotate180 => (false, false),
+            DisplayRotation::Rotate270 => (true, false),
+        };
 
-        Command::DisplayOn(false).send(&mut self.interface)?;
-        Command::DisplayClockDiv(0x8, 0x0).send(&mut self.interface)?;
-        Command::Multiplex(SIZE::HEIGHT - 1).send(&mut self.interface)?;
-        Command::DisplayOffset(0).send(&mut self.interface)?;
-        Command::StartLine(0).send(&mut self.interface)?;
-        // TODO: Ability to turn charge pump on/off
-        Command::ChargePump(true).send(&mut self.interface)?;
-        Command::AddressMode(mode).send(&mut self.interface)?;
-
-        self.size.configure(&mut self.interface)?;
-        self.set_rotation(rotation)?;
-
-        self.set_brightness(Brightness::default())?;
-        Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.interface)?;
-        Command::AllOn(false).send(&mut self.interface)?;
-        Command::Invert(false).send(&mut self.interface)?;
-        Command::EnableScroll(false).send(&mut self.interface)?;
-        Command::DisplayOn(true).send(&mut self.interface)?;
-
-        self.addr_mode = mode;
-
-        Ok(())
+        [
+            Command::SegmentRemap(remap),
+            Command::ReverseComDir(reverse),
+        ]
     }
 
-    /// Change the addressing mode
-    pub fn set_addr_mode(&mut self, mode: AddrMode) -> Result<(), DisplayError> {
-        Command::AddressMode(mode).send(&mut self.interface)?;
-        self.addr_mode = mode;
-        Ok(())
+    fn mirror_commands(&self, mirror: bool) -> [Command; 2] {
+        if mirror {
+            let (remap, reverse) = match self.rotation {
+                DisplayRotation::Rotate0 => (false, true),
+                DisplayRotation::Rotate90 => (false, false),
+                DisplayRotation::Rotate180 => (true, false),
+                DisplayRotation::Rotate270 => (true, true),
+            };
+
+            [
+                Command::SegmentRemap(remap),
+                Command::ReverseComDir(reverse),
+            ]
+        } else {
+            self.rotation_commands(self.rotation)
+        }
     }
 
-    /// Send the data to the display for drawing at the current position in the framebuffer
-    /// and advance the position accordingly. Cf. `set_draw_area` to modify the affected area by
-    /// this method.
-    ///
-    /// This method takes advantage of a bounding box for faster writes.
-    pub fn bounded_draw(
-        &mut self,
-        buffer: &[u8],
+    fn brightness_commands(&self, brightness: Brightness) -> [Command; 2] {
+        [
+            Command::PreChargePeriod(1, brightness.precharge),
+            Command::Contrast(brightness.contrast),
+        ]
+    }
+
+    fn init_commands(&self, mode: AddrMode) -> [Command; 18] {
+        [
+            Command::DisplayOn(false),
+            Command::DisplayClockDiv(0x8, 0x0),
+            Command::Multiplex(SIZE::HEIGHT - 1),
+            Command::DisplayOffset(0),
+            Command::StartLine(0),
+            // TODO: Ability to turn charge pump on/off
+            Command::ChargePump(true),
+            Command::AddressMode(mode),
+            self.size.commands()[0],
+            self.size.commands()[1],
+            self.rotation_commands(self.rotation)[0],
+            self.rotation_commands(self.rotation)[1],
+            self.brightness_commands(Brightness::default())[0],
+            self.brightness_commands(Brightness::default())[1],
+            Command::VcomhDeselect(VcomhLevel::Auto),
+            Command::AllOn(false),
+            Command::Invert(false),
+            Command::EnableScroll(false),
+            Command::DisplayOn(true),
+        ]
+    }
+
+    fn draw_area_commands(&self, start: (u8, u8), end: (u8, u8)) -> [Command; 2] {
+        [
+            Command::ColumnAddress(start.0, end.0.saturating_sub(1)),
+            if self.addr_mode != AddrMode::Page {
+                Command::PageAddress(start.1.into(), (end.1.saturating_sub(1)).into())
+            } else {
+                Command::FastNoop
+            },
+        ]
+    }
+
+    fn buffer_chunks<'a>(
+        buffer: &'a [u8],
         disp_width: usize,
         upper_left: (u8, u8),
         lower_right: (u8, u8),
-    ) -> Result<(), DisplayError> {
-        Self::flush_buffer_chunks(
-            &mut self.interface,
-            buffer,
-            disp_width,
-            upper_left,
-            lower_right,
-        )
-    }
+    ) -> impl Iterator<Item = &'a [u8]> {
+        // Divide by 8 since each row is actually 8 pixels tall
+        let num_pages = ((lower_right.1 - upper_left.1) / 8) as usize + 1;
 
-    /// Send a raw buffer to the display.
-    pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DisplayError> {
-        self.interface.send_data(U8(&buffer))
+        // Each page is 8 bits tall, so calculate which page number to start at (rounded down) from
+        // the top of the display
+        let starting_page = (upper_left.1 / 8) as usize;
+
+        // Calculate start and end X coordinates for each page
+        let page_lower = upper_left.0 as usize;
+        let page_upper = lower_right.0 as usize;
+
+        buffer
+            .chunks(disp_width)
+            .skip(starting_page)
+            .take(num_pages)
+            .map(move |s| &s[page_lower..page_upper])
     }
 
     /// Get display dimensions, taking into account the current rotation of the display
@@ -288,90 +323,98 @@ where
     pub fn rotation(&self) -> DisplayRotation {
         self.rotation
     }
+}
+
+impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE>
+where
+    DI: WriteOnlyDataCommand,
+    SIZE: DisplaySize,
+{
+    fn send_commands(&mut self, commands: &[Command]) -> Result<(), DisplayError> {
+        for command in commands {
+            command.send(&mut self.interface)?;
+        }
+
+        Ok(())
+    }
+
+    /// Initialise the display in one of the available addressing modes.
+    pub fn init_with_addr_mode(&mut self, mode: AddrMode) -> Result<(), DisplayError> {
+        self.send_commands(&self.init_commands(mode))?;
+        self.addr_mode = mode;
+
+        Ok(())
+    }
+
+    /// Change the addressing mode
+    pub fn set_addr_mode(&mut self, mode: AddrMode) -> Result<(), DisplayError> {
+        self.send_commands(&[Command::AddressMode(mode)])?;
+        self.addr_mode = mode;
+
+        Ok(())
+    }
+
+    /// Send the data to the display for drawing at the current position in the framebuffer
+    /// and advance the position accordingly. Cf. `set_draw_area` to modify the affected area by
+    /// this method.
+    ///
+    /// This method takes advantage of a bounding box for faster writes.
+    pub fn bounded_draw(
+        &mut self,
+        buffer: &[u8],
+        disp_width: usize,
+        upper_left: (u8, u8),
+        lower_right: (u8, u8),
+    ) -> Result<(), DisplayError> {
+        Self::flush_buffer_chunks(
+            &mut self.interface,
+            buffer,
+            disp_width,
+            upper_left,
+            lower_right,
+        )
+    }
+
+    /// Send a raw buffer to the display.
+    pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DisplayError> {
+        self.interface.send_data(U8(&buffer))
+    }
 
     /// Set the display rotation.
     pub fn set_rotation(&mut self, rotation: DisplayRotation) -> Result<(), DisplayError> {
+        self.send_commands(&self.rotation_commands(rotation))?;
         self.rotation = rotation;
-
-        match rotation {
-            DisplayRotation::Rotate0 => {
-                Command::SegmentRemap(true).send(&mut self.interface)?;
-                Command::ReverseComDir(true).send(&mut self.interface)?;
-            }
-            DisplayRotation::Rotate90 => {
-                Command::SegmentRemap(false).send(&mut self.interface)?;
-                Command::ReverseComDir(true).send(&mut self.interface)?;
-            }
-            DisplayRotation::Rotate180 => {
-                Command::SegmentRemap(false).send(&mut self.interface)?;
-                Command::ReverseComDir(false).send(&mut self.interface)?;
-            }
-            DisplayRotation::Rotate270 => {
-                Command::SegmentRemap(true).send(&mut self.interface)?;
-                Command::ReverseComDir(false).send(&mut self.interface)?;
-            }
-        };
 
         Ok(())
     }
 
     /// Set mirror enabled/disabled.
     pub fn set_mirror(&mut self, mirror: bool) -> Result<(), DisplayError> {
-        if mirror {
-            match self.rotation {
-                DisplayRotation::Rotate0 => {
-                    Command::SegmentRemap(false).send(&mut self.interface)?;
-                    Command::ReverseComDir(true).send(&mut self.interface)?;
-                }
-                DisplayRotation::Rotate90 => {
-                    Command::SegmentRemap(false).send(&mut self.interface)?;
-                    Command::ReverseComDir(false).send(&mut self.interface)?;
-                }
-                DisplayRotation::Rotate180 => {
-                    Command::SegmentRemap(true).send(&mut self.interface)?;
-                    Command::ReverseComDir(false).send(&mut self.interface)?;
-                }
-                DisplayRotation::Rotate270 => {
-                    Command::SegmentRemap(true).send(&mut self.interface)?;
-                    Command::ReverseComDir(true).send(&mut self.interface)?;
-                }
-            };
-        } else {
-            self.set_rotation(self.rotation)?;
-        }
-        Ok(())
+        self.send_commands(&self.mirror_commands(mirror))
     }
 
     /// Change the display brightness.
     pub fn set_brightness(&mut self, brightness: Brightness) -> Result<(), DisplayError> {
-        Command::PreChargePeriod(1, brightness.precharge).send(&mut self.interface)?;
-        Command::Contrast(brightness.contrast).send(&mut self.interface)
+        self.send_commands(&self.brightness_commands(brightness))
     }
 
     /// Turn the display on or off. The display can be drawn to and retains all
     /// of its memory even while off.
     pub fn set_display_on(&mut self, on: bool) -> Result<(), DisplayError> {
-        Command::DisplayOn(on).send(&mut self.interface)
+        self.send_commands(&[Command::DisplayOn(on)])
     }
 
     /// Set the position in the framebuffer of the display limiting where any sent data should be
     /// drawn. This method can be used for changing the affected area on the screen as well
     /// as (re-)setting the start point of the next `draw` call.
     pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), DisplayError> {
-        Command::ColumnAddress(start.0, end.0.saturating_sub(1)).send(&mut self.interface)?;
-
-        if self.addr_mode != AddrMode::Page {
-            Command::PageAddress(start.1.into(), (end.1.saturating_sub(1)).into())
-                .send(&mut self.interface)?;
-        }
-
-        Ok(())
+        self.send_commands(&self.draw_area_commands(start, end))
     }
 
     /// Set the column address in the framebuffer of the display where any sent data should be
     /// drawn.
     pub fn set_column(&mut self, column: u8) -> Result<(), DisplayError> {
-        Command::ColStart(column).send(&mut self.interface)
+        self.send_commands(&[Command::ColStart(column)])
     }
 
     /// Set the page address (row 8px high) in the framebuffer of the display where any sent data
@@ -380,7 +423,7 @@ where
     /// Note that the parameter is in pixels, but the page will be set to the start of the 8px
     /// row which contains the passed-in row.
     pub fn set_row(&mut self, row: u8) -> Result<(), DisplayError> {
-        Command::PageStart(row.into()).send(&mut self.interface)
+        self.send_commands(&[Command::PageStart(row.into())])
     }
 
     /// Set the screen pixel on/off inversion
@@ -395,22 +438,7 @@ where
         upper_left: (u8, u8),
         lower_right: (u8, u8),
     ) -> Result<(), DisplayError> {
-        // Divide by 8 since each row is actually 8 pixels tall
-        let num_pages = ((lower_right.1 - upper_left.1) / 8) as usize + 1;
-
-        // Each page is 8 bits tall, so calculate which page number to start at (rounded down) from
-        // the top of the display
-        let starting_page = (upper_left.1 / 8) as usize;
-
-        // Calculate start and end X coordinates for each page
-        let page_lower = upper_left.0 as usize;
-        let page_upper = lower_right.0 as usize;
-
-        buffer
-            .chunks(disp_width)
-            .skip(starting_page)
-            .take(num_pages)
-            .map(|s| &s[page_lower..page_upper])
+        Self::buffer_chunks(buffer, disp_width, upper_left, lower_right)
             .try_for_each(|c| interface.send_data(U8(&c)))
     }
 }

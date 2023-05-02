@@ -159,71 +159,23 @@ where
 
 impl<DI, SIZE> Ssd1306<DI, SIZE, TerminalMode>
 where
-    DI: WriteOnlyDataCommand,
     SIZE: TerminalDisplaySize,
 {
-    /// Clear the display and reset the cursor to the top left corner
-    pub fn clear(&mut self) -> Result<(), TerminalModeError> {
-        // Let the chip handle line wrapping so we can fill the screen with blanks faster
-        self.set_addr_mode(AddrMode::Horizontal)?;
-
-        let offset_x = match self.rotation() {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate270 => SIZE::OFFSETX,
-            DisplayRotation::Rotate180 | DisplayRotation::Rotate90 => {
-                // If segment remapping is flipped, we need to calculate
-                // the offset from the other edge of the display.
-                SIZE::DRIVER_COLS - SIZE::WIDTH - SIZE::OFFSETX
+    fn char_bitmap(&self, c: char) -> [u8; 8] {
+        match self.rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => Self::char_to_bitmap(c),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                let bitmap = Self::char_to_bitmap(c);
+                Self::rotate_bitmap(bitmap)
             }
-        };
-        self.set_draw_area(
-            (offset_x, SIZE::OFFSETY),
-            (SIZE::WIDTH + offset_x, SIZE::HEIGHT + SIZE::OFFSETY),
-        )?;
-
-        // Clear the display
-        for _ in 0..SIZE::CHAR_NUM {
-            self.draw(&[0; 8])?;
         }
-
-        // But for normal operation we manage the line wrapping
-        self.set_addr_mode(AddrMode::Page)?;
-        self.reset_pos()?;
-
-        Ok(())
     }
 
-    /// Print a character to the display
-    pub fn print_char(&mut self, c: char) -> Result<(), TerminalModeError> {
-        match c {
-            '\n' => {
-                let CursorWrapEvent(new_line) = self.ensure_cursor()?.advance_line();
-                self.set_column(0)?;
-                self.set_row(new_line * 8)?;
-            }
-            '\r' => {
-                self.set_column(0)?;
-                let (_, cur_line) = self.ensure_cursor()?.get_position();
-                self.ensure_cursor()?.set_position(0, cur_line);
-            }
-            _ => {
-                let bitmap = match self.rotation {
-                    DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                        Self::char_to_bitmap(c)
-                    }
-                    DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                        let bitmap = Self::char_to_bitmap(c);
-                        Self::rotate_bitmap(bitmap)
-                    }
-                };
-
-                self.draw(&bitmap)?;
-
-                // Increment character counter and potentially wrap line
-                self.advance_cursor()?;
-            }
-        }
-
-        Ok(())
+    fn ensure_cursor(&mut self) -> Result<&mut Cursor, TerminalModeError> {
+        self.mode
+            .cursor
+            .as_mut()
+            .ok_or(TerminalModeError::Uninitialized)
     }
 
     /// Get the current cursor position, in character coordinates.
@@ -233,71 +185,6 @@ where
             .cursor
             .as_ref()
             .map(|c| c.get_position())
-            .ok_or(TerminalModeError::Uninitialized)
-    }
-
-    /// Set the cursor position, in character coordinates.
-    /// This is the (column, row) that the next character will be written to.
-    /// If the position is out of bounds, an Err will be returned.
-    pub fn set_position(&mut self, column: u8, row: u8) -> Result<(), TerminalModeError> {
-        let (width, height) = self.ensure_cursor()?.get_dimensions();
-        if column >= width || row >= height {
-            Err(TerminalModeError::OutOfBounds)
-        } else {
-            let offset_x = match self.rotation() {
-                DisplayRotation::Rotate0 | DisplayRotation::Rotate270 => SIZE::OFFSETX,
-                DisplayRotation::Rotate180 | DisplayRotation::Rotate90 => {
-                    // If segment remapping is flipped, we need to calculate
-                    // the offset from the other edge of the display.
-                    SIZE::DRIVER_COLS - SIZE::WIDTH - SIZE::OFFSETX
-                }
-            };
-            match self.rotation() {
-                DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                    self.set_column(offset_x + column * 8)?;
-                    self.set_row(SIZE::OFFSETY + row * 8)?;
-                }
-                DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                    self.set_column(offset_x + row * 8)?;
-                    self.set_row(SIZE::OFFSETY + column * 8)?;
-                }
-            }
-            self.ensure_cursor()?.set_position(column, row);
-            Ok(())
-        }
-    }
-
-    /// Reset the draw area and move pointer to the top left corner
-    fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
-        // Initialise the counter when we know it's valid
-        let (w, h) = match self.rotation() {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (SIZE::WIDTH, SIZE::HEIGHT),
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (SIZE::HEIGHT, SIZE::WIDTH),
-        };
-        self.mode.cursor = Some(Cursor::new(w, h));
-
-        // Reset cursor position
-        self.set_position(0, 0)?;
-
-        Ok(())
-    }
-
-    /// Advance the cursor, automatically wrapping lines and/or screens if necessary
-    /// Takes in an already-unwrapped cursor to avoid re-unwrapping
-    fn advance_cursor(&mut self) -> Result<(), TerminalModeError> {
-        let cursor = self.ensure_cursor()?;
-
-        cursor.advance();
-        let (c, r) = cursor.get_position();
-        self.set_position(c, r)?;
-
-        Ok(())
-    }
-
-    fn ensure_cursor(&mut self) -> Result<&mut Cursor, TerminalModeError> {
-        self.mode
-            .cursor
-            .as_mut()
             .ok_or(TerminalModeError::Uninitialized)
     }
 
@@ -417,6 +304,131 @@ where
         }
 
         rotated
+    }
+
+    fn horizontal_offset(&self) -> u8 {
+        match self.rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate270 => SIZE::OFFSETX,
+            DisplayRotation::Rotate180 | DisplayRotation::Rotate90 => {
+                // If segment remapping is flipped, we need to calculate
+                // the offset from the other edge of the display.
+                SIZE::DRIVER_COLS - SIZE::WIDTH - SIZE::OFFSETX
+            }
+        }
+    }
+
+    fn display_area(&self) -> ((u8, u8), (u8, u8)) {
+        let offset_x = self.horizontal_offset();
+
+        // TODO: explain why we don't take rotation into account here, as opposed to what's done in
+        // BufferedGraphics
+        (
+            (offset_x, SIZE::OFFSETY),
+            (SIZE::WIDTH + offset_x, SIZE::HEIGHT + SIZE::OFFSETY),
+        )
+    }
+}
+
+impl<DI, SIZE> Ssd1306<DI, SIZE, TerminalMode>
+where
+    DI: WriteOnlyDataCommand,
+    SIZE: TerminalDisplaySize,
+{
+    /// Clear the display and reset the cursor to the top left corner
+    pub fn clear(&mut self) -> Result<(), TerminalModeError> {
+        // Let the chip handle line wrapping so we can fill the screen with blanks faster
+        self.set_addr_mode(AddrMode::Horizontal)?;
+
+        let (area_start, area_end) = self.display_area();
+        self.set_draw_area(area_start, area_end)?;
+
+        // Clear the display
+        for _ in 0..SIZE::CHAR_NUM {
+            self.draw(&[0; 8])?;
+        }
+
+        // But for normal operation we manage the line wrapping
+        self.set_addr_mode(AddrMode::Page)?;
+        self.reset_pos()?;
+
+        Ok(())
+    }
+
+    /// Print a character to the display
+    pub fn print_char(&mut self, c: char) -> Result<(), TerminalModeError> {
+        match c {
+            '\n' => {
+                let CursorWrapEvent(new_line) = self.ensure_cursor()?.advance_line();
+                self.set_column(0)?;
+                self.set_row(new_line * 8)?;
+            }
+            '\r' => {
+                self.set_column(0)?;
+                let (_, cur_line) = self.ensure_cursor()?.get_position();
+                self.ensure_cursor()?.set_position(0, cur_line);
+            }
+            _ => {
+                let bitmap = self.char_bitmap(c);
+
+                self.draw(&bitmap)?;
+
+                // Increment character counter and potentially wrap line
+                self.advance_cursor()?;
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Set the cursor position, in character coordinates.
+    /// This is the (column, row) that the next character will be written to.
+    /// If the position is out of bounds, an Err will be returned.
+    pub fn set_position(&mut self, column: u8, row: u8) -> Result<(), TerminalModeError> {
+        let (width, height) = self.ensure_cursor()?.get_dimensions();
+        if column >= width || row >= height {
+            Err(TerminalModeError::OutOfBounds)
+        } else {
+            let offset_x = self.horizontal_offset();
+            match self.rotation {
+                DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                    self.set_column(offset_x + column * 8)?;
+                    self.set_row(SIZE::OFFSETY + row * 8)?;
+                }
+                DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                    self.set_column(offset_x + row * 8)?;
+                    self.set_row(SIZE::OFFSETY + column * 8)?;
+                }
+            }
+            self.ensure_cursor()?.set_position(column, row);
+            Ok(())
+        }
+    }
+
+    /// Reset the draw area and move pointer to the top left corner
+    fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
+        // Initialise the counter when we know it's valid
+        let (w, h) = match self.rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (SIZE::WIDTH, SIZE::HEIGHT),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (SIZE::HEIGHT, SIZE::WIDTH),
+        };
+        self.mode.cursor = Some(Cursor::new(w, h));
+
+        // Reset cursor position
+        self.set_position(0, 0)?;
+
+        Ok(())
+    }
+
+    /// Advance the cursor, automatically wrapping lines and/or screens if necessary
+    /// Takes in an already-unwrapped cursor to avoid re-unwrapping
+    fn advance_cursor(&mut self) -> Result<(), TerminalModeError> {
+        let cursor = self.ensure_cursor()?;
+
+        cursor.advance();
+        let (c, r) = cursor.get_position();
+        self.set_position(c, r)?;
+
+        Ok(())
     }
 }
 

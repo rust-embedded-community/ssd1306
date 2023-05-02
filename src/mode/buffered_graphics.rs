@@ -2,6 +2,7 @@
 
 use crate::{
     command::AddrMode,
+    mode::DisplayConfig,
     rotation::DisplayRotation,
     size::{DisplaySize, NewZeroed},
     Ssd1306,
@@ -65,7 +66,6 @@ where
 
 impl<DI, SIZE> Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
 where
-    DI: WriteOnlyDataCommand,
     SIZE: DisplaySize,
 {
     fn clear_impl(&mut self, value: bool) {
@@ -76,84 +76,6 @@ where
         self.mode.max_x = width - 1;
         self.mode.min_y = 0;
         self.mode.max_y = height - 1;
-    }
-
-    /// Clear the underlying framebuffer. You need to call `disp.flush()` for any effect on the screen.
-    pub fn clear_buffer(&mut self) {
-        self.clear_impl(false);
-    }
-
-    /// Write out data to a display.
-    ///
-    /// This only updates the parts of the display that have changed since the last flush.
-    pub fn flush(&mut self) -> Result<(), DisplayError> {
-        // Nothing to do if no pixels have changed since the last update
-        if self.mode.max_x < self.mode.min_x || self.mode.max_y < self.mode.min_y {
-            return Ok(());
-        }
-
-        let (width, height) = self.dimensions();
-
-        // Determine which bytes need to be sent
-        let disp_min_x = self.mode.min_x;
-        let disp_min_y = self.mode.min_y;
-
-        let (disp_max_x, disp_max_y) = match self.rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (
-                (self.mode.max_x + 1).min(width),
-                (self.mode.max_y | 7).min(height),
-            ),
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (
-                (self.mode.max_x | 7).min(width),
-                (self.mode.max_y + 1).min(height),
-            ),
-        };
-
-        self.mode.min_x = 255;
-        self.mode.max_x = 0;
-        self.mode.min_y = 255;
-        self.mode.max_y = 0;
-
-        // Tell the display to update only the part that has changed
-        let offset_x = match self.rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate270 => SIZE::OFFSETX,
-            DisplayRotation::Rotate180 | DisplayRotation::Rotate90 => {
-                // If segment remapping is flipped, we need to calculate
-                // the offset from the other edge of the display.
-                SIZE::DRIVER_COLS - SIZE::WIDTH - SIZE::OFFSETX
-            }
-        };
-
-        match self.rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                self.set_draw_area(
-                    (disp_min_x + offset_x, disp_min_y + SIZE::OFFSETY),
-                    (disp_max_x + offset_x, disp_max_y + SIZE::OFFSETY),
-                )?;
-
-                Self::flush_buffer_chunks(
-                    &mut self.interface,
-                    self.mode.buffer.as_mut(),
-                    width as usize,
-                    (disp_min_x, disp_min_y),
-                    (disp_max_x, disp_max_y),
-                )
-            }
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                self.set_draw_area(
-                    (disp_min_y + offset_x, disp_min_x + SIZE::OFFSETY),
-                    (disp_max_y + offset_x, disp_max_x + SIZE::OFFSETY),
-                )?;
-
-                Self::flush_buffer_chunks(
-                    &mut self.interface,
-                    self.mode.buffer.as_mut(),
-                    height as usize,
-                    (disp_min_y, disp_min_x),
-                    (disp_max_y, disp_max_x),
-                )
-            }
-        }
     }
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
@@ -190,6 +112,89 @@ where
             *byte = *byte & !(1 << bit) | (value << bit)
         }
     }
+
+    fn dirty_area(&self, width: u8, height: u8) -> ((u8, u8), (u8, u8)) {
+        let min = (self.mode.min_x, self.mode.min_y);
+        let max = match self.rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (
+                (self.mode.max_x + 1).min(width),
+                (self.mode.max_y | 7).min(height),
+            ),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (
+                (self.mode.max_x | 7).min(width),
+                (self.mode.max_y + 1).min(height),
+            ),
+        };
+
+        (min, max)
+    }
+
+    fn display_area(&self, disp_min: (u8, u8), disp_max: (u8, u8)) -> ((u8, u8), (u8, u8)) {
+        let offset_x = match self.rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate270 => SIZE::OFFSETX,
+            DisplayRotation::Rotate180 | DisplayRotation::Rotate90 => {
+                // If segment remapping is flipped, we need to calculate
+                // the offset from the other edge of the display.
+                SIZE::DRIVER_COLS - SIZE::WIDTH - SIZE::OFFSETX
+            }
+        };
+
+        match self.rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (
+                (disp_min.0 + offset_x, disp_min.1 + SIZE::OFFSETY),
+                (disp_max.0 + offset_x, disp_max.1 + SIZE::OFFSETY),
+            ),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (
+                (disp_min.1 + offset_x, disp_min.0 + SIZE::OFFSETY),
+                (disp_max.1 + offset_x, disp_max.0 + SIZE::OFFSETY),
+            ),
+        }
+    }
+}
+
+impl<DI, SIZE> Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
+where
+    DI: WriteOnlyDataCommand,
+    SIZE: DisplaySize,
+{
+    /// Write out data to a display.
+    ///
+    /// This only updates the parts of the display that have changed since the last flush.
+    pub fn flush(&mut self) -> Result<(), DisplayError> {
+        // Nothing to do if no pixels have changed since the last update
+        if self.mode.max_x < self.mode.min_x || self.mode.max_y < self.mode.min_y {
+            return Ok(());
+        }
+
+        let (width, height) = self.dimensions();
+        let (disp_min, disp_max) = self.dirty_area(width, height);
+        let (area_start, area_end) = self.display_area(disp_min, disp_max);
+
+        self.mode.min_x = 255;
+        self.mode.max_x = 0;
+        self.mode.min_y = 255;
+        self.mode.max_y = 0;
+
+        // Tell the display to update only the part that has changed
+        self.set_draw_area(area_start, area_end)?;
+
+        match self.rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => Self::flush_buffer_chunks(
+                &mut self.interface,
+                self.mode.buffer.as_mut(),
+                width as usize,
+                (disp_min.0, disp_min.1),
+                (disp_max.0, disp_max.1),
+            ),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => Self::flush_buffer_chunks(
+                &mut self.interface,
+                self.mode.buffer.as_mut(),
+                height as usize,
+                (disp_min.1, disp_min.0),
+                (disp_max.1, disp_max.0),
+            ),
+        }
+    }
 }
 
 #[cfg(feature = "graphics")]
@@ -201,12 +206,9 @@ use embedded_graphics_core::{
     Pixel,
 };
 
-use super::DisplayConfig;
-
 #[cfg(feature = "graphics")]
 impl<DI, SIZE> DrawTarget for Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
 where
-    DI: WriteOnlyDataCommand,
     SIZE: DisplaySize,
 {
     type Color = BinaryColor;
@@ -237,7 +239,6 @@ where
 #[cfg(feature = "graphics")]
 impl<DI, SIZE> OriginDimensions for Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
 where
-    DI: WriteOnlyDataCommand,
     SIZE: DisplaySize,
 {
     fn size(&self) -> Size {

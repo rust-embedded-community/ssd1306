@@ -29,6 +29,7 @@
 - [#181](https://github.com/jamwaffles/ssd1306/pull/181) Update embedded-graphics-core dependency to 0.4
 - **(breaking)** [#185](https://github.com/jamwaffles/ssd1306/pull/185) The inherent `BufferedGraphicsMode::clear` has been renamed to `clear_buffer`.
 - [#185](https://github.com/jamwaffles/ssd1306/pull/185) Some methods no longer require `DI: WriteOnlyDataCommand`.
+- [#180](https://github.com/jamwaffles/ssd1306/pull/180) Some methods no longer require `DI: WriteOnlyDataCommand`.
 
 ## [0.7.1] - 2022-08-15
 

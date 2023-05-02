@@ -103,10 +103,12 @@
 #![deny(trivial_casts)]
 #![deny(trivial_numeric_casts)]
 #![deny(unsafe_code)]
-#![deny(unstable_features)]
+#![cfg_attr(not(feature = "async"), deny(unstable_features))]
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 #![deny(rustdoc::broken_intra_doc_links)]
+#![cfg_attr(feature = "async", allow(incomplete_features))]
+#![cfg_attr(feature = "async", feature(async_fn_in_trait, impl_trait_projections))]
 
 mod brightness;
 pub mod command;
@@ -119,12 +121,11 @@ pub mod size;
 #[doc(hidden)]
 pub mod test_helpers;
 
-use core::convert::Infallible;
-
 pub use crate::i2c_interface::I2CDisplayInterface;
 use crate::mode::BasicMode;
 use brightness::Brightness;
 use command::{AddrMode, Command, VcomhLevel};
+use core::convert::Infallible;
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 use embedded_hal::{delay::DelayUs, digital::OutputPin};
 use error::Error;
@@ -443,6 +444,140 @@ where
     }
 }
 
+#[cfg(feature = "async")]
+impl<DI, SIZE> Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
+where
+    DI: display_interface::AsyncWriteOnlyDataCommand,
+    SIZE: DisplaySize,
+{
+    async fn send_commands_async(&mut self, commands: &[Command]) -> Result<(), DisplayError> {
+        for command in commands {
+            command.send_async(&mut self.interface).await?;
+        }
+
+        Ok(())
+    }
+
+    /// Initialise the display in one of the available addressing modes.
+    pub async fn init_with_addr_mode_async(&mut self, mode: AddrMode) -> Result<(), DisplayError> {
+        self.send_commands_async(&self.init_commands(mode)).await?;
+        self.addr_mode = mode;
+
+        Ok(())
+    }
+
+    /// Change the addressing mode
+    pub async fn set_addr_mode_async(&mut self, mode: AddrMode) -> Result<(), DisplayError> {
+        self.send_commands_async(&[Command::AddressMode(mode)])
+            .await?;
+        self.addr_mode = mode;
+
+        Ok(())
+    }
+
+    /// Send the data to the display for drawing at the current position in the framebuffer
+    /// and advance the position accordingly. Cf. `set_draw_area` to modify the affected area by
+    /// this method.
+    ///
+    /// This method takes advantage of a bounding box for faster writes.
+    pub async fn bounded_draw_async(
+        &mut self,
+        buffer: &[u8],
+        disp_width: usize,
+        upper_left: (u8, u8),
+        lower_right: (u8, u8),
+    ) -> Result<(), DisplayError> {
+        Self::flush_buffer_chunks_async(
+            &mut self.interface,
+            buffer,
+            disp_width,
+            upper_left,
+            lower_right,
+        )
+        .await
+    }
+
+    /// Send a raw buffer to the display.
+    pub async fn draw_async(&mut self, buffer: &[u8]) -> Result<(), DisplayError> {
+        self.interface.send_data(U8(&buffer)).await
+    }
+
+    /// Set the display rotation.
+    pub async fn set_rotation_async(
+        &mut self,
+        rotation: DisplayRotation,
+    ) -> Result<(), DisplayError> {
+        self.send_commands_async(&self.rotation_commands(rotation))
+            .await?;
+        self.rotation = rotation;
+
+        Ok(())
+    }
+
+    /// Set mirror enabled/disabled.
+    pub async fn set_mirror_async(&mut self, mirror: bool) -> Result<(), DisplayError> {
+        self.send_commands_async(&self.mirror_commands(mirror))
+            .await
+    }
+
+    /// Change the display brightness.
+    pub async fn set_brightness_async(
+        &mut self,
+        brightness: Brightness,
+    ) -> Result<(), DisplayError> {
+        self.send_commands_async(&self.brightness_commands(brightness))
+            .await
+    }
+
+    /// Turn the display on or off. The display can be drawn to and retains all
+    /// of its memory even while off.
+    pub async fn set_display_on_async(&mut self, on: bool) -> Result<(), DisplayError> {
+        self.send_commands_async(&[Command::DisplayOn(on)]).await
+    }
+
+    /// Set the position in the framebuffer of the display limiting where any sent data should be
+    /// drawn. This method can be used for changing the affected area on the screen as well
+    /// as (re-)setting the start point of the next `draw` call.
+    pub async fn set_draw_area_async(
+        &mut self,
+        start: (u8, u8),
+        end: (u8, u8),
+    ) -> Result<(), DisplayError> {
+        self.send_commands_async(&self.draw_area_commands(start, end))
+            .await
+    }
+
+    /// Set the column address in the framebuffer of the display where any sent data should be
+    /// drawn.
+    pub async fn set_column_async(&mut self, column: u8) -> Result<(), DisplayError> {
+        self.send_commands_async(&[Command::ColStart(column)]).await
+    }
+
+    /// Set the page address (row 8px high) in the framebuffer of the display where any sent data
+    /// should be drawn.
+    ///
+    /// Note that the parameter is in pixels, but the page will be set to the start of the 8px
+    /// row which contains the passed-in row.
+    pub async fn set_row_async(&mut self, row: u8) -> Result<(), DisplayError> {
+        self.send_commands_async(&[Command::PageStart(row.into())])
+            .await
+    }
+
+    async fn flush_buffer_chunks_async(
+        interface: &mut DI,
+        buffer: &[u8],
+        disp_width: usize,
+        upper_left: (u8, u8),
+        lower_right: (u8, u8),
+    ) -> Result<(), DisplayError> {
+        for chunk in Self::buffer_chunks(buffer, disp_width, upper_left, lower_right) {
+            interface.send_data(U8(chunk)).await?;
+        }
+
+        Ok(())
+    }
+}
+
 // SPI-only reset
 impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE> {
     /// Reset the display.
@@ -468,5 +603,37 @@ impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE> {
         }
 
         inner_reset(rst, delay).map_err(Error::Pin)
+    }
+}
+
+#[cfg(feature = "async")]
+// SPI-only reset
+impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE> {
+    /// Reset the display.
+    pub async fn reset_async<RST, DELAY>(
+        &mut self,
+        rst: &mut RST,
+        delay: &mut DELAY,
+    ) -> Result<(), Error<Infallible, RST::Error>>
+    where
+        RST: OutputPin,
+        DELAY: embedded_hal_async::delay::DelayUs,
+    {
+        async fn inner_reset_async<RST, DELAY>(
+            rst: &mut RST,
+            delay: &mut DELAY,
+        ) -> Result<(), RST::Error>
+        where
+            RST: OutputPin,
+            DELAY: embedded_hal_async::delay::DelayUs,
+        {
+            rst.set_high()?;
+            delay.delay_ms(1).await;
+            rst.set_low()?;
+            delay.delay_ms(10).await;
+            rst.set_high()
+        }
+
+        inner_reset_async(rst, delay).await.map_err(Error::Pin)
     }
 }

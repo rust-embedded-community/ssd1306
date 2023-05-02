@@ -191,6 +191,20 @@ impl Command {
             Ok(())
         }
     }
+
+    /// Send command to SSD1306 asynchronously
+    #[cfg(feature = "async")]
+    pub async fn send_async<DI>(self, iface: &mut DI) -> Result<(), DisplayError>
+    where
+        DI: display_interface::AsyncWriteOnlyDataCommand,
+    {
+        if let Some((data, len)) = self.bytes() {
+            // Send command over the interface
+            iface.send_commands(U8(&data[0..len])).await
+        } else {
+            Ok(())
+        }
+    }
 }
 
 /// Horizontal Scroll Direction

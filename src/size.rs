@@ -38,7 +38,7 @@ pub trait DisplaySize {
     /// Vertical offset in pixels
     const OFFSETY: u8 = 0;
 
-    /// Size of framebuffer. Because the display is monocrome, this is
+    /// Size of framebuffer. Because the display is monochrome, this is
     /// width * height / 8
     type Buffer: AsMut<[u8]> + NewZeroed;
 

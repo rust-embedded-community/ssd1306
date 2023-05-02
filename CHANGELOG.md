@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- [#177](https://github.com/jamwaffles/ssd1306/pull/177) Fixed a few spelling mistakes.
+
 ### Changed
 
 - **(breaking)** [#175](https://github.com/jamwaffles/ssd1306/pull/175) Increased MSRV to 1.57.0
@@ -15,7 +19,7 @@
 ### Added
 
 - [#161](https://github.com/jamwaffles/ssd1306/pull/161) Added a `set_mirror` method to enable or disable display mirroring.
-- [#166](https://github.com/jamwaffles/ssd1306/pull/166) Added `DisplaySize` configuration for 64x32 displays
+- [#166](https://github.com/jamwaffles/ssd1306/pull/166) Added `DisplaySize` configuration for 64x32 displays.
 
 ## [0.7.0] - 2021-07-08
 

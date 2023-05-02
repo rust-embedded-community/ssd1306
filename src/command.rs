@@ -63,7 +63,7 @@ pub enum Command {
     StartLine(u8),
     /// Reverse columns from 127-0
     SegmentRemap(bool),
-    /// Set multipex ratio from 15-63 (MUX-1)
+    /// Set multiplex ratio from 15-63 (MUX-1)
     Multiplex(u8),
     /// Scan from COM[n-1] to COM0 (where N is mux ratio)
     ReverseComDir(bool),

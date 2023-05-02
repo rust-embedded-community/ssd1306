@@ -343,12 +343,6 @@ where
 
     /// Change the display brightness.
     pub fn set_brightness(&mut self, brightness: Brightness) -> Result<(), DisplayError> {
-        // Should be moved to Brightness::new once conditions can be used in const functions
-        debug_assert!(
-            0 < brightness.precharge && brightness.precharge <= 15,
-            "Precharge value must be between 1 and 15"
-        );
-
         Command::PreChargePeriod(1, brightness.precharge).send(&mut self.interface)?;
         Command::Contrast(brightness.contrast).send(&mut self.interface)
     }

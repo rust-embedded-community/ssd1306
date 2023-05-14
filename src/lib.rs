@@ -126,7 +126,6 @@ use crate::mode::BasicMode;
 use brightness::Brightness;
 use command::{AddrMode, Command, VcomhLevel};
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
-use display_interface_spi::{SPIInterface, SPIInterfaceNoCS};
 use embedded_hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 use error::Error;
 use mode::{BufferedGraphicsMode, TerminalMode};
@@ -412,7 +411,7 @@ where
 }
 
 // SPI-only reset
-impl<SPI, DC, SIZE, MODE> Ssd1306<SPIInterfaceNoCS<SPI, DC>, SIZE, MODE> {
+impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE> {
     /// Reset the display.
     pub fn reset<RST, DELAY>(
         &mut self,
@@ -423,34 +422,18 @@ impl<SPI, DC, SIZE, MODE> Ssd1306<SPIInterfaceNoCS<SPI, DC>, SIZE, MODE> {
         RST: OutputPin,
         DELAY: DelayMs<u8>,
     {
+        fn inner_reset<RST, DELAY>(rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
+        where
+            RST: OutputPin,
+            DELAY: DelayMs<u8>,
+        {
+            rst.set_high()?;
+            delay.delay_ms(1);
+            rst.set_low()?;
+            delay.delay_ms(10);
+            rst.set_high()
+        }
+
         inner_reset(rst, delay).map_err(Error::Pin)
     }
-}
-
-// SPI-only reset
-impl<SPI, DC, CS, SIZE, MODE> Ssd1306<SPIInterface<SPI, DC, CS>, SIZE, MODE> {
-    /// Reset the display.
-    pub fn reset<RST, DELAY>(
-        &mut self,
-        rst: &mut RST,
-        delay: &mut DELAY,
-    ) -> Result<(), Error<Infallible, RST::Error>>
-    where
-        RST: OutputPin,
-        DELAY: DelayMs<u8>,
-    {
-        inner_reset(rst, delay).map_err(Error::Pin)
-    }
-}
-
-fn inner_reset<RST, DELAY>(rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
-where
-    RST: OutputPin,
-    DELAY: DelayMs<u8>,
-{
-    rst.set_high()?;
-    delay.delay_ms(1);
-    rst.set_low()?;
-    delay.delay_ms(10);
-    rst.set_high()
 }

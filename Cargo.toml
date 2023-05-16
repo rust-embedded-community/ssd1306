@@ -11,7 +11,7 @@ repository = "https://github.com/jamwaffles/ssd1306"
 version = "0.7.1"
 edition = "2018"
 exclude = [ "build.rs", "build.sh", "memory.x", "doc", "*.jpg", "*.png", "*.bmp" ]
-rust-version = "1.57"
+rust-version = "1.61"
 
 [badges]
 circle-ci = { repository = "jamwaffles/ssd1306", branch = "master" }
@@ -28,16 +28,16 @@ embedded-graphics-core = { version = "0.4.0", optional = true }
 
 [dev-dependencies]
 cortex-m = "0.7.2"
-cortex-m-rt = "0.6.14"
-cortex-m-rtic = "0.5.6"
+cortex-m-rt = "0.7.3"
+cortex-m-rtic = "1.1.4"
 panic-halt = "0.2.0"
 cast = { version = "0.2.6", default-features = false }
 # Used to load BMP images in various examples
-tinybmp = { version = "0.4.0", git = "https://github.com/embedded-graphics/tinybmp.git" }
+tinybmp = "0.5.0"
 embedded-graphics = "0.8.0"
 # Used by the noise_i2c examples
 rand = { version = "0.8.4", default-features = false, features = [ "small_rng" ] }
-stm32f1xx-hal = { version = "0.7.0", features = [ "rt", "stm32f103" ] }
+stm32f1xx-hal = { version = "0.10.0", features = [ "rt", "stm32f103" ] }
 
 [features]
 default = ["graphics"]

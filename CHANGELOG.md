@@ -16,7 +16,7 @@
 
 ### Changed
 
-- **(breaking)** [#175](https://github.com/jamwaffles/ssd1306/pull/175) Increased MSRV to 1.57.0
+- **(breaking)** [#184](https://github.com/jamwaffles/ssd1306/pull/184) Increased MSRV to 1.61.0
 - **(breaking)** [#179](https://github.com/jamwaffles/ssd1306/pull/179) Changed `Ssd1306::reset` signature.
 - [#181](https://github.com/jamwaffles/ssd1306/pull/181) Update embedded-graphics-core dependency to 0.4
 

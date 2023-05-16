@@ -77,7 +77,7 @@ where
 
     /// Initialise and clear the display in graphics mode.
     fn init(&mut self) -> Result<(), DisplayError> {
-        self.clear();
+        self.clear_impl(false);
         self.init_with_addr_mode(AddrMode::Horizontal)
     }
 }
@@ -88,6 +88,7 @@ where
     SIZE: DisplaySize,
 {
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
+    #[cfg(not(feature = "graphics"))]
     pub fn clear(&mut self) {
         self.clear_impl(false);
     }

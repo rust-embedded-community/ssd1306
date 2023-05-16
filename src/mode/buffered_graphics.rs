@@ -40,6 +40,25 @@ where
             max_y: 0,
         }
     }
+
+    /// Updates the value of a single pixel without bounds-checking the coordinates.
+    fn update_pixel(&mut self, x: u32, y: u32, value: bool) {
+        let idx = ((y as usize) / 8 * SIZE::WIDTH as usize) + (x as usize);
+        let bit = y % 8;
+
+        if let Some(byte) = self.buffer.as_mut().get_mut(idx) {
+            // Keep track of max and min values
+            self.min_x = self.min_x.min(x as u8);
+            self.max_x = self.max_x.max(x as u8);
+
+            self.min_y = self.min_y.min(y as u8);
+            self.max_y = self.max_y.max(y as u8);
+
+            // Set pixel value in byte
+            // Ref this comment https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit#comment46654671_47990
+            *byte = *byte & !(1 << bit) | ((value as u8) << bit)
+        }
+    }
 }
 
 impl<DI, SIZE> DisplayConfig for Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
@@ -161,45 +180,27 @@ where
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, value: bool) {
-        let value = value as u8;
-        let rotation = self.rotation;
+        let (width, height) = self.dimensions();
 
-        let (idx, bit) = match rotation {
+        if x > width as u32 || y > height as u32 {
+            return;
+        }
+
+        match self.rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                let idx = ((y as usize) / 8 * SIZE::WIDTH as usize) + (x as usize);
-                let bit = y % 8;
-
-                (idx, bit)
+                self.mode.update_pixel(x, y, value)
             }
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                let idx = ((x as usize) / 8 * SIZE::WIDTH as usize) + (y as usize);
-                let bit = x % 8;
-
-                (idx, bit)
+                self.mode.update_pixel(y, x, value)
             }
-        };
-
-        if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
-            // Keep track of max and min values
-            self.mode.min_x = self.mode.min_x.min(x as u8);
-            self.mode.max_x = self.mode.max_x.max(x as u8);
-
-            self.mode.min_y = self.mode.min_y.min(y as u8);
-            self.mode.max_y = self.mode.max_y.max(y as u8);
-
-            // Set pixel value in byte
-            // Ref this comment https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit#comment46654671_47990
-            *byte = *byte & !(1 << bit) | (value << bit)
         }
     }
 }
 
+use embedded_graphics_core::prelude::Dimensions;
 #[cfg(feature = "graphics")]
 use embedded_graphics_core::{
-    draw_target::DrawTarget,
-    geometry::Size,
-    geometry::{Dimensions, OriginDimensions},
-    pixelcolor::BinaryColor,
+    draw_target::DrawTarget, geometry::OriginDimensions, geometry::Size, pixelcolor::BinaryColor,
     Pixel,
 };
 
@@ -220,12 +221,24 @@ where
     {
         let bb = self.bounding_box();
 
-        pixels
+        let pixels = pixels
             .into_iter()
-            .filter(|Pixel(pos, _color)| bb.contains(*pos))
-            .for_each(|Pixel(pos, color)| {
-                self.set_pixel(pos.x as u32, pos.y as u32, color.is_on())
-            });
+            .filter(|Pixel(pos, _color)| bb.contains(*pos));
+
+        match self.rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                pixels.for_each(|Pixel(pos, color)| {
+                    self.mode
+                        .update_pixel(pos.x as u32, pos.y as u32, color.is_on())
+                });
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                pixels.for_each(|Pixel(pos, color)| {
+                    self.mode
+                        .update_pixel(pos.y as u32, pos.x as u32, color.is_on())
+                });
+            }
+        }
 
         Ok(())
     }

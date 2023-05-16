@@ -13,6 +13,7 @@
 ### Fixed
 
 - [#177](https://github.com/jamwaffles/ssd1306/pull/177) Fixed a few spelling mistakes.
+- [#??](https://github.com/jamwaffles/ssd1306/pull/??) Fixed `BufferedGraphicsMode::set_pixel` bounds checking.
 
 ### Changed
 

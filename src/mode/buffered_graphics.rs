@@ -70,8 +70,12 @@ where
 {
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
+        self.clear_impl(false);
+    }
+
+    fn clear_impl(&mut self, value: bool) {
         for b in self.mode.buffer.as_mut() {
-            *b = 0;
+            *b = value as u8;
         }
 
         let (width, height) = self.dimensions();
@@ -223,6 +227,11 @@ where
                 self.set_pixel(pos.x as u32, pos.y as u32, color.is_on())
             });
 
+        Ok(())
+    }
+
+    fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
+        self.clear_impl(color.is_on());
         Ok(())
     }
 }

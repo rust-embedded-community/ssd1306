@@ -33,7 +33,7 @@ cortex-m-rtic = "0.5.6"
 panic-halt = "0.2.0"
 cast = { version = "0.2.6", default-features = false }
 # Used to load BMP images in various examples
-tinybmp = "0.3.1"
+tinybmp = { version = "0.4.0", git = "https://github.com/embedded-graphics/tinybmp.git" }
 embedded-graphics = "0.8.0"
 # Used by the noise_i2c examples
 rand = { version = "0.8.4", default-features = false, features = [ "small_rng" ] }

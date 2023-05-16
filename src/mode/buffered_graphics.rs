@@ -68,18 +68,19 @@ where
     DI: WriteOnlyDataCommand,
     SIZE: DisplaySize,
 {
-    /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
-    #[cfg(not(feature = "graphics"))]
-    pub fn clear(&mut self) {
-        for b in self.mode.buffer.as_mut() {
-            *b = 0;
-        }
+    fn clear_impl(&mut self, value: bool) {
+        self.mode.buffer.as_mut().fill(value as u8);
 
         let (width, height) = self.dimensions();
         self.mode.min_x = 0;
         self.mode.max_x = width - 1;
         self.mode.min_y = 0;
         self.mode.max_y = height - 1;
+    }
+
+    /// Clear the underlying framebuffer. You need to call `disp.flush()` for any effect on the screen.
+    pub fn clear_buffer(&mut self) {
+        self.clear_impl(false);
     }
 
     /// Write out data to a display.
@@ -224,6 +225,11 @@ where
                 self.set_pixel(pos.x as u32, pos.y as u32, color.is_on())
             });
 
+        Ok(())
+    }
+
+    fn clear(&mut self, color: Self::Color) -> Result<(), Self::Error> {
+        self.clear_impl(color.is_on());
         Ok(())
     }
 }

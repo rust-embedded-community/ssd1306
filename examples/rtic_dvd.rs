@@ -7,81 +7,83 @@
 #![no_std]
 #![no_main]
 
-use display_interface_spi::SPIInterfaceNoCS;
-use embedded_graphics::{
-    geometry::Point,
-    image::Image,
-    pixelcolor::{BinaryColor, Rgb565},
-    prelude::*,
-    primitives::{PrimitiveStyle, Rectangle},
-};
-use panic_halt as _;
-use rtic::app;
-use ssd1306::{mode::BufferedGraphicsMode, prelude::*, Ssd1306};
-use stm32f1xx_hal::{
-    delay::Delay,
-    gpio,
-    pac::{self, SPI1},
-    prelude::*,
-    spi::{self, Mode, Phase, Polarity, Spi},
-    timer::{CountDownTimer, Event, Timer},
-};
-use tinybmp::Bmp;
+#[rtic::app(device = stm32f1xx_hal::pac, peripherals = true, dispatchers = [EXTI0])]
+mod app {
+    use display_interface_spi::SPIInterfaceNoCS;
+    use embedded_graphics::{
+        geometry::Point,
+        image::Image,
+        pixelcolor::{BinaryColor, Rgb565},
+        prelude::*,
+        primitives::{PrimitiveStyle, Rectangle},
+    };
+    use panic_halt as _;
+    use ssd1306::{mode::BufferedGraphicsMode, prelude::*, Ssd1306};
+    use stm32f1xx_hal::{
+        gpio,
+        pac::{self, SPI1},
+        prelude::*,
+        spi::{self, Mode, Phase, Polarity, Spi},
+        timer::{CounterMs, Event, Timer},
+    };
+    use tinybmp::Bmp;
 
-type Display = Ssd1306<
-    SPIInterfaceNoCS<
-        spi::Spi<
-            SPI1,
-            spi::Spi1NoRemap,
-            (
-                gpio::gpioa::PA5<gpio::Alternate<gpio::PushPull>>,
-                gpio::gpioa::PA6<gpio::Input<gpio::Floating>>,
-                gpio::gpioa::PA7<gpio::Alternate<gpio::PushPull>>,
-            ),
-            u8,
+    type Display = Ssd1306<
+        SPIInterfaceNoCS<
+            spi::Spi<
+                SPI1,
+                spi::Spi1NoRemap,
+                (
+                    gpio::gpioa::PA5<gpio::Alternate<gpio::PushPull>>,
+                    gpio::gpioa::PA6<gpio::Input<gpio::Floating>>,
+                    gpio::gpioa::PA7<gpio::Alternate<gpio::PushPull>>,
+                ),
+                u8,
+            >,
+            gpio::gpiob::PB1<gpio::Output<gpio::PushPull>>,
         >,
-        gpio::gpiob::PB1<gpio::Output<gpio::PushPull>>,
-    >,
-    DisplaySize128x64,
-    BufferedGraphicsMode<DisplaySize128x64>,
->;
+        DisplaySize128x64,
+        BufferedGraphicsMode<DisplaySize128x64>,
+    >;
 
-#[app(device = stm32f1xx_hal::pac, peripherals = true)]
-const APP: () = {
+    #[shared]
+    struct SharedResources {}
+
+    #[local]
     struct Resources {
         display: Display,
-        timer: CountDownTimer<pac::TIM1>,
+        timer: CounterMs<pac::TIM1>,
         top_left: Point,
         velocity: Point,
         bmp: Bmp<Rgb565, 'static>,
     }
 
     #[init]
-    fn init(cx: init::Context) -> init::LateResources {
+    fn init(cx: init::Context) -> (SharedResources, Resources, init::Monotonics) {
         let dp = cx.device;
         let core = cx.core;
 
         let mut flash = dp.FLASH.constrain();
-        let mut rcc = dp.RCC.constrain();
+        let rcc = dp.RCC.constrain();
 
         let clocks = rcc
             .cfgr
-            .use_hse(8.mhz())
-            .sysclk(72.mhz())
-            .pclk1(36.mhz())
+            .use_hse(8.MHz())
+            .sysclk(72.MHz())
+            .pclk1(36.MHz())
             .freeze(&mut flash.acr);
 
-        let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
+        let mut afio = dp.AFIO.constrain();
 
-        let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
-        let mut gpioa = dp.GPIOA.split(&mut rcc.apb2);
+        let mut gpiob = dp.GPIOB.split();
+        let mut gpioa = dp.GPIOA.split();
 
         // SPI1
         let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
         let miso = gpioa.pa6;
         let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
 
-        let mut delay = Delay::new(core.SYST, clocks);
+        let mut delay = Timer::syst(core.SYST, &clocks).delay();
 
         let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
         let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
@@ -94,9 +96,8 @@ const APP: () = {
                 polarity: Polarity::IdleLow,
                 phase: Phase::CaptureOnFirstTransition,
             },
-            8.mhz(),
+            8.MHz(),
             clocks,
-            &mut rcc.apb2,
         );
 
         let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
@@ -107,34 +108,37 @@ const APP: () = {
         display.init().unwrap();
 
         // Update framerate
-        let fps = 20;
-
-        let mut timer = Timer::tim1(dp.TIM1, &clocks, &mut rcc.apb2).start_count_down(fps.hz());
+        let mut timer = dp.TIM1.counter_ms(&clocks);
+        timer.start(50.millis()).unwrap(); // 20 FPS
 
         timer.listen(Event::Update);
 
         let bmp = Bmp::from_slice(include_bytes!("dvd.bmp")).unwrap();
 
         // Init the static resources to use them later through RTIC
-        init::LateResources {
-            timer,
-            display,
-            top_left: Point::new(5, 3),
-            velocity: Point::new(1, 1),
-            bmp,
-        }
+        (
+            SharedResources {},
+            Resources {
+                timer,
+                display,
+                top_left: Point::new(5, 3),
+                velocity: Point::new(1, 1),
+                bmp,
+            },
+            init::Monotonics(),
+        )
     }
 
-    #[task(binds = TIM1_UP, resources = [display, top_left, velocity, timer, bmp])]
+    #[task(binds = TIM1_UP, local = [display, top_left, velocity, timer, bmp])]
     fn update(cx: update::Context) {
-        let update::Resources {
+        let update::LocalResources {
             display,
             top_left,
             velocity,
             timer,
             bmp,
             ..
-        } = cx.resources;
+        } = cx.local;
 
         let bottom_right = *top_left + bmp.bounding_box().size;
 
@@ -167,10 +171,6 @@ const APP: () = {
         display.flush().unwrap();
 
         // Clears the update flag
-        timer.clear_update_interrupt_flag();
+        timer.clear_interrupt(Event::Update);
     }
-
-    extern "C" {
-        fn EXTI0();
-    }
-};
+}

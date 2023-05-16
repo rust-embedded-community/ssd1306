@@ -25,10 +25,10 @@ use cortex_m_rt::{entry, exception, ExceptionFrame};
 use panic_halt as _;
 use ssd1306::{prelude::*, Ssd1306};
 use stm32f1xx_hal::{
-    delay::Delay,
     prelude::*,
     spi::{Mode, Phase, Polarity, Spi},
     stm32,
+    timer::Timer,
 };
 
 #[entry]
@@ -37,21 +37,21 @@ fn main() -> ! {
     let dp = stm32::Peripherals::take().unwrap();
 
     let mut flash = dp.FLASH.constrain();
-    let mut rcc = dp.RCC.constrain();
+    let rcc = dp.RCC.constrain();
 
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
-    let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
+    let mut afio = dp.AFIO.constrain();
 
-    let mut gpioa = dp.GPIOA.split(&mut rcc.apb2);
-    let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
+    let mut gpioa = dp.GPIOA.split();
+    let mut gpiob = dp.GPIOB.split();
 
     // SPI1
     let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
     let miso = gpioa.pa6;
     let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
 
-    let mut delay = Delay::new(cp.SYST, clocks);
+    let mut delay = Timer::syst(cp.SYST, &clocks).delay();
 
     let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
     let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
@@ -64,9 +64,8 @@ fn main() -> ! {
             polarity: Polarity::IdleLow,
             phase: Phase::CaptureOnFirstTransition,
         },
-        8.mhz(),
+        8.MHz(),
         clocks,
-        &mut rcc.apb2,
     );
 
     let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
@@ -106,6 +105,6 @@ fn main() -> ! {
 }
 
 #[exception]
-fn HardFault(ef: &ExceptionFrame) -> ! {
+unsafe fn HardFault(ef: &ExceptionFrame) -> ! {
     panic!("{:#?}", ef);
 }

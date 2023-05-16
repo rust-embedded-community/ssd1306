@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#183](https://github.com/jamwaffles/ssd1306/pull/183) `Brightness::custom()` is now publicly available.
+
 ### Fixed
 
 - [#177](https://github.com/jamwaffles/ssd1306/pull/177) Fixed a few spelling mistakes.

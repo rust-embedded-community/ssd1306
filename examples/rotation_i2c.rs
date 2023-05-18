@@ -42,13 +42,13 @@ fn main() -> ! {
     let dp = stm32::Peripherals::take().unwrap();
 
     let mut flash = dp.FLASH.constrain();
-    let mut rcc = dp.RCC.constrain();
+    let rcc = dp.RCC.constrain();
 
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
-    let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
+    let mut afio = dp.AFIO.constrain();
 
-    let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
+    let mut gpiob = dp.GPIOB.split();
 
     let scl = gpiob.pb8.into_alternate_open_drain(&mut gpiob.crh);
     let sda = gpiob.pb9.into_alternate_open_drain(&mut gpiob.crh);
@@ -58,11 +58,10 @@ fn main() -> ! {
         (scl, sda),
         &mut afio.mapr,
         Mode::Fast {
-            frequency: 400_000.hz(),
+            frequency: 400_000.Hz(),
             duty_cycle: DutyCycle::Ratio2to1,
         },
         clocks,
-        &mut rcc.apb1,
         1000,
         10,
         1000,
@@ -95,6 +94,6 @@ fn main() -> ! {
 }
 
 #[exception]
-fn HardFault(ef: &ExceptionFrame) -> ! {
+unsafe fn HardFault(ef: &ExceptionFrame) -> ! {
     panic!("{:#?}", ef);
 }

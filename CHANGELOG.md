@@ -19,7 +19,8 @@
 - **(breaking)** [#184](https://github.com/jamwaffles/ssd1306/pull/184) Increased MSRV to 1.61.0
 - **(breaking)** [#179](https://github.com/jamwaffles/ssd1306/pull/179) Changed `Ssd1306::reset` signature.
 - [#181](https://github.com/jamwaffles/ssd1306/pull/181) Update embedded-graphics-core dependency to 0.4
-- **(breaking)** [#18?](https://github.com/jamwaffles/ssd1306/pull/18?) The inherent `BufferedGraphicsMode::clear` has been renamed to `clear_buffer`.
+- **(breaking)** [#185](https://github.com/jamwaffles/ssd1306/pull/185) The inherent `BufferedGraphicsMode::clear` has been renamed to `clear_buffer`.
+- [#185](https://github.com/jamwaffles/ssd1306/pull/185) Some methods no longer require `DI: WriteOnlyDataCommand`.
 
 ## [0.7.1] - 2022-08-15
 

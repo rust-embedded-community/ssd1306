@@ -107,8 +107,11 @@
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 #![deny(rustdoc::broken_intra_doc_links)]
-#![cfg_attr(feature = "async", allow(incomplete_features))]
-#![cfg_attr(feature = "async", feature(async_fn_in_trait, impl_trait_projections))]
+#![cfg_attr(
+    all(feature = "async", feature = "nightly"),
+    allow(incomplete_features),
+    feature(async_fn_in_trait, impl_trait_projections)
+)]
 
 mod brightness;
 pub mod command;

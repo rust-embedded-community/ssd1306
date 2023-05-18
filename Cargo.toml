@@ -41,9 +41,10 @@ rand = { version = "0.8.4", default-features = false, features = [ "small_rng" ]
 stm32f1xx-hal = { version = "0.10.0", features = [ "rt", "stm32f103" ] }
 
 [features]
-default = ["graphics", "async"]
+default = ["graphics"]
 graphics = ["embedded-graphics-core"]
 async = ["display-interface-spi/async", "display-interface/async", "embedded-hal-async"]
+nightly = ["display-interface-spi/nightly"]
 
 [profile.dev]
 codegen-units = 1

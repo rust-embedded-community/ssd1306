@@ -8,7 +8,6 @@ use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 
 /// Commands
 #[derive(Debug, Copy, Clone)]
-#[allow(dead_code)]
 pub enum Command {
     /// Set contrast. Higher number is higher contrast. Default = 0x7F
     Contrast(u8),

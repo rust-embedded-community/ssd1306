@@ -383,6 +383,11 @@ where
         Command::PageStart(row.into()).send(&mut self.interface)
     }
 
+    /// Set the screen pixel on/off inversion
+    pub fn set_invert(&mut self, invert: bool) -> Result<(), DisplayError> {
+        Command::Invert(invert).send(&mut self.interface)
+    }
+
     fn flush_buffer_chunks(
         interface: &mut DI,
         buffer: &[u8],

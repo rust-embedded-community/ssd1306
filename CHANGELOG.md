@@ -6,6 +6,8 @@
 
 ## [Unreleased] - ReleaseDate
 
+## [0.8.1] - 2023-08-18
+
 ### Added
 
 - [#190](https://github.com/jamwaffles/ssd1306/pull/190) Added `Ssd1306::set_invert` to invert the screen pixels
@@ -193,7 +195,8 @@
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.8.0...HEAD
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.8.1...HEAD
+[0.8.1]: https://github.com/jamwaffles/ssd1306/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/jamwaffles/ssd1306/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/jamwaffles/ssd1306/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/jamwaffles/ssd1306/compare/v0.6.0...v0.7.0

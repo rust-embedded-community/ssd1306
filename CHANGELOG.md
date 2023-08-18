@@ -6,6 +6,10 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#190](https://github.com/jamwaffles/ssd1306/pull/190) Added `Ssd1306::set_invert` to invert the screen pixels
+
 ## [0.8.0] - 2023-06-01
 
 ### Added

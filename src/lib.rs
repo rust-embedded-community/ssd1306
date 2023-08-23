@@ -432,7 +432,7 @@ where
 
     /// Set the screen pixel on/off inversion
     pub fn set_invert(&mut self, invert: bool) -> Result<(), DisplayError> {
-        Command::Invert(invert).send(&mut self.interface)
+        self.send_commands(&[Command::Invert(invert)])
     }
 
     fn flush_buffer_chunks(
@@ -564,6 +564,11 @@ where
     pub async fn set_row_async(&mut self, row: u8) -> Result<(), DisplayError> {
         self.send_commands_async(&[Command::PageStart(row.into())])
             .await
+    }
+
+    /// Set the screen pixel on/off inversion
+    pub async fn set_invert_async(&mut self, invert: bool) -> Result<(), DisplayError> {
+        self.send_commands_async(&[Command::Invert(invert)]).await
     }
 
     async fn flush_buffer_chunks_async(

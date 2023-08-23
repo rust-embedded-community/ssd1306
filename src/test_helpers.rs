@@ -16,18 +16,6 @@ impl spi::ErrorType for SpiStub {
     type Error = Infallible;
 }
 
-impl spi::SpiDeviceWrite<u8> for SpiStub {
-    fn write_transaction(&mut self, _operations: &[&[u8]]) -> Result<(), Self::Error> {
-        todo!()
-    }
-}
-
-impl spi::SpiDeviceRead<u8> for SpiStub {
-    fn read_transaction(&mut self, _operations: &mut [&mut [u8]]) -> Result<(), Self::Error> {
-        todo!()
-    }
-}
-
 impl spi::SpiDevice<u8> for SpiStub {
     fn transaction(
         &mut self,

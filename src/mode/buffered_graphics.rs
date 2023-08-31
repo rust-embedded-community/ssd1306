@@ -190,8 +190,8 @@ where
     pub fn set_pixel(&mut self, x: u32, y: u32, value: bool) {
         let value = value as u8;
         let (idx, bit) = self.pixel_location(x,y);
+        self.track_change(x,y);
         if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
-            self.track_change(x,y);
             *byte = *byte & !(1 << bit) | (value << bit) // Set pixel value in byte
             // Ref this comment https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit#comment46654671_47990
         }
@@ -199,8 +199,8 @@ where
 
     pub fn toggle_pixel(&mut self, x: u32, y: u32) {
         let (idx, bit) = self.pixel_location(x,y);
+        self.track_change(x,y);
         if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
-            self.track_change(x,y);
             *byte = *byte ^ !(1 << bit) // toggle pixel in byte
         }
     }

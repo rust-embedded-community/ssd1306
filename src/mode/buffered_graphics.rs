@@ -157,7 +157,7 @@ where
     }
 
     fn pixel_location(&self, x: u32, y: u32) -> (usize, u32) {
-        match rotation {
+        match self.rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
                 let idx = ((y as usize) / 8 * SIZE::WIDTH as usize) + (x as usize);
                 let bit = y % 8;
@@ -182,8 +182,6 @@ where
     /// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, value: bool) {
         let value = value as u8;
-        let rotation = self.rotation;
-
         let (idx, bit) = self.pixel_location(x,y);
 
         if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {

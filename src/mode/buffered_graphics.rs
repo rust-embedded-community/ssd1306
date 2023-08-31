@@ -201,7 +201,7 @@ where
         let (idx, bit) = self.pixel_location(x,y);
         self.track_change(x,y);
         if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
-            *byte = *byte ^ !(1 << bit) // toggle pixel in byte
+            *byte = *byte ^ (1 << bit) // toggle pixel in byte
         }
     }
 }

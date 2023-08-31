@@ -175,7 +175,7 @@ where
 
     pub fn get_pixel(&self, x: u32, y: u32) -> Option<bool> {
         let (idx, bit) = self.pixel_location(x,y);
-        self.mode.buffer.as_mut().get(idx).map(|byte| byte & !(1 << bit) != 0)
+        self.mode.buffer.get(idx).map(|byte| byte & !(1 << bit) != 0)
     }
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y

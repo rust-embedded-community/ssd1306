@@ -182,7 +182,7 @@ where
 
     pub fn get_pixel(&mut self, x: u32, y: u32) -> Option<bool> {
         let (idx, bit) = self.pixel_location(x,y);
-        self.mode.buffer.as_mut().get(idx).map(|byte| byte & !(1 << bit) != 0)
+        self.mode.buffer.as_mut().get(idx).map(|byte| byte & (1 << bit) != 0)
     }
 
     /// Turn a pixel on or off. If the Y coordinate is out of bounds for the display, this method call is a noop.

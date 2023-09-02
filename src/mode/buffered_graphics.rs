@@ -178,7 +178,7 @@ where
     }
 
     pub fn get_pixel(&self, x: u32, y: u32) -> Option<bool> {
-        self.pixel_location(x, y).map(|(idx, bit)| {
+        self.pixel_location(x, y).and_then(|(idx, bit)| {
             self.mode
                 .buffer
                 .as_ref()

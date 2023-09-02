@@ -161,7 +161,7 @@ where
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (x, y),
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (y, x),
         };
-        if x_rotated >= SIZE::WIDTH || y_rotated >= SIZE::HEIGHT {
+        if x_rotated >= SIZE::WIDTH as u32 || y_rotated >= SIZE::HEIGHT as u32 {
             None
         } else {
             let idx = ((y_rotated as usize) / 8 * SIZE::WIDTH as usize) + (x_rotated as usize);

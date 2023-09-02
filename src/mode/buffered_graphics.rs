@@ -178,7 +178,7 @@ where
     }
 
     pub fn get_pixel(&self, x: u32, y: u32) -> Option<bool> {
-        self.pixel_location(x, y).map(|idx, bit| {
+        self.pixel_location(x, y).map(|(idx, bit)| {
             self.mode
                 .buffer
                 .as_ref()
@@ -189,7 +189,7 @@ where
 
     /// Turn a pixel on or off. If the coordinates are out of bounds for the display, this method call is a noop
     pub fn set_pixel(&mut self, x: u32, y: u32, value: bool) {
-        self.pixel_location(x, y).map(|idx, bit| {
+        self.pixel_location(x, y).map(|(idx, bit)| {
             self.track_change(x, y);
             if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
                 // Ref this comment https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit#comment46654671_47990
@@ -200,7 +200,7 @@ where
 
     /// Toggle a pixel to the opposite of it's current state. If the coordinates are out of bounds for the display, this method call is a noop
     pub fn toggle_pixel(&mut self, x: u32, y: u32) {
-        self.pixel_location(x, y).map(|idx, bit| {
+        self.pixel_location(x, y).map(|(idx, bit)| {
             self.track_change(x, y);
             if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
                 *byte = *byte ^ (1 << bit) // toggle pixel in byte

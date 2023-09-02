@@ -40,7 +40,7 @@ pub trait DisplaySize {
 
     /// Size of framebuffer. Because the display is monochrome, this is
     /// width * height / 8
-    type Buffer: AsMut<[u8]> + NewZeroed;
+    type Buffer: AsRef<[u8]> + AsMut<[u8]> + NewZeroed;
 
     /// Send resolution and model-dependent configuration to the display
     ///

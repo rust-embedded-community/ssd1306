@@ -195,7 +195,7 @@ where
                 // Ref this comment https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit#comment46654671_47990
                 *byte = *byte & !(1 << bit) | ((value as u8) << bit) // Set pixel value in byte
             }
-        })
+        });
     }
 
     /// Toggle a pixel to the opposite of it's current state. If the coordinates are out of bounds for the display, this method call is a noop
@@ -205,7 +205,7 @@ where
             if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
                 *byte = *byte ^ (1 << bit) // toggle pixel in byte
             }
-        })
+        });
     }
 }
 

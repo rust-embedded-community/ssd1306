@@ -156,20 +156,17 @@ where
         }
     }
 
-    fn pixel_location(&self, x: u32, y: u32) -> (usize, u32) {
-        match self.rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                let idx = ((y as usize) / 8 * SIZE::WIDTH as usize) + (x as usize);
-                let bit = y % 8;
-
-                (idx, bit)
-            }
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                let idx = ((x as usize) / 8 * SIZE::WIDTH as usize) + (y as usize);
-                let bit = x % 8;
-
-                (idx, bit)
-            }
+    fn pixel_location(&self, x: u32, y: u32) -> Option<(usize, u32)> {
+        let (x_rotated, y_rotated) = match self.rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (x, y),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (y, x),
+        };
+        if x_rotated >= SIZE::WIDTH || y_rotated >= SIZE::HEIGHT {
+            None
+        } else {
+            let idx = ((y_rotated as usize) / 8 * SIZE::WIDTH as usize) + (x_rotated as usize);
+            let bit = y_rotated % 8;
+            Some((idx, bit))
         }
     }
 
@@ -181,28 +178,34 @@ where
     }
 
     pub fn get_pixel(&self, x: u32, y: u32) -> Option<bool> {
-        let (idx, bit) = self.pixel_location(x,y);
-        self.mode.buffer.as_ref().get(idx).map(|byte| byte & (1 << bit) != 0)
+        self.pixel_location(x, y).map(|idx, bit| {
+            self.mode
+                .buffer
+                .as_ref()
+                .get(idx)
+                .map(|byte| byte & (1 << bit) != 0)
+        })
     }
 
-    /// Turn a pixel on or off. If the Y coordinate is out of bounds for the display, this method call is a noop.
-    /// If X is out of bounds, it will overflow into a different Y coordinate.
+    /// Turn a pixel on or off. If the coordinates are out of bounds for the display, this method call is a noop
     pub fn set_pixel(&mut self, x: u32, y: u32, value: bool) {
-        let value = value as u8;
-        let (idx, bit) = self.pixel_location(x,y);
-        self.track_change(x,y);
-        if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
-            *byte = *byte & !(1 << bit) | (value << bit) // Set pixel value in byte
-            // Ref this comment https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit#comment46654671_47990
-        }
+        self.pixel_location(x, y).map(|idx, bit| {
+            self.track_change(x, y);
+            if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
+                // Ref this comment https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit#comment46654671_47990
+                *byte = *byte & !(1 << bit) | ((value as u8) << bit) // Set pixel value in byte
+            }
+        })
     }
 
+    /// Toggle a pixel to the opposite of it's current state. If the coordinates are out of bounds for the display, this method call is a noop
     pub fn toggle_pixel(&mut self, x: u32, y: u32) {
-        let (idx, bit) = self.pixel_location(x,y);
-        self.track_change(x,y);
-        if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
-            *byte = *byte ^ (1 << bit) // toggle pixel in byte
-        }
+        self.pixel_location(x, y).map(|idx, bit| {
+            self.track_change(x, y);
+            if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
+                *byte = *byte ^ (1 << bit) // toggle pixel in byte
+            }
+        })
     }
 }
 

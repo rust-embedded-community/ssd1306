@@ -6,6 +6,13 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- [#195](https://github.com/jamwaffles/ssd1306/pull/195) Changed `BasicMode::clear` to clear page-by-page instead of
+  one big write. This drops RAM requirement by 1Kb and fixes issues on MCUs with less than 1Kb of RAM.
+- [#195](https://github.com/jamwaffles/ssd1306/pull/195) Changed `TerminalMode` to use lookup by ascii code instead of
+  per-character match when searching for glyph. This may save up to 3Kb of compiled code on AVR MCUs.
+
 ## [0.8.1] - 2023-08-18
 
 ### Added

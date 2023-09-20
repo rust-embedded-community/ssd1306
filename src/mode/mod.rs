@@ -31,11 +31,14 @@ where
 {
     /// Clear the display.
     pub fn clear(&mut self) -> Result<(), DisplayError> {
-        self.set_draw_area((0, 0), self.dimensions())?;
+        let dim = self.dimensions();
+        self.set_draw_area((0, 0), dim)?;
 
-        // TODO: If const generics allows this, replace `1024` with computed W x H value for current
-        // `SIZE`.
-        self.draw(&[0u8; 1024])
+        for _ in 0..dim.0 * dim.1 {
+            self.draw(&[0; 8])?;
+        }
+
+        Ok(())
     }
 }
 

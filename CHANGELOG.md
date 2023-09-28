@@ -7,6 +7,11 @@ SSD1306 monochrome OLED display.
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- [#197](https://github.com/jamwaffles/ssd1306/pull/197) Fixed terminal mode panic and wrapping
+  behaviour for rotated displays.
+
 ## [0.8.1] - 2023-08-18
 
 ### Added

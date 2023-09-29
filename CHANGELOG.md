@@ -7,6 +7,8 @@ SSD1306 monochrome OLED display.
 
 ## [Unreleased] - ReleaseDate
 
+## [0.8.2] - 2023-09-29
+
 ### Fixed
 
 - [#197](https://github.com/jamwaffles/ssd1306/pull/197) Fixed terminal mode panic and wrapping
@@ -250,8 +252,9 @@ SSD1306 monochrome OLED display.
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.8.2...HEAD
 
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.8.1...HEAD
+[0.8.2]: https://github.com/jamwaffles/ssd1306/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/jamwaffles/ssd1306/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/jamwaffles/ssd1306/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/jamwaffles/ssd1306/compare/v0.7.0...v0.7.1

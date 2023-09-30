@@ -37,7 +37,7 @@ where
         }
 
         let dim = self.dimensions();
-        self.set_draw_area((0, 0), dim).unwrap();
+        self.set_draw_area((0, 0), dim)?;
 
         let num_pixels = dim.0 as u16 * dim.1 as u16;
 

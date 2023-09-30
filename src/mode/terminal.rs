@@ -495,11 +495,9 @@ where
             [0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
         ];
 
-        let g = if ('!'..='~').contains(&input) {
-            CHARS[(input as u8 - b'!') as usize]
-        } else {
-            CHARS[CHARS.len() - 1]
-        };
+        let g = CHARS
+            .get((input as u8 - b'!') as usize)
+            .unwrap_or(&CHARS[CHARS.len() - 1]);
 
         [0, g[0], g[1], g[2], g[3], g[4], g[5], 0]
     }

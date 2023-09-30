@@ -195,21 +195,37 @@ pub enum VHScrollDir {
 #[derive(Debug, Clone, Copy)]
 pub enum Page {
     /// Page 0
-    Page0 = 0b000,
+    Page0 = 0b0000,
     /// Page 1
-    Page1 = 0b001,
+    Page1 = 0b0001,
     /// Page 2
-    Page2 = 0b010,
+    Page2 = 0b0010,
     /// Page 3
-    Page3 = 0b011,
+    Page3 = 0b0011,
     /// Page 4
-    Page4 = 0b100,
+    Page4 = 0b0100,
     /// Page 5
-    Page5 = 0b101,
+    Page5 = 0b0101,
     /// Page 6
-    Page6 = 0b110,
+    Page6 = 0b0110,
     /// Page 7
-    Page7 = 0b111,
+    Page7 = 0b0111,
+    /// Page 8
+    Page8 = 0b1000,
+    /// Page 9
+    Page9 = 0b1001,
+    /// Page 10
+    Page10 = 0b1010,
+    /// Page 11
+    Page11 = 0b1011,
+    /// Page 12
+    Page12 = 0b1100,
+    /// Page 13
+    Page13 = 0b1101,
+    /// Page 14
+    Page14 = 0b1110,
+    /// Page 15
+    Page15 = 0b1111,
 }
 
 impl From<u8> for Page {
@@ -223,6 +239,14 @@ impl From<u8> for Page {
             5 => Page::Page5,
             6 => Page::Page6,
             7 => Page::Page7,
+            8 => Page::Page8,
+            9 => Page::Page9,
+            10 => Page::Page10,
+            11 => Page::Page11,
+            12 => Page::Page12,
+            13 => Page::Page13,
+            14 => Page::Page14,
+            15 => Page::Page15,
             _ => panic!("Page too high"),
         }
     }

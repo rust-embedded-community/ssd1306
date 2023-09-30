@@ -197,8 +197,7 @@ where
         match c {
             '\n' => {
                 let CursorWrapEvent(new_line) = self.ensure_cursor()?.advance_line();
-                self.set_column(0)?;
-                self.set_row(new_line * 8)?;
+                self.set_position(0, new_line)?;
             }
             '\r' => {
                 self.set_column(0)?;

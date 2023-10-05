@@ -1,5 +1,5 @@
 //! Print "Hello world!" with "Hello rust!" underneath. Uses the `embedded_graphics` crate to draw
-//! the text with a 6x8 pixel font.
+//! the text with a 6x10 pixel font.
 //!
 //! This example is for the STM32F103 "Blue Pill" board using I2C1.
 //!

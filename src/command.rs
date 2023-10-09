@@ -95,14 +95,14 @@ impl Command {
     where
         DI: WriteOnlyDataCommand,
     {
-        // Transform command into a fixed size array of 7 u8 and the real length for sending
-        let (data, len) = match self {
-            Command::Contrast(val) => ([0x81, val, 0, 0, 0, 0, 0], 2),
-            Command::AllOn(on) => ([0xA4 | (on as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::Invert(inv) => ([0xA6 | (inv as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::DisplayOn(on) => ([0xAE | (on as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::HScrollSetup(dir, start, end, rate) => (
-                [
+        match self {
+            Command::Contrast(val) => Self::send_commands(iface, &[0x81, val]),
+            Command::AllOn(on) => Self::send_commands(iface, &[0xA4 | (on as u8)]),
+            Command::Invert(inv) => Self::send_commands(iface, &[0xA6 | (inv as u8)]),
+            Command::DisplayOn(on) => Self::send_commands(iface, &[0xAE | (on as u8)]),
+            Command::HScrollSetup(dir, start, end, rate) => Self::send_commands(
+                iface,
+                &[
                     0x26 | (dir as u8),
                     0,
                     start as u8,
@@ -111,72 +111,63 @@ impl Command {
                     0,
                     0xFF,
                 ],
-                7,
             ),
-            Command::VHScrollSetup(dir, start, end, rate, offset) => (
-                [
+            Command::VHScrollSetup(dir, start, end, rate, offset) => Self::send_commands(
+                iface,
+                &[
                     0x28 | (dir as u8),
                     0,
                     start as u8,
                     rate as u8,
                     end as u8,
                     offset,
-                    0,
                 ],
-                6,
             ),
-            Command::EnableScroll(en) => ([0x2E | (en as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::VScrollArea(above, lines) => ([0xA3, above, lines, 0, 0, 0, 0], 3),
-            Command::LowerColStart(addr) => ([0xF & addr, 0, 0, 0, 0, 0, 0], 1),
-            Command::UpperColStart(addr) => ([0x10 | (0xF & addr), 0, 0, 0, 0, 0, 0], 1),
-            Command::ColStart(addr) => ([0xF & addr, 0x10 | (0xF & (addr >> 4)), 0, 0, 0, 0, 0], 2),
-            Command::AddressMode(mode) => ([0x20, mode as u8, 0, 0, 0, 0, 0], 2),
-            Command::ColumnAddress(start, end) => ([0x21, start, end, 0, 0, 0, 0], 3),
-            Command::PageAddress(start, end) => ([0x22, start as u8, end as u8, 0, 0, 0, 0], 3),
-            Command::PageStart(page) => ([0xB0 | (page as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::StartLine(line) => ([0x40 | (0x3F & line), 0, 0, 0, 0, 0, 0], 1),
-            Command::SegmentRemap(remap) => ([0xA0 | (remap as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::Multiplex(ratio) => ([0xA8, ratio, 0, 0, 0, 0, 0], 2),
-            Command::ReverseComDir(rev) => ([0xC0 | ((rev as u8) << 3), 0, 0, 0, 0, 0, 0], 1),
-            Command::DisplayOffset(offset) => ([0xD3, offset, 0, 0, 0, 0, 0], 2),
-            Command::ComPinConfig(alt, lr) => (
-                [
-                    0xDA,
-                    0x2 | ((alt as u8) << 4) | ((lr as u8) << 5),
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                ],
-                2,
-            ),
-            Command::DisplayClockDiv(fosc, div) => {
-                ([0xD5, ((0xF & fosc) << 4) | (0xF & div), 0, 0, 0, 0, 0], 2)
+            Command::EnableScroll(en) => Self::send_commands(iface, &[0x2E | (en as u8)]),
+            Command::VScrollArea(above, lines) => Self::send_commands(iface, &[0xA3, above, lines]),
+            Command::LowerColStart(addr) => Self::send_commands(iface, &[0xF & addr]),
+            Command::UpperColStart(addr) => Self::send_commands(iface, &[0x10 | (0xF & addr)]),
+            Command::ColStart(addr) => {
+                Self::send_commands(iface, &[0xF & addr, 0x10 | (0xF & (addr >> 4))])
             }
-            Command::PreChargePeriod(phase1, phase2) => (
-                [0xD9, ((0xF & phase2) << 4) | (0xF & phase1), 0, 0, 0, 0, 0],
-                2,
-            ),
-            Command::VcomhDeselect(level) => ([0xDB, (level as u8) << 4, 0, 0, 0, 0, 0], 2),
-            Command::Noop => ([0xE3, 0, 0, 0, 0, 0, 0], 1),
-            Command::ChargePump(en) => ([0x8D, 0x10 | ((en as u8) << 2), 0, 0, 0, 0, 0], 2),
-            Command::InternalIref(en, current) => (
-                [
-                    0xAD,
-                    ((current as u8) << 5) | ((en as u8) << 4),
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                ],
-                2,
-            ),
-        };
+            Command::AddressMode(mode) => Self::send_commands(iface, &[0x20, mode as u8]),
+            Command::ColumnAddress(start, end) => Self::send_commands(iface, &[0x21, start, end]),
+            Command::PageAddress(start, end) => {
+                Self::send_commands(iface, &[0x22, start as u8, end as u8])
+            }
+            Command::PageStart(page) => Self::send_commands(iface, &[0xB0 | (page as u8)]),
+            Command::StartLine(line) => Self::send_commands(iface, &[0x40 | (0x3F & line)]),
+            Command::SegmentRemap(remap) => Self::send_commands(iface, &[0xA0 | (remap as u8)]),
+            Command::Multiplex(ratio) => Self::send_commands(iface, &[0xA8, ratio]),
+            Command::ReverseComDir(rev) => Self::send_commands(iface, &[0xC0 | ((rev as u8) << 3)]),
+            Command::DisplayOffset(offset) => Self::send_commands(iface, &[0xD3, offset]),
+            Command::ComPinConfig(alt, lr) => {
+                Self::send_commands(iface, &[0xDA, 0x2 | ((alt as u8) << 4) | ((lr as u8) << 5)])
+            }
+            Command::DisplayClockDiv(fosc, div) => {
+                Self::send_commands(iface, &[0xD5, ((0xF & fosc) << 4) | (0xF & div)])
+            }
+            Command::PreChargePeriod(phase1, phase2) => {
+                Self::send_commands(iface, &[0xD9, ((0xF & phase2) << 4) | (0xF & phase1)])
+            }
+            Command::VcomhDeselect(level) => {
+                Self::send_commands(iface, &[0xDB, (level as u8) << 4])
+            }
+            Command::Noop => Self::send_commands(iface, &[0xE3]),
+            Command::ChargePump(en) => {
+                Self::send_commands(iface, &[0x8D, 0x10 | ((en as u8) << 2)])
+            }
+            Command::InternalIref(en, current) => {
+                Self::send_commands(iface, &[0xAD, ((current as u8) << 5) | ((en as u8) << 4)])
+            }
+        }
+    }
 
-        // Send command over the interface
-        iface.send_commands(U8(&data[0..len]))
+    fn send_commands<DI>(iface: &mut DI, data: &[u8]) -> Result<(), DisplayError>
+    where
+        DI: WriteOnlyDataCommand,
+    {
+        iface.send_commands(U8(data))
     }
 }
 

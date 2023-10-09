@@ -31,11 +31,32 @@ where
 {
     /// Clear the display.
     pub fn clear(&mut self) -> Result<(), DisplayError> {
-        self.set_draw_area((0, 0), self.dimensions())?;
+        let old_addr_mode = self.addr_mode;
+        if old_addr_mode != AddrMode::Horizontal {
+            self.set_addr_mode(AddrMode::Horizontal)?;
+        }
 
-        // TODO: If const generics allows this, replace `1024` with computed W x H value for current
-        // `SIZE`.
-        self.draw(&[0u8; 1024])
+        let dim = self.dimensions();
+        self.set_draw_area((0, 0), dim)?;
+
+        let num_pixels = dim.0 as u16 * dim.1 as u16;
+
+        const BITS_PER_BYTE: u16 = 8;
+        const BYTES_PER_BATCH: u16 = 64;
+        const PIXELS_PER_BATCH: u16 = BITS_PER_BYTE * BYTES_PER_BATCH;
+
+        // Not all screens have number of pixels divisible by 512, so add 1 to cover tail
+        let num_batches = num_pixels / PIXELS_PER_BATCH + 1;
+
+        for _ in 0..num_batches {
+            self.draw(&[0; BYTES_PER_BATCH as usize])?;
+        }
+
+        if old_addr_mode != AddrMode::Horizontal {
+            self.set_addr_mode(old_addr_mode)?;
+        }
+
+        Ok(())
     }
 }
 

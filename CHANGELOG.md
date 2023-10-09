@@ -9,10 +9,12 @@ SSD1306 monochrome OLED display.
 
 ### Changed
 
-- [#195](https://github.com/jamwaffles/ssd1306/pull/195) Changed `BasicMode::clear` to clear in small batches instead of
-  one big write. This drops RAM requirement by ~900b and fixes issues on MCUs with less than 1Kb of RAM.
-- [#195](https://github.com/jamwaffles/ssd1306/pull/195) Changed `TerminalMode` to use lookup by ASCII code instead of
-  per-character match when searching for glyph. This may save up to 3.5Kb of compiled code on AVR MCUs.
+- [#195](https://github.com/jamwaffles/ssd1306/pull/195) Changed `BasicMode::clear` to clear in
+  small batches instead of one big write. This drops RAM requirement by ~900b and fixes issues on
+  MCUs with less than 1Kb of RAM.
+- [#195](https://github.com/jamwaffles/ssd1306/pull/195) Changed `TerminalMode` to use lookup by
+  ASCII code instead of per-character match when searching for glyph. This may save up to 3.5Kb of
+  compiled code on AVR MCUs.
 
 ## [0.8.2] - 2023-09-29
 
@@ -259,8 +261,8 @@ SSD1306 monochrome OLED display.
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.8.2...HEAD
 
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.8.2...HEAD
 [0.8.2]: https://github.com/jamwaffles/ssd1306/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/jamwaffles/ssd1306/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/jamwaffles/ssd1306/compare/v0.7.1...v0.8.0

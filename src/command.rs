@@ -93,85 +93,172 @@ pub enum Command {
 
 impl Command {
     /// Transform command into a fixed size array of 7 u8 and the real length for sending
-    fn bytes(self) -> ([u8; 7], usize) {
+    fn encode(self, buffer: &mut [u8; 7]) -> &[u8] {
         match self {
-            Command::Contrast(val) => ([0x81, val, 0, 0, 0, 0, 0], 2),
-            Command::AllOn(on) => ([0xA4 | (on as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::Invert(inv) => ([0xA6 | (inv as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::DisplayOn(on) => ([0xAE | (on as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::HScrollSetup(dir, start, end, rate) => (
-                [
-                    0x26 | (dir as u8),
-                    0,
-                    start as u8,
-                    rate as u8,
-                    end as u8,
-                    0,
-                    0xFF,
-                ],
-                7,
-            ),
-            Command::VHScrollSetup(dir, start, end, rate, offset) => (
-                [
-                    0x28 | (dir as u8),
-                    0,
-                    start as u8,
-                    rate as u8,
-                    end as u8,
-                    offset,
-                    0,
-                ],
-                6,
-            ),
-            Command::EnableScroll(en) => ([0x2E | (en as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::VScrollArea(above, lines) => ([0xA3, above, lines, 0, 0, 0, 0], 3),
-            Command::LowerColStart(addr) => ([0xF & addr, 0, 0, 0, 0, 0, 0], 1),
-            Command::UpperColStart(addr) => ([0x10 | (0xF & addr), 0, 0, 0, 0, 0, 0], 1),
-            Command::ColStart(addr) => ([0xF & addr, 0x10 | (0xF & (addr >> 4)), 0, 0, 0, 0, 0], 2),
-            Command::AddressMode(mode) => ([0x20, mode as u8, 0, 0, 0, 0, 0], 2),
-            Command::ColumnAddress(start, end) => ([0x21, start, end, 0, 0, 0, 0], 3),
-            Command::PageAddress(start, end) => ([0x22, start as u8, end as u8, 0, 0, 0, 0], 3),
-            Command::PageStart(page) => ([0xB0 | (page as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::StartLine(line) => ([0x40 | (0x3F & line), 0, 0, 0, 0, 0, 0], 1),
-            Command::SegmentRemap(remap) => ([0xA0 | (remap as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::Multiplex(ratio) => ([0xA8, ratio, 0, 0, 0, 0, 0], 2),
-            Command::ReverseComDir(rev) => ([0xC0 | ((rev as u8) << 3), 0, 0, 0, 0, 0, 0], 1),
-            Command::DisplayOffset(offset) => ([0xD3, offset, 0, 0, 0, 0, 0], 2),
-            Command::ComPinConfig(alt, lr) => (
-                [
-                    0xDA,
-                    0x2 | ((alt as u8) << 4) | ((lr as u8) << 5),
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                ],
-                2,
-            ),
-            Command::DisplayClockDiv(fosc, div) => {
-                ([0xD5, ((0xF & fosc) << 4) | (0xF & div), 0, 0, 0, 0, 0], 2)
+            Command::Contrast(val) => {
+                buffer[0] = 0x81;
+                buffer[1] = val;
+
+                &buffer[..2]
             }
-            Command::PreChargePeriod(phase1, phase2) => (
-                [0xD9, ((0xF & phase2) << 4) | (0xF & phase1), 0, 0, 0, 0, 0],
-                2,
-            ),
-            Command::VcomhDeselect(level) => ([0xDB, (level as u8) << 4, 0, 0, 0, 0, 0], 2),
-            Command::ChargePump(en) => ([0x8D, 0x10 | ((en as u8) << 2), 0, 0, 0, 0, 0], 2),
-            Command::InternalIref(en, current) => (
-                [
-                    0xAD,
-                    ((current as u8) << 5) | ((en as u8) << 4),
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                ],
-                2,
-            ),
-            Command::Noop => ([0xE3, 0, 0, 0, 0, 0, 0], 1),
-            Command::FastNoop => ([0, 0, 0, 0, 0, 0, 0], 0),
+            Command::AllOn(on) => {
+                buffer[0] = 0xA4 | (on as u8);
+
+                &buffer[..1]
+            }
+            Command::Invert(inv) => {
+                buffer[0] = 0xA6 | (inv as u8);
+
+                &buffer[..1]
+            }
+            Command::DisplayOn(on) => {
+                buffer[0] = 0xAE | (on as u8);
+
+                &buffer[..1]
+            }
+            Command::HScrollSetup(dir, start, end, rate) => {
+                buffer[0] = 0x26 | (dir as u8);
+                buffer[1] = 0;
+                buffer[2] = start as u8;
+                buffer[3] = rate as u8;
+                buffer[4] = end as u8;
+                buffer[5] = 0;
+                buffer[6] = 0xFF;
+
+                &buffer[..7]
+            }
+            Command::VHScrollSetup(dir, start, end, rate, offset) => {
+                buffer[0] = 0x28 | (dir as u8);
+                buffer[1] = 0;
+                buffer[2] = start as u8;
+                buffer[3] = rate as u8;
+                buffer[4] = end as u8;
+                buffer[5] = offset;
+
+                &buffer[..6]
+            }
+            Command::EnableScroll(en) => {
+                buffer[0] = 0x2E | (en as u8);
+
+                &buffer[..1]
+            }
+            Command::VScrollArea(above, lines) => {
+                buffer[0] = 0xA3;
+                buffer[1] = above;
+                buffer[2] = lines;
+
+                &buffer[..3]
+            }
+            Command::LowerColStart(addr) => {
+                buffer[0] = addr & 0x0F;
+
+                &buffer[..1]
+            }
+            Command::UpperColStart(addr) => {
+                buffer[0] = 0x10 | (addr & 0x0F);
+
+                &buffer[..1]
+            }
+            Command::ColStart(addr) => {
+                buffer[0] = addr & 0x0F;
+                buffer[1] = 0x10 | (addr >> 4);
+
+                &buffer[..2]
+            }
+            Command::AddressMode(mode) => {
+                buffer[0] = 0x20;
+                buffer[1] = mode as u8;
+
+                &buffer[..2]
+            }
+            Command::ColumnAddress(start, end) => {
+                buffer[0] = 0x21;
+                buffer[1] = start;
+                buffer[2] = end;
+
+                &buffer[..3]
+            }
+            Command::PageAddress(start, end) => {
+                buffer[0] = 0x22;
+                buffer[1] = start as u8;
+                buffer[2] = end as u8;
+
+                &buffer[..3]
+            }
+            Command::PageStart(page) => {
+                buffer[0] = 0xB0 | (page as u8);
+
+                &buffer[..1]
+            }
+            Command::StartLine(line) => {
+                buffer[0] = 0x40 | (line & 0x3F);
+
+                &buffer[..1]
+            }
+            Command::SegmentRemap(remap) => {
+                buffer[0] = 0xA0 | (remap as u8);
+
+                &buffer[..1]
+            }
+            Command::Multiplex(ratio) => {
+                buffer[0] = 0xA8;
+                buffer[1] = ratio;
+
+                &buffer[..2]
+            }
+            Command::ReverseComDir(rev) => {
+                buffer[0] = 0xC0 | ((rev as u8) << 3);
+
+                &buffer[..1]
+            }
+            Command::DisplayOffset(offset) => {
+                buffer[0] = 0xD3;
+                buffer[1] = offset;
+
+                &buffer[..2]
+            }
+            Command::ComPinConfig(alt, lr) => {
+                buffer[0] = 0xDA;
+                buffer[1] = 0x2 | ((alt as u8) << 4) | ((lr as u8) << 5);
+
+                &buffer[..2]
+            }
+            Command::DisplayClockDiv(fosc, div) => {
+                buffer[0] = 0xD5;
+                buffer[1] = ((fosc & 0xF) << 4) | (div & 0xF);
+
+                &buffer[..2]
+            }
+            Command::PreChargePeriod(phase1, phase2) => {
+                buffer[0] = 0xD9;
+                buffer[1] = ((phase2 & 0xF) << 4) | (phase1 & 0xF);
+
+                &buffer[..2]
+            }
+            Command::VcomhDeselect(level) => {
+                buffer[0] = 0xDB;
+                buffer[1] = level as u8;
+
+                &buffer[..2]
+            }
+            Command::ChargePump(en) => {
+                buffer[0] = 0x8D;
+                buffer[1] = 0x10 | ((en as u8) << 2);
+
+                &buffer[..2]
+            }
+            Command::InternalIref(en, current) => {
+                buffer[0] = 0xAD;
+                buffer[1] = ((current as u8) << 5) | ((en as u8) << 4);
+
+                &buffer[..2]
+            }
+            Command::Noop => {
+                buffer[0] = 0xE3;
+
+                &buffer[..1]
+            }
+            Command::FastNoop => &[],
         }
     }
 
@@ -180,11 +267,12 @@ impl Command {
     where
         DI: WriteOnlyDataCommand,
     {
-        let (data, len) = self.bytes();
+        let mut buffer = [0; 7];
+        let data = self.encode(&mut buffer);
 
-        if len > 0 {
+        if !data.is_empty() {
             // Send command over the interface
-            iface.send_commands(U8(&data[0..len]))
+            iface.send_commands(U8(data))
         } else {
             Ok(())
         }
@@ -196,11 +284,12 @@ impl Command {
     where
         DI: display_interface::AsyncWriteOnlyDataCommand,
     {
-        let (data, len) = self.bytes();
+        let mut buffer = [0; 7];
+        let data = self.encode(&mut buffer);
 
-        if len > 0 {
+        if !data.is_empty() {
             // Send command over the interface
-            iface.send_commands(U8(&data[0..len])).await
+            iface.send_commands(U8(data)).await
         } else {
             Ok(())
         }

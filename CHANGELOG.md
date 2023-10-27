@@ -7,6 +7,8 @@ SSD1306 monochrome OLED display.
 
 ## [Unreleased] - ReleaseDate
 
+## [0.8.4] - 2023-10-27
+
 ### Fixed
 
 - [#201](https://github.com/jamwaffles/ssd1306/pull/201) Fixed `BufferedGraphicsMode::clear(On)` such that it fills all pixels with `On`, not only some.
@@ -267,7 +269,8 @@ SSD1306 monochrome OLED display.
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.8.3...HEAD
+[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.8.4...HEAD
+[0.8.4]: https://github.com/jamwaffles/ssd1306/compare/v0.8.3...v0.8.4
 
 [0.8.3]: https://github.com/jamwaffles/ssd1306/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/jamwaffles/ssd1306/compare/v0.8.1...v0.8.2

@@ -9,7 +9,7 @@ SSD1306 monochrome OLED display.
 
 ### Fixed
 
-- Fixed `BufferedGraphicsMode::clear(On)` such that it fills all pixels with `On`, not only some.
+- [#201](https://github.com/jamwaffles/ssd1306/pull/201) Fixed `BufferedGraphicsMode::clear(On)` such that it fills all pixels with `On`, not only some.
 
 ## [0.8.3] - 2023-10-09
 

@@ -7,6 +7,10 @@ SSD1306 monochrome OLED display.
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- Fixed `BufferedGraphicsMode::clear(On)` such that it fills all pixels with `On`, not only some.
+
 ## [0.8.3] - 2023-10-09
 
 ### Changed

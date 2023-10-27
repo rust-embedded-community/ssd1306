@@ -69,7 +69,7 @@ where
     SIZE: DisplaySize,
 {
     fn clear_impl(&mut self, value: bool) {
-        self.mode.buffer.as_mut().fill(value as u8);
+        self.mode.buffer.as_mut().fill(if value { 0xff } else { 0 });
 
         let (width, height) = self.dimensions();
         self.mode.min_x = 0;

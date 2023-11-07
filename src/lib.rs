@@ -252,7 +252,7 @@ where
 
     /// Send a raw buffer to the display.
     pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DisplayError> {
-        self.interface.send_data(U8(&buffer))
+        self.interface.send_data(U8(buffer))
     }
 
     /// Get display dimensions, taking into account the current rotation of the display
@@ -411,7 +411,7 @@ where
             .skip(starting_page)
             .take(num_pages)
             .map(|s| &s[page_lower..page_upper])
-            .try_for_each(|c| interface.send_data(U8(&c)))
+            .try_for_each(|c| interface.send_data(U8(c)))
     }
 
     /// Release the contained interface.

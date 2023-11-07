@@ -119,7 +119,7 @@ impl From<DisplayError> for TerminalModeError {
 }
 
 /// Terminal mode.
-#[derive(Copy, Clone, Debug)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct TerminalMode {
     cursor: Option<Cursor>,
 }
@@ -127,7 +127,7 @@ pub struct TerminalMode {
 impl TerminalMode {
     /// Create a new terminal mode config instance.
     pub fn new() -> Self {
-        Self { cursor: None }
+        Self::default()
     }
 }
 
@@ -505,13 +505,12 @@ where
     fn rotate_bitmap(bitmap: [u8; 8]) -> [u8; 8] {
         let mut rotated: [u8; 8] = [0; 8];
 
-        for col in 0..8 {
+        for (col, source) in bitmap.iter().enumerate() {
             // source.msb is the top pixel
-            let source = bitmap[col];
-            for row in 0..8 {
+            for (row, item) in rotated.iter_mut().enumerate() {
                 let bit = source & 1 << row != 0;
                 if bit {
-                    rotated[row] |= 1 << col;
+                    *item |= 1 << col;
                 }
             }
         }

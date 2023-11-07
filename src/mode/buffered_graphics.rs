@@ -187,7 +187,7 @@ where
 
             // Set pixel value in byte
             // Ref this comment https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit#comment46654671_47990
-            *byte = *byte & !(1 << bit) | (value << bit)
+            *byte = *byte & !(1 << bit) | (value << bit);
         }
     }
 }
@@ -222,7 +222,7 @@ where
             .into_iter()
             .filter(|Pixel(pos, _color)| bb.contains(*pos))
             .for_each(|Pixel(pos, color)| {
-                self.set_pixel(pos.x as u32, pos.y as u32, color.is_on())
+                self.set_pixel(pos.x as u32, pos.y as u32, color.is_on());
             });
 
         Ok(())

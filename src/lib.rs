@@ -182,14 +182,14 @@ where
     /// Convert the display into a buffered graphics mode, supporting
     /// [embedded-graphics](https://crates.io/crates/embedded-graphics).
     ///
-    /// See [BufferedGraphicsMode] for more information.
+    /// See [`BufferedGraphicsMode`] for more information.
     pub fn into_buffered_graphics_mode(self) -> Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>> {
         self.into_mode(BufferedGraphicsMode::new())
     }
 
     /// Convert the display into a text-only, terminal-like mode.
     ///
-    /// See [TerminalMode] for more information.
+    /// See [`TerminalMode`] for more information.
     pub fn into_terminal_mode(self) -> Ssd1306<DI, SIZE, TerminalMode> {
         self.into_mode(TerminalMode::new())
     }

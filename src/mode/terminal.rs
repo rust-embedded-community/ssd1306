@@ -231,7 +231,7 @@ where
         self.mode
             .cursor
             .as_ref()
-            .map(|c| c.get_position())
+            .map(Cursor::get_position)
             .ok_or(TerminalModeError::Uninitialized)
     }
 

@@ -7,6 +7,10 @@ SSD1306 monochrome OLED display.
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#203](https://github.com/jamwaffles/ssd1306/pull/203) Added `Ssd1306::release(self)` to release the contained i2c interface.
+
 ## [0.8.4] - 2023-10-27
 
 ### Fixed

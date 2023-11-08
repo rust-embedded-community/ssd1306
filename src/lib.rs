@@ -413,6 +413,11 @@ where
             .map(|s| &s[page_lower..page_upper])
             .try_for_each(|c| interface.send_data(U8(&c)))
     }
+
+    /// Release the contained interface.
+    pub fn release(self) -> DI {
+        self.interface
+    }
 }
 
 // SPI-only reset

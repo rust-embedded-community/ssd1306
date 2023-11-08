@@ -8,6 +8,8 @@ pub struct I2CDisplayInterface(());
 
 impl I2CDisplayInterface {
     /// Create new builder with a default I2C address of 0x3C
+    #[allow(clippy::new_ret_no_self)]
+    // pub fn with_i2c<I>(i2c: I) -> I2CInterface<I> // alternative, but breaking change
     pub fn new<I>(i2c: I) -> I2CInterface<I>
     where
         I: embedded_hal::blocking::i2c::Write,

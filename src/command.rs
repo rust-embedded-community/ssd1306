@@ -5,8 +5,6 @@
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 
 /// SSD1306 Commands
-
-/// Commands
 #[derive(Debug, Copy, Clone)]
 pub enum Command {
     /// Set contrast. Higher number is higher contrast. Default = 0x7F
@@ -275,7 +273,7 @@ pub enum NFrames {
 }
 
 /// Address mode
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(dead_code)]
 pub enum AddrMode {
     /// Horizontal mode

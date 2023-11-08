@@ -182,14 +182,14 @@ where
     /// Convert the display into a buffered graphics mode, supporting
     /// [embedded-graphics](https://crates.io/crates/embedded-graphics).
     ///
-    /// See [BufferedGraphicsMode] for more information.
+    /// See [`BufferedGraphicsMode`] for more information.
     pub fn into_buffered_graphics_mode(self) -> Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>> {
         self.into_mode(BufferedGraphicsMode::new())
     }
 
     /// Convert the display into a text-only, terminal-like mode.
     ///
-    /// See [TerminalMode] for more information.
+    /// See [`TerminalMode`] for more information.
     pub fn into_terminal_mode(self) -> Ssd1306<DI, SIZE, TerminalMode> {
         self.into_mode(TerminalMode::new())
     }
@@ -252,7 +252,7 @@ where
 
     /// Send a raw buffer to the display.
     pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DisplayError> {
-        self.interface.send_data(U8(&buffer))
+        self.interface.send_data(U8(buffer))
     }
 
     /// Get display dimensions, taking into account the current rotation of the display
@@ -411,7 +411,7 @@ where
             .skip(starting_page)
             .take(num_pages)
             .map(|s| &s[page_lower..page_upper])
-            .try_for_each(|c| interface.send_data(U8(&c)))
+            .try_for_each(|c| interface.send_data(U8(c)))
     }
 
     /// Release the contained interface.

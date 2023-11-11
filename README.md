@@ -91,6 +91,10 @@ fn HardFault(ef: &ExceptionFrame) -> ! {
 }
 ```
 
+### Raspberry Pi
+
+A sample project is available under [examples/raspi](./examples/raspi)
+
 ## License
 
 Licensed under either of

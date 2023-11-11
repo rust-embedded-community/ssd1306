@@ -24,6 +24,38 @@ target_steps: &target_steps
           - ./target
           - /home/circleci/.cargo/registry
 
+cross_steps: &cross_steps
+  docker:
+    - image: cimg/rust:1.41.0
+  steps:
+    - checkout
+    - restore_cache:
+        key: v2-ssd1306-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
+    - run: sudo apt update
+    - run: sudo apt install -y gcc-arm-linux-gnueabihf
+    - run: rustup self update
+    - run: rustup default ${RUST_VERSION:-stable}
+    - run: rustup component add rustfmt
+    - run: cargo update
+    - run: |
+        SYSROOT=$(rustc --print sysroot)
+
+        if [[ ! "$SYSROOT" =~ "$TARGET" ]]; then
+          rustup target add $TARGET
+        else
+          echo "Target $TARGET is already installed"
+        fi
+    - run: |
+        set -e -x
+        cd $EXAMPLE_PATH
+        cargo fmt --all -- --check
+        cargo build --target $TARGET --all-features --release
+    - save_cache:
+        key: v2-ssd1306-{{ .Environment.CIRCLE_JOB }}-{{ checksum "Cargo.toml" }}
+        paths:
+          - ./target
+          - /usr/local/cargo/registry
+
 version: 2
 jobs:
   target-arm-unknown-linux-eabi:
@@ -72,6 +104,12 @@ jobs:
       - TARGET: "thumbv7m-none-eabi"
     <<: *target_steps
 
+  example-raspi:
+    environment:
+      - TARGET: "armv7-unknown-linux-gnueabihf"
+      - EXAMPLE_PATH: "examples/raspi"
+    <<: *cross_steps
+
 build_jobs: &build_jobs
   jobs:
     # Raspberry Pi 1
@@ -89,6 +127,9 @@ build_jobs: &build_jobs
     - target-thumbv7em-none-eabi
     - target-thumbv7em-none-eabihf
     - target-thumbv7m-none-eabi
+
+    # Samples
+    - example-raspi
 
 workflows:
   version: 2

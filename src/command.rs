@@ -279,7 +279,6 @@ impl Command {
     }
 
     /// Send command to SSD1306 asynchronously
-    #[cfg(feature = "async")]
     pub async fn send_async<DI>(self, iface: &mut DI) -> Result<(), DisplayError>
     where
         DI: display_interface::AsyncWriteOnlyDataCommand,

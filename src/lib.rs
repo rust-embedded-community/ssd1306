@@ -103,15 +103,11 @@
 #![deny(trivial_casts)]
 #![deny(trivial_numeric_casts)]
 #![deny(unsafe_code)]
-#![cfg_attr(not(feature = "async"), deny(unstable_features))]
+#![deny(unstable_features)]
 #![deny(unused_import_braces)]
 #![deny(unused_qualifications)]
 #![deny(rustdoc::broken_intra_doc_links)]
-#![cfg_attr(
-    all(feature = "async", feature = "nightly"),
-    allow(incomplete_features, unknown_lints, stable_features, async_fn_in_trait),
-    feature(async_fn_in_trait, impl_trait_projections)
-)]
+#![allow(async_fn_in_trait)]
 
 mod brightness;
 pub mod command;
@@ -130,7 +126,7 @@ use brightness::Brightness;
 use command::{AddrMode, Command, VcomhLevel};
 use core::convert::Infallible;
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
-use embedded_hal::{delay::DelayUs, digital::OutputPin};
+use embedded_hal::{delay::DelayNs, digital::OutputPin};
 use error::Error;
 use mode::{BufferedGraphicsMode, TerminalMode};
 use rotation::DisplayRotation;
@@ -447,7 +443,6 @@ where
     }
 }
 
-#[cfg(feature = "async")]
 impl<DI, SIZE> Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
 where
     DI: display_interface::AsyncWriteOnlyDataCommand,
@@ -591,12 +586,12 @@ impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE> {
     ) -> Result<(), Error<Infallible, RST::Error>>
     where
         RST: OutputPin,
-        DELAY: DelayUs,
+        DELAY: DelayNs,
     {
         fn inner_reset<RST, DELAY>(rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
         where
             RST: OutputPin,
-            DELAY: DelayUs,
+            DELAY: DelayNs,
         {
             rst.set_high()?;
             delay.delay_ms(1);
@@ -609,7 +604,6 @@ impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE> {
     }
 }
 
-#[cfg(feature = "async")]
 // SPI-only reset
 impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE> {
     /// Reset the display.
@@ -620,7 +614,7 @@ impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE> {
     ) -> Result<(), Error<Infallible, RST::Error>>
     where
         RST: OutputPin,
-        DELAY: embedded_hal_async::delay::DelayUs,
+        DELAY: embedded_hal_async::delay::DelayNs,
     {
         async fn inner_reset_async<RST, DELAY>(
             rst: &mut RST,
@@ -628,7 +622,7 @@ impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE> {
         ) -> Result<(), RST::Error>
         where
             RST: OutputPin,
-            DELAY: embedded_hal_async::delay::DelayUs,
+            DELAY: embedded_hal_async::delay::DelayNs,
         {
             rst.set_high()?;
             delay.delay_ms(1).await;

@@ -202,7 +202,6 @@ where
     }
 }
 
-#[cfg(feature = "async")]
 impl<DI, SIZE> Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>
 where
     DI: display_interface::AsyncWriteOnlyDataCommand,

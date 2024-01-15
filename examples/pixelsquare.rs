@@ -68,7 +68,7 @@ fn main() -> ! {
         clocks,
     );
 
-    let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
+    let interface = display_interface_spi::SPIInterface::new(spi, dc);
     let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)
         .into_buffered_graphics_mode();
 

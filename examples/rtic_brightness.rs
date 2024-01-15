@@ -8,7 +8,7 @@
 
 #[rtic::app(device = stm32f1xx_hal::pac, peripherals = true, dispatchers = [EXTI0])]
 mod app {
-    use display_interface_spi::SPIInterfaceNoCS;
+    use display_interface_spi::SPIInterface;
     use embedded_graphics::{
         geometry::Point,
         image::Image,
@@ -28,7 +28,7 @@ mod app {
     use tinybmp::Bmp;
 
     type Display = Ssd1306<
-        SPIInterfaceNoCS<
+        SPIInterface<
             spi::Spi<
                 SPI1,
                 spi::Spi1NoRemap,
@@ -100,7 +100,7 @@ mod app {
             clocks,
         );
 
-        let interface = display_interface_spi::SPIInterfaceNoCS::new(spi, dc);
+        let interface = display_interface_spi::SPIInterface::new(spi, dc);
         let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate180)
             .into_buffered_graphics_mode();
 

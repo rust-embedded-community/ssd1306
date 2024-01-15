@@ -2,7 +2,7 @@
 
 pub use display_interface::WriteOnlyDataCommand;
 pub use display_interface_i2c::I2CInterface;
-pub use display_interface_spi::{SPIInterface, SPIInterfaceNoCS};
+pub use display_interface_spi::SPIInterface;
 
 pub use super::{
     brightness::Brightness,

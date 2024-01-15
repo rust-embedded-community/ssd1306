@@ -11,7 +11,7 @@ repository = "https://github.com/jamwaffles/ssd1306"
 version = "0.8.4"
 edition = "2018"
 exclude = [ "build.rs", "build.sh", "memory.x", "doc", "*.jpg", "*.png", "*.bmp" ]
-rust-version = "1.61"
+rust-version = "1.75.0"
 
 [badges]
 circle-ci = { repository = "jamwaffles/ssd1306", branch = "master" }
@@ -20,10 +20,10 @@ circle-ci = { repository = "jamwaffles/ssd1306", branch = "master" }
 targets = [ "thumbv7m-none-eabi", "thumbv7em-none-eabihf" ]
 
 [dependencies]
-embedded-hal = "0.2.5"
-display-interface = "0.4.1"
-display-interface-i2c = "0.4.0"
-display-interface-spi = "0.4.1"
+embedded-hal = "1.0.0"
+display-interface = "0.5.0"
+display-interface-i2c = "0.5.0"
+display-interface-spi = "0.5.0"
 embedded-graphics-core = { version = "0.4.0", optional = true }
 
 [dev-dependencies]

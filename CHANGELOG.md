@@ -7,6 +7,8 @@ SSD1306 monochrome OLED display.
 
 ## [Unreleased] - ReleaseDate
 
+- Changed dependencies for embbedded-hal-1.0.0
+
 ### Added
 
 - [#203](https://github.com/jamwaffles/ssd1306/pull/203) Added `Ssd1306::release(self)` to release the contained i2c interface.

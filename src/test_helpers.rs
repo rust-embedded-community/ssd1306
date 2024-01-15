@@ -2,30 +2,59 @@
 
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 use embedded_hal::{
-    blocking::{
-        i2c,
-        spi::{self, Transfer},
-    },
-    digital::v2::OutputPin,
+    digital::{ErrorType, OutputPin},
+    i2c,
+    spi::{self, SpiBus},
 };
+
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
+pub struct Error {}
+
+impl embedded_hal::digital::Error for Error {
+    fn kind(&self) -> embedded_hal::digital::ErrorKind {
+        embedded_hal::digital::ErrorKind::Other
+    }
+}
+
+impl i2c::Error for Error {
+    fn kind(&self) -> i2c::ErrorKind {
+        i2c::ErrorKind::Other
+    }
+}
+
+impl spi::Error for Error {
+    fn kind(&self) -> spi::ErrorKind {
+        spi::ErrorKind::Other
+    }
+}
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy)]
 pub struct SpiStub;
 
-impl spi::Write<u8> for SpiStub {
-    type Error = ();
-
-    fn write(&mut self, _buf: &[u8]) -> Result<(), ()> {
-        Ok(())
-    }
+impl spi::ErrorType for SpiStub {
+    type Error = Error;
 }
 
-impl Transfer<u8> for SpiStub {
-    type Error = ();
+impl SpiBus<u8> for SpiStub {
+    fn read(&mut self, _words: &mut [u8]) -> Result<(), Self::Error> {
+        todo!()
+    }
 
-    fn transfer<'a>(&mut self, buf: &'a mut [u8]) -> Result<&'a [u8], ()> {
-        Ok(buf)
+    fn write(&mut self, _words: &[u8]) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn transfer(&mut self, _read: &mut [u8], _write: &[u8]) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn transfer_in_place(&mut self, _words: &mut [u8]) -> Result<(), Self::Error> {
+        todo!()
+    }
+
+    fn flush(&mut self) -> Result<(), Self::Error> {
+        todo!()
     }
 }
 
@@ -33,10 +62,16 @@ impl Transfer<u8> for SpiStub {
 #[derive(Debug, Clone, Copy)]
 pub struct I2cStub;
 
-impl i2c::Write for I2cStub {
-    type Error = ();
+impl i2c::ErrorType for I2cStub {
+    type Error = Error;
+}
 
-    fn write(&mut self, _addr: u8, _buf: &[u8]) -> Result<(), ()> {
+impl i2c::I2c for I2cStub {
+    fn transaction(
+        &mut self,
+        _address: u8,
+        _operations: &mut [i2c::Operation<'_>],
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
 }
@@ -45,14 +80,16 @@ impl i2c::Write for I2cStub {
 #[derive(Debug, Clone, Copy)]
 pub struct PinStub;
 
-impl OutputPin for PinStub {
-    type Error = ();
+impl ErrorType for PinStub {
+    type Error = Error;
+}
 
-    fn set_high(&mut self) -> Result<(), ()> {
+impl OutputPin for PinStub {
+    fn set_low(&mut self) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn set_low(&mut self) -> Result<(), ()> {
+    fn set_high(&mut self) -> Result<(), Self::Error> {
         Ok(())
     }
 }

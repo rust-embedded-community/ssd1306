@@ -267,7 +267,7 @@ where
     }
 
     /// Reset the draw area and move pointer to the top left corner
-    fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
+    pub fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
         // Initialise the counter when we know it's valid
         let (w, h) = match self.rotation() {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (SIZE::WIDTH, SIZE::HEIGHT),

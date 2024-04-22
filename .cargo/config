@@ -1,8 +1,12 @@
-[target.'cfg(all(target_arch = "arm", target_os = "none"))']
-runner = "probe-run --chip STM32F103C8"
-rustflags = [
-  "-C", "link-arg=-Tlink.x",
-]
+[target.riscv32imc-unknown-none-elf]
+runner = "espflash flash --monitor"
 
 [build]
-target = "thumbv7m-none-eabi"
+rustflags = [
+  "-C", "link-arg=-Tlinkall.x",
+]
+
+target = "riscv32imc-unknown-none-elf"
+
+[unstable]
+build-std = ["core"]

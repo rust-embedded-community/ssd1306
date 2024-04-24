@@ -1,6 +1,6 @@
 //! Helpers for use in examples and tests
 
-use display_interface::{DisplayError, WriteOnlyDataCommand};
+use display_interface::{AsyncWriteOnlyDataCommand, DisplayError};
 use embedded_hal::{
     digital::{ErrorType, OutputPin},
     i2c,
@@ -98,14 +98,17 @@ impl OutputPin for PinStub {
 #[derive(Debug, Clone, Copy)]
 pub struct StubInterface;
 
-impl WriteOnlyDataCommand for StubInterface {
-    fn send_commands(
+impl AsyncWriteOnlyDataCommand for StubInterface {
+    async fn send_commands(
         &mut self,
         _cmd: display_interface::DataFormat<'_>,
     ) -> Result<(), DisplayError> {
         Ok(())
     }
-    fn send_data(&mut self, _buf: display_interface::DataFormat<'_>) -> Result<(), DisplayError> {
+    async fn send_data(
+        &mut self,
+        _buf: display_interface::DataFormat<'_>,
+    ) -> Result<(), DisplayError> {
         Ok(())
     }
 }

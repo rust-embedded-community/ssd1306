@@ -18,6 +18,7 @@ targets = [ "riscv32imc-unknown-none-elf" ]
 
 [dependencies]
 embedded-hal = "^1.0.0"
+embedded-hal-async = "^1.0.0"
 display-interface = "0.5.0"
 display-interface-i2c = "0.5.0"
 display-interface-spi = "0.5.0"

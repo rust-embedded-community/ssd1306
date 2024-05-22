@@ -102,8 +102,8 @@ pub enum TerminalModeError {
     OutOfBounds,
 }
 
-impl core::fmt::Debug for TerminalModeError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
+impl fmt::Debug for TerminalModeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         match self {
             Self::InterfaceError(_) => "InterfaceError".fmt(f),
             Self::Uninitialized => "Uninitialized".fmt(f),
@@ -519,7 +519,7 @@ where
     }
 }
 
-impl<DI, SIZE> core::fmt::Write for Ssd1306<DI, SIZE, TerminalMode>
+impl<DI, SIZE> fmt::Write for Ssd1306<DI, SIZE, TerminalMode>
 where
     DI: WriteOnlyDataCommand,
     SIZE: TerminalDisplaySize,

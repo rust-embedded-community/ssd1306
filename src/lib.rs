@@ -6,7 +6,7 @@
 //! The main driver is created using [`Ssd1306::new`] which accepts an interface instance, display
 //! size, rotation and mode. The following display modes are supported:
 //!
-//! - [`BasicMode`](crate::mode::BasicMode) - A simple mode with lower level methods available.
+//! - [`BasicMode`] - A simple mode with lower level methods available.
 //! - [`BufferedGraphicsMode`] - A framebuffered mode with additional methods and integration with
 //!   [embedded-graphics](https://docs.rs/embedded-graphics).
 //! - [`TerminalMode`] - A bufferless mode supporting drawing text to the display, as well as

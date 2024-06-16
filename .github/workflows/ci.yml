@@ -1,0 +1,63 @@
+name: Build and test
+on:
+  push:
+    branches-ignore:
+      - '*.tmp'
+    tags:
+      - '*'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  fmt:
+    name: fmt
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.79
+        with:
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  test:
+    name: test
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.79
+      - run: cargo test --lib --target x86_64-unknown-linux-gnu
+      - run: cargo test --doc --target x86_64-unknown-linux-gnu
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          -  arm-unknown-linux-gnueabi
+          # Raspberry Pi 2, 3, etc
+          - armv7-unknown-linux-gnueabihf
+          # Linux
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          # Bare metal
+          - thumbv6m-none-eabi
+        include:
+          - target: thumbv7em-none-eabi
+            examples: true
+          - target: thumbv7em-none-eabihf
+            examples: true
+          - target: thumbv7m-none-eabi
+            examples: true
+    name: ${{matrix.target}}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.79
+        with:
+          components: rustfmt
+      - run: rustup target add ${{matrix.target}}
+      - run: cargo build --target ${{matrix.target}} --all-features --release
+      - if: ${{ matrix.examples }}
+        run: cargo build --target ${{matrix.target}} --all-features --examples --release
+      - run: cargo doc --all-features --target ${{matrix.target }}
+

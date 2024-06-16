@@ -15,13 +15,13 @@
 //! # Examples
 //!
 //! Examples can be found in [the examples/
-//! folder](https://github.com/jamwaffles/ssd1306/blob/master/examples)
+//! folder](https://github.com/rust-embedded-community/ssd1306/blob/master/examples)
 //!
 //! ## Draw some text to the display
 //!
 //! Uses [`BufferedGraphicsMode`] and [embedded_graphics](https://docs.rs/embedded-graphics). [See
 //! the complete example
-//! here](https://github.com/jamwaffles/ssd1306/blob/master/examples/text_i2c.rs).
+//! here](https://github.com/rust-embedded-community/ssd1306/blob/master/examples/text_i2c.rs).
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::I2cStub;
@@ -61,7 +61,7 @@
 //! ## Write text to the display without a framebuffer
 //!
 //! Uses [`TerminalMode`]. [See the complete example
-//! here](https://github.com/jamwaffles/ssd1306/blob/master/examples/terminal_i2c.rs).
+//! here](https://github.com/rust-embedded-community/ssd1306/blob/master/examples/terminal_i2c.rs).
 //!
 //! ```rust
 //! # use ssd1306::test_helpers::I2cStub;
@@ -91,7 +91,7 @@
 //! write!(display, "Hello, {}", "world");
 //! ```
 //!
-//! [featureset]: https://github.com/jamwaffles/embedded-graphics#features
+//! [featureset]: https://github.com/rust-embedded-community/embedded-graphics#features
 //! [`BufferedGraphicsMode`]: crate::mode::BufferedGraphicsMode
 //! [`TerminalMode`]: crate::mode::TerminalMode
 

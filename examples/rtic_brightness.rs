@@ -6,9 +6,23 @@
 #![no_std]
 #![no_main]
 
-#[rtic::app(device = stm32f1xx_hal::pac, peripherals = true, dispatchers = [EXTI0])]
+pub mod pac {
+    pub use embassy_stm32::pac::Interrupt as interrupt;
+    pub use embassy_stm32::pac::*;
+}
+
+#[rtic::app(device = crate::pac, peripherals= false, dispatchers = [EXTI0])]
 mod app {
+    use defmt_rtt as _;
     use display_interface_spi::SPIInterface;
+    use embassy_stm32::{
+        gpio,
+        mode::Blocking,
+        spi::{self, Spi},
+        time::Hertz,
+        timer::low_level::Timer,
+        Config,
+    };
     use embedded_graphics::{
         geometry::Point,
         image::Image,
@@ -16,30 +30,18 @@ mod app {
         prelude::*,
         primitives::{PrimitiveStyle, Rectangle},
     };
-    use panic_halt as _;
+    use panic_probe as _;
     use ssd1306::{mode::BufferedGraphicsMode, prelude::*, Ssd1306};
-    use stm32f1xx_hal::{
-        gpio,
-        pac::{self, SPI1},
-        prelude::*,
-        spi::{self, Mode, Phase, Polarity, Spi},
-        timer::{CounterMs, Event, Timer},
-    };
     use tinybmp::Bmp;
 
     type Display = Ssd1306<
         SPIInterface<
-            spi::Spi<
-                SPI1,
-                spi::Spi1NoRemap,
-                (
-                    gpio::gpioa::PA5<gpio::Alternate<gpio::PushPull>>,
-                    gpio::gpioa::PA6<gpio::Input<gpio::Floating>>,
-                    gpio::gpioa::PA7<gpio::Alternate<gpio::PushPull>>,
-                ),
-                u8,
+            embedded_hal_bus::spi::ExclusiveDevice<
+                Spi<'static, Blocking>,
+                gpio::Output<'static>,
+                embedded_hal_bus::spi::NoDelay,
             >,
-            gpio::gpiob::PB1<gpio::Output<gpio::PushPull>>,
+            gpio::Output<'static>,
         >,
         DisplaySize128x64,
         BufferedGraphicsMode<DisplaySize128x64>,
@@ -51,7 +53,7 @@ mod app {
     #[local]
     struct Resources {
         display: Display,
-        timer: CounterMs<pac::TIM1>,
+        timer: Timer<'static, embassy_stm32::peripherals::TIM1>,
         top_left: Point,
         velocity: Point,
         bmp: Bmp<Rgb565, 'static>,
@@ -59,59 +61,47 @@ mod app {
     }
 
     #[init]
-    fn init(cx: init::Context) -> (SharedResources, Resources, init::Monotonics) {
-        let dp = cx.device;
-        let core = cx.core;
+    fn init(_cx: init::Context) -> (SharedResources, Resources, init::Monotonics) {
+        let mut config: Config = Default::default();
+        config.rcc.hse = Some(embassy_stm32::rcc::Hse {
+            freq: Hertz::mhz(8),
+            mode: embassy_stm32::rcc::HseMode::Oscillator,
+        });
+        config.rcc.sys = embassy_stm32::rcc::Sysclk::PLL1_P;
+        config.rcc.pll = Some(embassy_stm32::rcc::Pll {
+            src: embassy_stm32::rcc::PllSource::HSE,
+            prediv: embassy_stm32::rcc::PllPreDiv::DIV1,
+            mul: embassy_stm32::rcc::PllMul::MUL9, // 8 * 9 = 72Mhz
+        });
+        // Scale down to 36Mhz (maximum allowed)
+        config.rcc.apb1_pre = embassy_stm32::rcc::APBPrescaler::DIV2;
 
-        let mut flash = dp.FLASH.constrain();
-        let rcc = dp.RCC.constrain();
+        let p = embassy_stm32::init(config);
+        let mut config = spi::Config::default();
+        config.frequency = Hertz::mhz(8);
+        let spi = Spi::new_blocking_txonly(p.SPI1, p.PA5, p.PA7, config);
 
-        let clocks = rcc
-            .cfgr
-            .use_hse(8.MHz())
-            .sysclk(72.MHz())
-            .pclk1(36.MHz())
-            .freeze(&mut flash.acr);
-
-        let mut afio = dp.AFIO.constrain();
-
-        let mut gpiob = dp.GPIOB.split();
-        let mut gpioa = dp.GPIOA.split();
-
-        // SPI1
-        let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
-        let miso = gpioa.pa6;
-        let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
-
-        let mut delay = Timer::syst(core.SYST, &clocks).delay();
-
-        let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
-        let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
-
-        let spi = Spi::spi1(
-            dp.SPI1,
-            (sck, miso, mosi),
-            &mut afio.mapr,
-            Mode {
-                polarity: Polarity::IdleLow,
-                phase: Phase::CaptureOnFirstTransition,
-            },
-            8.MHz(),
-            clocks,
-        );
+        let mut rst = gpio::Output::new(p.PB0, gpio::Level::Low, gpio::Speed::Low);
+        let dc = gpio::Output::new(p.PB1, gpio::Level::Low, gpio::Speed::Low);
+        let cs = gpio::Output::new(p.PB10, gpio::Level::Low, gpio::Speed::Low);
+        let spi = embedded_hal_bus::spi::ExclusiveDevice::new_no_delay(spi, cs).unwrap();
 
         let interface = display_interface_spi::SPIInterface::new(spi, dc);
         let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate180)
             .into_buffered_graphics_mode();
 
-        display.reset(&mut rst, &mut delay).unwrap();
+        display
+            .reset(&mut rst, &mut embassy_time::Delay {})
+            .unwrap();
         display.init().unwrap();
+        // Forget the RST pin to keep the display out of reset
+        core::mem::forget(rst);
 
         // Update framerate
-        let mut timer = dp.TIM1.counter_ms(&clocks);
-        timer.start(50.millis()).unwrap(); // 20 FPS
-
-        timer.listen(Event::Update);
+        let timer = Timer::new(p.TIM1);
+        timer.set_frequency(Hertz(20)); // 20 FPS
+        timer.enable_update_interrupt(true);
+        timer.start();
 
         let bmp = Bmp::from_slice(include_bytes!("dvd.bmp")).unwrap();
 
@@ -191,6 +181,6 @@ mod app {
         display.flush().unwrap();
 
         // Clears the update flag
-        timer.clear_interrupt(Event::Update);
+        timer.clear_update_interrupt();
     }
 }

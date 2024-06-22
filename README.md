@@ -1,6 +1,6 @@
 # SSD1306 driver
 
-[![Build Status](https://circleci.com/gh/jamwaffles/ssd1306/tree/master.svg?style=shield)](https://circleci.com/gh/jamwaffles/ssd1306/tree/master)
+[![Build Status](https://github.com/rust-embedded-community/ssd1306/actions/workflows/ci.yml/badge.svg)](https://github.com/rust-embedded-community/ssd1306/actions/workflows/ci.yml)
 [![Crates.io](https://img.shields.io/crates/v/ssd1306.svg)](https://crates.io/crates/ssd1306)
 [![Docs.rs](https://docs.rs/ssd1306/badge.svg)](https://docs.rs/ssd1306)
 

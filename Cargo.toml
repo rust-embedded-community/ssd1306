@@ -9,7 +9,7 @@ name = "ssd1306"
 readme = "README.md"
 repository = "https://github.com/rust-embedded-community/ssd1306"
 version = "0.8.4"
-edition = "2018"
+edition = "2021"
 exclude = [ "build.rs", "build.sh", "memory.x", "doc", "*.jpg", "*.png", "*.bmp" ]
 rust-version = "1.75.0"
 

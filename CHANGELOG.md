@@ -11,6 +11,12 @@ SSD1306 monochrome OLED display.
 
 - [#203](https://github.com/jamwaffles/ssd1306/pull/203) Added `Ssd1306::release(self)` to release the contained i2c interface.
 
+### Changed
+
+- [#212](https://github.com/rust-embedded-community/ssd1306/pull/212) Switch
+  from circleci to github actions. Adjust urls now repository is hosted on
+  rust-embedded-community. Update code and config for modern rust and tools
+
 ## [0.8.4] - 2023-10-27
 
 ### Fixed

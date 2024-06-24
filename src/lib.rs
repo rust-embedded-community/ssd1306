@@ -126,7 +126,7 @@ use crate::mode::BasicMode;
 use brightness::Brightness;
 use command::{AddrMode, Command, VcomhLevel};
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
-use embedded_hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
+use embedded_hal::{delay::DelayNs, digital::OutputPin};
 use error::Error;
 use mode::{BufferedGraphicsMode, TerminalMode};
 use rotation::DisplayRotation;
@@ -430,12 +430,12 @@ impl<DI, SIZE, MODE> Ssd1306<DI, SIZE, MODE> {
     ) -> Result<(), Error<Infallible, RST::Error>>
     where
         RST: OutputPin,
-        DELAY: DelayMs<u8>,
+        DELAY: DelayNs,
     {
         fn inner_reset<RST, DELAY>(rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
         where
             RST: OutputPin,
-            DELAY: DelayMs<u8>,
+            DELAY: DelayNs,
         {
             rst.set_high()?;
             delay.delay_ms(1);

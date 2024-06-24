@@ -8,6 +8,7 @@ SSD1306 monochrome OLED display.
 ## [Unreleased] - ReleaseDate
 
 - Changed dependencies for embbedded-hal-1.0.0
+- Switch examples to embassy stm32 pac whith implemented embedded-hal-1.0.0
 
 ### Added
 

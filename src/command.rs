@@ -2,9 +2,12 @@
 
 // Shamefully taken from https://github.com/EdgewaterDevelopment/rust-ssd1306
 
+#[cfg(feature = "async")]
+use display_interface::AsyncWriteOnlyDataCommand;
 use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
 
 /// SSD1306 Commands
+#[maybe_async_cfg::maybe(sync(keep_self), async(feature = "async"))]
 #[derive(Debug, Copy, Clone)]
 pub enum Command {
     /// Set contrast. Higher number is higher contrast. Default = 0x7F
@@ -87,85 +90,110 @@ pub enum Command {
     InternalIref(bool, bool),
 }
 
+#[maybe_async_cfg::maybe(
+    sync(keep_self),
+    async(
+        feature = "async",
+        idents(WriteOnlyDataCommand(async = "AsyncWriteOnlyDataCommand"))
+    )
+)]
 impl Command {
     /// Send command to SSD1306
-    pub fn send<DI>(self, iface: &mut DI) -> Result<(), DisplayError>
+    pub async fn send<DI>(self, iface: &mut DI) -> Result<(), DisplayError>
     where
         DI: WriteOnlyDataCommand,
     {
         match self {
-            Command::Contrast(val) => Self::send_commands(iface, &[0x81, val]),
-            Command::AllOn(on) => Self::send_commands(iface, &[0xA4 | (on as u8)]),
-            Command::Invert(inv) => Self::send_commands(iface, &[0xA6 | (inv as u8)]),
-            Command::DisplayOn(on) => Self::send_commands(iface, &[0xAE | (on as u8)]),
-            Command::HScrollSetup(dir, start, end, rate) => Self::send_commands(
-                iface,
-                &[
-                    0x26 | (dir as u8),
-                    0,
-                    start as u8,
-                    rate as u8,
-                    end as u8,
-                    0,
-                    0xFF,
-                ],
-            ),
-            Command::VHScrollSetup(dir, start, end, rate, offset) => Self::send_commands(
-                iface,
-                &[
-                    0x28 | (dir as u8),
-                    0,
-                    start as u8,
-                    rate as u8,
-                    end as u8,
-                    offset,
-                ],
-            ),
-            Command::EnableScroll(en) => Self::send_commands(iface, &[0x2E | (en as u8)]),
-            Command::VScrollArea(above, lines) => Self::send_commands(iface, &[0xA3, above, lines]),
-            Command::LowerColStart(addr) => Self::send_commands(iface, &[0xF & addr]),
-            Command::UpperColStart(addr) => Self::send_commands(iface, &[0x10 | (0xF & addr)]),
+            Command::Contrast(val) => Self::send_commands(iface, &[0x81, val]).await,
+            Command::AllOn(on) => Self::send_commands(iface, &[0xA4 | (on as u8)]).await,
+            Command::Invert(inv) => Self::send_commands(iface, &[0xA6 | (inv as u8)]).await,
+            Command::DisplayOn(on) => Self::send_commands(iface, &[0xAE | (on as u8)]).await,
+            Command::HScrollSetup(dir, start, end, rate) => {
+                Self::send_commands(
+                    iface,
+                    &[
+                        0x26 | (dir as u8),
+                        0,
+                        start as u8,
+                        rate as u8,
+                        end as u8,
+                        0,
+                        0xFF,
+                    ],
+                )
+                .await
+            }
+            Command::VHScrollSetup(dir, start, end, rate, offset) => {
+                Self::send_commands(
+                    iface,
+                    &[
+                        0x28 | (dir as u8),
+                        0,
+                        start as u8,
+                        rate as u8,
+                        end as u8,
+                        offset,
+                    ],
+                )
+                .await
+            }
+            Command::EnableScroll(en) => Self::send_commands(iface, &[0x2E | (en as u8)]).await,
+            Command::VScrollArea(above, lines) => {
+                Self::send_commands(iface, &[0xA3, above, lines]).await
+            }
+            Command::LowerColStart(addr) => Self::send_commands(iface, &[0xF & addr]).await,
+            Command::UpperColStart(addr) => {
+                Self::send_commands(iface, &[0x10 | (0xF & addr)]).await
+            }
             Command::ColStart(addr) => {
-                Self::send_commands(iface, &[0xF & addr, 0x10 | (0xF & (addr >> 4))])
+                Self::send_commands(iface, &[0xF & addr, 0x10 | (0xF & (addr >> 4))]).await
             }
-            Command::AddressMode(mode) => Self::send_commands(iface, &[0x20, mode as u8]),
-            Command::ColumnAddress(start, end) => Self::send_commands(iface, &[0x21, start, end]),
+            Command::AddressMode(mode) => Self::send_commands(iface, &[0x20, mode as u8]).await,
+            Command::ColumnAddress(start, end) => {
+                Self::send_commands(iface, &[0x21, start, end]).await
+            }
             Command::PageAddress(start, end) => {
-                Self::send_commands(iface, &[0x22, start as u8, end as u8])
+                Self::send_commands(iface, &[0x22, start as u8, end as u8]).await
             }
-            Command::PageStart(page) => Self::send_commands(iface, &[0xB0 | (page as u8)]),
-            Command::StartLine(line) => Self::send_commands(iface, &[0x40 | (0x3F & line)]),
-            Command::SegmentRemap(remap) => Self::send_commands(iface, &[0xA0 | (remap as u8)]),
-            Command::Multiplex(ratio) => Self::send_commands(iface, &[0xA8, ratio]),
-            Command::ReverseComDir(rev) => Self::send_commands(iface, &[0xC0 | ((rev as u8) << 3)]),
-            Command::DisplayOffset(offset) => Self::send_commands(iface, &[0xD3, offset]),
+            Command::PageStart(page) => Self::send_commands(iface, &[0xB0 | (page as u8)]).await,
+            Command::StartLine(line) => Self::send_commands(iface, &[0x40 | (0x3F & line)]).await,
+            Command::SegmentRemap(remap) => {
+                Self::send_commands(iface, &[0xA0 | (remap as u8)]).await
+            }
+            Command::Multiplex(ratio) => Self::send_commands(iface, &[0xA8, ratio]).await,
+            Command::ReverseComDir(rev) => {
+                Self::send_commands(iface, &[0xC0 | ((rev as u8) << 3)]).await
+            }
+            Command::DisplayOffset(offset) => Self::send_commands(iface, &[0xD3, offset]).await,
             Command::ComPinConfig(alt, lr) => {
                 Self::send_commands(iface, &[0xDA, 0x2 | ((alt as u8) << 4) | ((lr as u8) << 5)])
+                    .await
             }
             Command::DisplayClockDiv(fosc, div) => {
-                Self::send_commands(iface, &[0xD5, ((0xF & fosc) << 4) | (0xF & div)])
+                Self::send_commands(iface, &[0xD5, ((0xF & fosc) << 4) | (0xF & div)]).await
             }
             Command::PreChargePeriod(phase1, phase2) => {
-                Self::send_commands(iface, &[0xD9, ((0xF & phase2) << 4) | (0xF & phase1)])
+                Self::send_commands(iface, &[0xD9, ((0xF & phase2) << 4) | (0xF & phase1)]).await
             }
             Command::VcomhDeselect(level) => {
-                Self::send_commands(iface, &[0xDB, (level as u8) << 4])
+                Self::send_commands(iface, &[0xDB, (level as u8) << 4]).await
             }
-            Command::Noop => Self::send_commands(iface, &[0xE3]),
+            Command::Noop => Self::send_commands(iface, &[0xE3]).await,
             Command::ChargePump(en) => {
-                Self::send_commands(iface, &[0x8D, 0x10 | ((en as u8) << 2)])
+                Self::send_commands(iface, &[0x8D, 0x10 | ((en as u8) << 2)]).await
             }
             Command::InternalIref(en, current) => {
                 Self::send_commands(iface, &[0xAD, ((current as u8) << 5) | ((en as u8) << 4)])
+                    .await
             }
         }
     }
 
-    fn send_commands<DI>(iface: &mut DI, data: &[u8]) -> Result<(), DisplayError>
+    async fn send_commands<DI>(iface: &mut DI, data: &[u8]) -> Result<(), DisplayError>
     where
         DI: WriteOnlyDataCommand,
     {
-        iface.send_commands(U8(data))
+        iface.send_commands(U8(data)).await
     }
 }
 

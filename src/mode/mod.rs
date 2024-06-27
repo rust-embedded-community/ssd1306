@@ -9,15 +9,16 @@ use display_interface::{DisplayError, WriteOnlyDataCommand};
 pub use terminal::*;
 
 /// Common functions to all display modes.
+#[maybe_async_cfg::maybe(sync(keep_self,), async(feature = "async"))]
 pub trait DisplayConfig {
     /// Error.
     type Error;
 
     /// Set display rotation.
-    fn set_rotation(&mut self, rotation: DisplayRotation) -> Result<(), Self::Error>;
+    async fn set_rotation(&mut self, rotation: DisplayRotation) -> Result<(), Self::Error>;
 
     /// Initialise and configure the display for the given mode.
-    fn init(&mut self) -> Result<(), Self::Error>;
+    async fn init(&mut self) -> Result<(), Self::Error>;
 }
 
 /// A mode with no additional functionality beyond that provided by the base [`Ssd1306`] struct.

@@ -15,6 +15,7 @@ rust-version = "1.75.0"
 
 [package.metadata.docs.rs]
 targets = [ "thumbv7m-none-eabi", "thumbv7em-none-eabihf" ]
+all-features = true
 
 [dependencies]
 embedded-hal = "1.0.0"
@@ -22,6 +23,8 @@ display-interface = "0.5.0"
 display-interface-i2c = "0.5.0"
 display-interface-spi = "0.5.0"
 embedded-graphics-core = { version = "0.4.0", optional = true }
+embedded-hal-async = { version = "1.0.0",  optional = true }
+maybe-async-cfg = "0.2.4"
 
 [dev-dependencies]
 embedded-graphics = "0.8.0"
@@ -37,13 +40,25 @@ panic-probe = { version = "0.3.1", features = ["print-defmt"] }
 tinybmp = "0.5.0"
 # Used by the noise_i2c examples
 rand = { version = "0.8.4", default-features = false, features = [ "small_rng" ] }
+embassy-embedded-hal = { version = "0.2.0", default-features=false }
+embassy-executor = { version = "0.6.0", git = "https://github.com/embassy-rs/embassy", features = ["arch-cortex-m", "executor-thread", "defmt", "integrated-timers"] }
 embassy-stm32 = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [ "stm32f103c8", "memory-x", "defmt", "exti", "time-driver-tim3" , "unstable-pac"]  }
 embassy-time = { version = "0.3.1", git = "https://github.com/embassy-rs/embassy" }
-embedded-hal-bus = "0.2.0"
+embassy-futures = "0.1.1"
+embedded-hal-bus = { version = "0.2.0", features = ["async"]}
 
 [features]
 default = ["graphics"]
 graphics = ["embedded-graphics-core"]
+async = [ "dep:embedded-hal-async" ]
+
+[[example]]
+name = "async_i2c_spi"
+required-features = [ "async" ]
+
+[[example]]
+name = "async_terminal_i2c"
+required-features = [ "async" ]
 
 [profile.dev]
 opt-level="s"

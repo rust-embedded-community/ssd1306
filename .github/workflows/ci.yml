@@ -37,7 +37,9 @@ jobs:
         with:
             toolchain: 1.75
       - run: cargo build --lib --target x86_64-unknown-linux-gnu
+      - run: cargo build --lib --target x86_64-unknown-linux-gnu --features async
       - run: cargo doc --target x86_64-unknown-linux-gnu
+      - run: cargo doc --target x86_64-unknown-linux-gnu --features async
 
   build:
     strategy:
@@ -68,6 +70,8 @@ jobs:
           components: rustfmt
       - run: rustup target add ${{matrix.target}}
       - run: cargo build --target ${{matrix.target}} --all-features --release
+      - if: ${{ matrix.examples }}
+        run: cargo build --target ${{matrix.target}} --examples --release
       - if: ${{ matrix.examples }}
         run: cargo build --target ${{matrix.target}} --all-features --examples --release
       - run: cargo doc --all-features --target ${{matrix.target }}

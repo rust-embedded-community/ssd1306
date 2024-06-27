@@ -13,3 +13,6 @@ pub use super::{
         DisplaySize96x16,
     },
 };
+
+#[cfg(feature = "async")]
+pub use super::mode::DisplayConfigAsync;

@@ -1,7 +1,23 @@
+#[cfg(feature = "async")]
+use crate::mode::DisplayConfigAsync;
 use crate::{command::AddrMode, mode::DisplayConfig, rotation::DisplayRotation, size::*, Ssd1306};
+#[cfg(feature = "async")]
+use crate::{size::DisplaySizeAsync, Ssd1306Async};
 use core::{cmp::min, fmt};
+#[cfg(feature = "async")]
+use display_interface::AsyncWriteOnlyDataCommand;
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 
+#[maybe_async_cfg::maybe(
+    sync(keep_self),
+    async(
+        feature = "async",
+        idents(
+            TerminalDisplaySize(async = "TerminalDisplaySizeAsync"),
+            DisplaySize(async = "DisplaySizeAsync"),
+        )
+    )
+)]
 /// Extends the [`DisplaySize`](crate::size::DisplaySize) trait
 /// to include number of characters that can fit on the display.
 pub trait TerminalDisplaySize: DisplaySize {
@@ -9,22 +25,62 @@ pub trait TerminalDisplaySize: DisplaySize {
     const CHAR_NUM: u8;
 }
 
+#[maybe_async_cfg::maybe(
+    sync(keep_self),
+    async(
+        feature = "async",
+        keep_self,
+        idents(TerminalDisplaySize(async = "TerminalDisplaySizeAsync"),)
+    )
+)]
 impl TerminalDisplaySize for DisplaySize128x64 {
     const CHAR_NUM: u8 = 128;
 }
 
+#[maybe_async_cfg::maybe(
+    sync(keep_self),
+    async(
+        feature = "async",
+        keep_self,
+        idents(TerminalDisplaySize(async = "TerminalDisplaySizeAsync"),)
+    )
+)]
 impl TerminalDisplaySize for DisplaySize128x32 {
     const CHAR_NUM: u8 = 64;
 }
 
+#[maybe_async_cfg::maybe(
+    sync(keep_self),
+    async(
+        feature = "async",
+        keep_self,
+        idents(TerminalDisplaySize(async = "TerminalDisplaySizeAsync"),)
+    )
+)]
 impl TerminalDisplaySize for DisplaySize96x16 {
     const CHAR_NUM: u8 = 24;
 }
 
+#[maybe_async_cfg::maybe(
+    sync(keep_self),
+    async(
+        keep_self,
+        feature = "async",
+        idents(TerminalDisplaySize(async = "TerminalDisplaySizeAsync"),)
+    )
+)]
 impl TerminalDisplaySize for DisplaySize72x40 {
     const CHAR_NUM: u8 = 45;
 }
 
+#[maybe_async_cfg::maybe(
+    sync(keep_self),
+    async(
+        feature = "async",
+        keep_self,
+        idents(TerminalDisplaySize(async = "TerminalDisplaySizeAsync"),)
+    )
+)]
 impl TerminalDisplaySize for DisplaySize64x48 {
     const CHAR_NUM: u8 = 48;
 }
@@ -119,11 +175,19 @@ impl From<DisplayError> for TerminalModeError {
 }
 
 /// Terminal mode.
+#[maybe_async_cfg::maybe(
+    sync(keep_self),
+    async(feature = "async", idents(TerminalMode(async = "TerminalModeAsync")))
+)]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct TerminalMode {
     cursor: Option<Cursor>,
 }
 
+#[maybe_async_cfg::maybe(
+    sync(keep_self),
+    async(feature = "async", idents(TerminalMode(async = "TerminalModeAsync")))
+)]
 impl TerminalMode {
     /// Create a new terminal mode config instance.
     pub fn new() -> Self {
@@ -131,6 +195,19 @@ impl TerminalMode {
     }
 }
 
+#[maybe_async_cfg::maybe(
+    sync(keep_self),
+    async(
+        feature = "async",
+        idents(
+            DisplaySize(async = "DisplaySizeAsync"),
+            DisplayConfig(async = "DisplayConfigAsync"),
+            WriteOnlyDataCommand(async = "AsyncWriteOnlyDataCommand"),
+            TerminalMode(async = "TerminalModeAsync"),
+            TerminalDisplaySize(async = "TerminalDisplaySizeAsync"),
+        )
+    )
+)]
 impl<DI, SIZE> DisplayConfig for Ssd1306<DI, SIZE, TerminalMode>
 where
     DI: WriteOnlyDataCommand,
@@ -141,31 +218,43 @@ where
     /// Set the display rotation
     ///
     /// This method resets the cursor but does not clear the screen.
-    fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), TerminalModeError> {
-        self.set_rotation(rot)?;
+    async fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), TerminalModeError> {
+        self.set_rotation(rot).await?;
         // Need to reset cursor position, otherwise coordinates can become invalid
-        self.reset_pos()
+        self.reset_pos().await
     }
 
     /// Initialise the display in page mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(SIZE::Width::U8 - 1)_ on the right, but no automatic line
     /// wrapping.
-    fn init(&mut self) -> Result<(), TerminalModeError> {
-        self.init_with_addr_mode(AddrMode::Page)?;
-        self.reset_pos()?;
-        Ok(())
+    async fn init(&mut self) -> Result<(), TerminalModeError> {
+        self.init_with_addr_mode(AddrMode::Page).await?;
+        self.reset_pos().await
     }
 }
 
+#[maybe_async_cfg::maybe(
+    sync(keep_self),
+    async(
+        feature = "async",
+        idents(
+            DisplaySize(async = "DisplaySizeAsync"),
+            DisplayConfig(async = "DisplayConfigAsync"),
+            WriteOnlyDataCommand(async = "AsyncWriteOnlyDataCommand"),
+            TerminalMode(async = "TerminalModeAsync"),
+            TerminalDisplaySize(async = "TerminalDisplaySizeAsync"),
+        )
+    )
+)]
 impl<DI, SIZE> Ssd1306<DI, SIZE, TerminalMode>
 where
     DI: WriteOnlyDataCommand,
     SIZE: TerminalDisplaySize,
 {
     /// Clear the display and reset the cursor to the top left corner
-    pub fn clear(&mut self) -> Result<(), TerminalModeError> {
+    pub async fn clear(&mut self) -> Result<(), TerminalModeError> {
         // Let the chip handle line wrapping so we can fill the screen with blanks faster
-        self.set_addr_mode(AddrMode::Horizontal)?;
+        self.set_addr_mode(AddrMode::Horizontal).await?;
 
         let offset_x = match self.rotation() {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate270 => SIZE::OFFSETX,
@@ -178,29 +267,28 @@ where
         self.set_draw_area(
             (offset_x, SIZE::OFFSETY),
             (SIZE::WIDTH + offset_x, SIZE::HEIGHT + SIZE::OFFSETY),
-        )?;
+        )
+        .await?;
 
         // Clear the display
         for _ in 0..SIZE::CHAR_NUM {
-            self.draw(&[0; 8])?;
+            self.draw(&[0; 8]).await?;
         }
 
         // But for normal operation we manage the line wrapping
-        self.set_addr_mode(AddrMode::Page)?;
-        self.reset_pos()?;
-
-        Ok(())
+        self.set_addr_mode(AddrMode::Page).await?;
+        self.reset_pos().await
     }
 
     /// Print a character to the display
-    pub fn print_char(&mut self, c: char) -> Result<(), TerminalModeError> {
+    pub async fn print_char(&mut self, c: char) -> Result<(), TerminalModeError> {
         match c {
             '\n' => {
                 let CursorWrapEvent(new_line) = self.ensure_cursor()?.advance_line();
-                self.set_position(0, new_line)?;
+                self.set_position(0, new_line).await?;
             }
             '\r' => {
-                self.set_column(0)?;
+                self.set_column(0).await?;
                 let (_, cur_line) = self.ensure_cursor()?.get_position();
                 self.ensure_cursor()?.set_position(0, cur_line);
             }
@@ -215,10 +303,10 @@ where
                     }
                 };
 
-                self.draw(&bitmap)?;
+                self.draw(&bitmap).await?;
 
                 // Increment character counter and potentially wrap line
-                self.advance_cursor()?;
+                self.advance_cursor().await?;
             }
         }
 
@@ -238,7 +326,7 @@ where
     /// Set the cursor position, in character coordinates.
     /// This is the (column, row) that the next character will be written to.
     /// If the position is out of bounds, an Err will be returned.
-    pub fn set_position(&mut self, column: u8, row: u8) -> Result<(), TerminalModeError> {
+    pub async fn set_position(&mut self, column: u8, row: u8) -> Result<(), TerminalModeError> {
         let (width, height) = self.ensure_cursor()?.get_dimensions();
         if column >= width || row >= height {
             Err(TerminalModeError::OutOfBounds)
@@ -253,12 +341,12 @@ where
             };
             match self.rotation() {
                 DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                    self.set_column(offset_x + column * 8)?;
-                    self.set_row(SIZE::OFFSETY + row * 8)?;
+                    self.set_column(offset_x + column * 8).await?;
+                    self.set_row(SIZE::OFFSETY + row * 8).await?;
                 }
                 DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                    self.set_column(offset_x + row * 8)?;
-                    self.set_row(SIZE::OFFSETY + column * 8)?;
+                    self.set_column(offset_x + row * 8).await?;
+                    self.set_row(SIZE::OFFSETY + column * 8).await?;
                 }
             }
             self.ensure_cursor()?.set_position(column, row);
@@ -267,7 +355,7 @@ where
     }
 
     /// Reset the draw area and move pointer to the top left corner
-    fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
+    async fn reset_pos(&mut self) -> Result<(), TerminalModeError> {
         // Initialise the counter when we know it's valid
         let (w, h) = match self.rotation() {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (SIZE::WIDTH, SIZE::HEIGHT),
@@ -276,21 +364,17 @@ where
         self.mode.cursor = Some(Cursor::new(w, h));
 
         // Reset cursor position
-        self.set_position(0, 0)?;
-
-        Ok(())
+        self.set_position(0, 0).await
     }
 
     /// Advance the cursor, automatically wrapping lines and/or screens if necessary
     /// Takes in an already-unwrapped cursor to avoid re-unwrapping
-    fn advance_cursor(&mut self) -> Result<(), TerminalModeError> {
+    async fn advance_cursor(&mut self) -> Result<(), TerminalModeError> {
         let cursor = self.ensure_cursor()?;
 
         cursor.advance();
         let (c, r) = cursor.get_position();
-        self.set_position(c, r)?;
-
-        Ok(())
+        self.set_position(c, r).await
     }
 
     fn ensure_cursor(&mut self) -> Result<&mut Cursor, TerminalModeError> {
@@ -516,6 +600,21 @@ where
         }
 
         rotated
+    }
+}
+
+#[cfg(feature = "async")]
+impl<DI, SIZE> Ssd1306Async<DI, SIZE, TerminalModeAsync>
+where
+    DI: AsyncWriteOnlyDataCommand,
+    SIZE: TerminalDisplaySizeAsync,
+{
+    /// Write a string slice to the display
+    pub async fn write_str(&mut self, s: &str) -> Result<(), TerminalModeError> {
+        for c in s.chars() {
+            self.print_char(c).await?;
+        }
+        Ok(())
     }
 }
 

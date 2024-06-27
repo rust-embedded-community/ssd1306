@@ -9,6 +9,7 @@ SSD1306 monochrome OLED display.
 
 - Updated dependencies for `embedded-hal` 1.0.0.
 - Switch examples to embassy STM32 PAC which implements `embedded-hal` 1.0.0 traits.
+- Add an asynchronous interface, enabled via the `async` feature.
 - **(breaking)** Increased MSRV to 1.75.0
 
 ### Added

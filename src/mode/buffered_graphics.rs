@@ -156,13 +156,8 @@ where
         }
     }
 
-    /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
-    /// coordinates are out of the bounds of the display, this method call is a noop.
-    pub fn set_pixel(&mut self, x: u32, y: u32, value: bool) {
-        let value = value as u8;
-        let rotation = self.rotation;
-
-        let (idx, bit) = match rotation {
+    fn pixel_location(&self, x: u32, y: u32) -> (usize, u32) {
+        match self.rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
                 let idx = ((y as usize) / 8 * SIZE::WIDTH as usize) + (x as usize);
                 let bit = y % 8;
@@ -175,7 +170,19 @@ where
 
                 (idx, bit)
             }
-        };
+        }
+    }
+
+    pub fn get_pixel(&mut self, x: u32, y: u32) -> Option<bool> {
+        let (idx, bit) = self.pixel_location(x,y);
+        self.mode.buffer.as_mut().get(idx).map(|byte| byte & !(1 << bit) != 0)
+    }
+
+    /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
+    /// coordinates are out of the bounds of the display, this method call is a noop.
+    pub fn set_pixel(&mut self, x: u32, y: u32, value: bool) {
+        let value = value as u8;
+        let (idx, bit) = self.pixel_location(x,y);
 
         if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
             // Keep track of max and min values

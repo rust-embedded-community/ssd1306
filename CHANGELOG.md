@@ -7,6 +7,8 @@ SSD1306 monochrome OLED display.
 
 ## [Unreleased] - ReleaseDate
 
+## [0.9.0] - 2024-08-30
+
 - Updated dependencies for `embedded-hal` 1.0.0.
 - Switch examples to embassy STM32 PAC which implements `embedded-hal` 1.0.0 traits.
 - Add an asynchronous interface, enabled via the `async` feature.
@@ -284,7 +286,8 @@ SSD1306 monochrome OLED display.
 - Builder docs clarify the order of method calls (#89)
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/ssd1306/compare/v0.8.4...HEAD
+[Unreleased]: https://github.com/rust-embedded-community/ssd1306/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/jamwaffles/ssd1306/compare/v0.8.4...v0.9.0
 [0.8.4]: https://github.com/jamwaffles/ssd1306/compare/v0.8.3...v0.8.4
 
 [0.8.3]: https://github.com/jamwaffles/ssd1306/compare/v0.8.2...v0.8.3

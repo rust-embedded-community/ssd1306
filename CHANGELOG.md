@@ -7,6 +7,8 @@ SSD1306 monochrome OLED display.
 
 ## [Unreleased] - ReleaseDate
 
+ - use embedded_hal_async::i2c::I2c in I2CDisplayInterface if feature 'async' is enabled to enable embassy_embedded_hal::shared_bus::asynch::i2c
+
 ## [0.9.0] - 2024-08-30
 
 - Updated dependencies for `embedded-hal` 1.0.0.

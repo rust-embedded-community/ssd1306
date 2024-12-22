@@ -9,8 +9,8 @@ pub use super::{
     mode::DisplayConfig,
     rotation::DisplayRotation,
     size::{
-        DisplaySize, DisplaySize128x32, DisplaySize128x64, DisplaySize64x48, DisplaySize72x40,
-        DisplaySize96x16,
+        DisplaySize, DisplaySize128x32, DisplaySize128x64, DisplaySize64x32, DisplaySize64x48,
+        DisplaySize72x40, DisplaySize96x16,
     },
 };
 

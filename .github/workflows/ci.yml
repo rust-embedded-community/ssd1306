@@ -14,7 +14,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.79
+      - uses: dtolnay/rust-toolchain@1.84
         with:
           components: rustfmt
       - run: cargo fmt --all -- --check
@@ -24,7 +24,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.79
+      - uses: dtolnay/rust-toolchain@1.84
       - run: cargo test --lib --target x86_64-unknown-linux-gnu
       - run: cargo test --doc --target x86_64-unknown-linux-gnu
 
@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.79
+      - uses: dtolnay/rust-toolchain@1.84
         with:
           components: rustfmt
       - run: rustup target add ${{matrix.target}}

@@ -5,7 +5,7 @@ SSD1306 monochrome OLED display.
 
 <!-- next-header -->
 
-## [Unreleased] - 2025-01-12
+## [Unreleased] - ReleaseDate
 - Update dependencies for  `embassy-executor` to 0.7.0
 - Remove `embassy-executor` feature  "integrated-timer". See https://github.com/embassy-rs/embassy/blob/main/embassy-executor/CHANGELOG.md
 - Switch `embassy-executor` from git to crates.io

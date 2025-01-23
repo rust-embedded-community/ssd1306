@@ -3,7 +3,14 @@
 [`ssd1306`](https://crates.io/crates/ssd1306) is a no-std driver written in Rust for the popular
 SSD1306 monochrome OLED display.
 
-<!-- next-header -->
+## [Unreleased] - ReleaseDate
+- Update dependcies for `embedded-hal-bus` to 0.3.0
+- Switch iterator in `write_str` in mode/terminal.rs  from last() to next_back (see https://rust-lang.github.io/rust-clippy/master/index.html#double_ended_iterator_last)
+- parenthese for expression in in mode/terminal.rs (see https://rust-lang.github.io/rust-clippy/master/index.html#precedence) in mode/terminal.rs
+- If feature `async`is enabled, the embedded_hal_async::i2c::I2  is used instead of embedded_hal::i2c::I2c  so I2c can shared
+- Update examples
+
+
 
 ## [Unreleased] - ReleaseDate
 - Update dependencies for  `embassy-executor` to 0.7.0

@@ -25,6 +25,8 @@ use cortex_m::asm::nop;
 use cortex_m_rt::entry;
 use defmt_rtt as _;
 use embassy_stm32::time::Hertz;
+#[cfg(feature = "async")]
+use embassy_stm32::{bind_interrupts, i2c, peripherals};
 use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
 use panic_probe as _;
 use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
@@ -33,7 +35,26 @@ use tinybmp::Bmp;
 
 #[entry]
 fn main() -> ! {
-    let p = embassy_stm32::init(Default::default());
+    let p: embassy_stm32::Peripherals = embassy_stm32::init(Default::default());
+    #[cfg(feature = "async")]
+    bind_interrupts!(struct Irqs {
+        I2C1_EV => i2c::EventInterruptHandler<peripherals::I2C1>;
+        I2C1_ER => i2c::ErrorInterruptHandler<peripherals::I2C1>;
+    });
+
+    #[cfg(feature = "async")]
+    let i2c = embassy_stm32::i2c::I2c::new(
+        p.I2C1,
+        p.PB6,
+        p.PB7,
+        Irqs,
+        p.DMA1_CH6,
+        p.DMA1_CH7,
+        Hertz::khz(400),
+        Default::default(),
+    );
+
+    #[cfg(not(feature = "async"))]
     let i2c = embassy_stm32::i2c::I2c::new_blocking(
         p.I2C1,
         p.PB6,
@@ -41,8 +62,8 @@ fn main() -> ! {
         Hertz::khz(400),
         Default::default(),
     );
-
     let interface = I2CDisplayInterface::new(i2c);
+
     let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)
         .into_buffered_graphics_mode();
     display.init().unwrap();

@@ -592,7 +592,7 @@ where
         for (col, source) in bitmap.iter().enumerate() {
             // source.msb is the top pixel
             for (row, item) in rotated.iter_mut().enumerate() {
-                let bit = source & 1 << row != 0;
+                let bit = source & (1 << row) != 0;
                 if bit {
                     *item |= 1 << col;
                 }
@@ -624,7 +624,7 @@ where
     SIZE: TerminalDisplaySize,
 {
     fn write_str(&mut self, s: &str) -> Result<(), fmt::Error> {
-        s.chars().map(move |c| self.print_char(c)).last();
+        s.chars().map(move |c| self.print_char(c)).next_back();
         Ok(())
     }
 }

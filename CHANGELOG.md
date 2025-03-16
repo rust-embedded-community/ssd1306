@@ -10,6 +10,7 @@ SSD1306 monochrome OLED display.
 - Update examples
 
 ### Fixed
+- Switch to resolver ver2; it fixes compilation issues when `async` feature enabled.
 - Parentheses for expression in mode/terminal.rs (see [precedence](https://rust-lang.github.io/rust-clippy/master/index.html#precedence)) in mode/terminal.rs
 - Switch iterator in `write_str` in mode/terminal.rs  from last() to next_back (see [double_ended_iterator_last](https://rust-lang.github.io/rust-clippy/master/index.html#double_ended_iterator_last))
 - If feature `async` is enabled, the `embedded_hal_async::i2c::I2c`  is used instead of `embedded_hal::i2c::I2c`  so the I2C can be shared

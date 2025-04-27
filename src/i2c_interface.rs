@@ -19,7 +19,7 @@ impl I2CDisplayInterface {
     }
     #[cfg(feature = "async")]
     #[allow(clippy::new_ret_no_self)]
-    /// Create a new async I2C interface with the address 0x3D
+    /// Create a new async I2C interface with the address 0x3C
     pub fn new<I>(i2c: I) -> I2CInterface<I>
     where
         I: embedded_hal_async::i2c::I2c,

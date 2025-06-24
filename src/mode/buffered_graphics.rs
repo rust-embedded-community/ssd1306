@@ -234,9 +234,9 @@ where
 #[cfg(feature = "graphics")]
 use embedded_graphics_core::{
     draw_target::DrawTarget,
-    geometry::Size,
-    geometry::{Dimensions, OriginDimensions},
+    geometry::{AnchorX, AnchorY, Dimensions, OriginDimensions, Size},
     pixelcolor::BinaryColor,
+    primitives::Rectangle,
     Pixel,
 };
 
@@ -276,6 +276,53 @@ where
             .for_each(|Pixel(pos, color)| {
                 self.set_pixel(pos.x as u32, pos.y as u32, color.is_on());
             });
+        Ok(())
+    }
+
+    fn fill_contiguous<I>(&mut self, area: &Rectangle, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Self::Color>,
+    {
+        let area = area.intersection(&self.bounding_box());
+        let mut pixels = pixels.into_iter();
+
+        // Keep track of max and min values
+        self.mode.min_x = self.mode.min_x.min(area.anchor_x(AnchorX::Left) as u8);
+        self.mode.max_x = self.mode.max_x.max(area.anchor_x(AnchorX::Right) as u8);
+        self.mode.min_y = self.mode.min_y.min(area.anchor_y(AnchorY::Top) as u8);
+        self.mode.max_y = self.mode.max_y.max(area.anchor_y(AnchorY::Bottom) as u8);
+
+        let buffer = self.mode.buffer.as_mut();
+        match self.rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                for y in area.rows() {
+                    for x in area.columns() {
+                        let Some(color) = pixels.next() else {
+                            return Ok(());
+                        };
+                        let value = color.is_on() as u8;
+                        let idx = ((y as usize) / 8 * SIZE::WIDTH as usize) + (x as usize);
+                        let bit = y % 8;
+                        let byte = &mut buffer[idx];
+                        *byte = *byte & !(1 << bit) | (value << bit);
+                    }
+                }
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                for y in area.rows() {
+                    for x in area.columns() {
+                        let Some(color) = pixels.next() else {
+                            return Ok(());
+                        };
+                        let value = color.is_on() as u8;
+                        let idx = ((x as usize) / 8 * SIZE::WIDTH as usize) + (y as usize);
+                        let bit = x % 8;
+                        let byte = &mut buffer[idx];
+                        *byte = *byte & !(1 << bit) | (value << bit);
+                    }
+                }
+            }
+        };
 
         Ok(())
     }

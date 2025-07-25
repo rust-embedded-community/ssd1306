@@ -25,7 +25,10 @@ impl<const N: usize> NewZeroed for [u8; N] {
 /// This includes resolution, offset and framebuffer size.
 #[maybe_async_cfg::maybe(
     sync(keep_self),
-    async(feature = "async", idents(WriteOnlyDataCommand(async = "AsyncWriteOnlyDataCommand")))
+    async(
+        feature = "async",
+        idents(WriteOnlyDataCommand(async = "AsyncWriteOnlyDataCommand"))
+    )
 )]
 pub trait DisplaySize {
     /// Width in pixels

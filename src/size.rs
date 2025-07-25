@@ -88,6 +88,25 @@ impl DisplaySize for DisplaySize128x64 {
     }
 }
 
+/// Size information for the common 102x64 variants
+#[derive(Debug, Copy, Clone)]
+pub struct DisplaySize102x64;
+#[maybe_async_cfg::maybe(sync(keep_self), async(feature = "async", keep_self))]
+impl DisplaySize for DisplaySize102x64 {
+    const WIDTH: u8 = 102;
+    const HEIGHT: u8 = 64;
+    const OFFSETX: u8 = 13;
+    type Buffer = [u8; <Self as DisplaySize>::WIDTH as usize *
+        <Self as DisplaySize>::HEIGHT as usize / 8];
+
+    async fn configure(
+        &self,
+        iface: &mut impl WriteOnlyDataCommand,
+    ) -> Result<(), DisplayError> {
+        Command::ComPinConfig(true, false).send(iface).await
+    }
+}
+
 /// Size information for the common 128x32 variants
 #[derive(Debug, Copy, Clone)]
 pub struct DisplaySize128x32;

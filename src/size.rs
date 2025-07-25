@@ -25,10 +25,7 @@ impl<const N: usize> NewZeroed for [u8; N] {
 /// This includes resolution, offset and framebuffer size.
 #[maybe_async_cfg::maybe(
     sync(keep_self),
-    async(
-        feature = "async",
-        idents(WriteOnlyDataCommand(async = "AsyncWriteOnlyDataCommand"))
-    )
+    async(feature = "async", idents(WriteOnlyDataCommand(async = "AsyncWriteOnlyDataCommand")))
 )]
 pub trait DisplaySize {
     /// Width in pixels
@@ -77,6 +74,25 @@ pub struct DisplaySize128x64;
 impl DisplaySize for DisplaySize128x64 {
     const WIDTH: u8 = 128;
     const HEIGHT: u8 = 64;
+    type Buffer = [u8; <Self as DisplaySize>::WIDTH as usize *
+        <Self as DisplaySize>::HEIGHT as usize / 8];
+
+    async fn configure(
+        &self,
+        iface: &mut impl WriteOnlyDataCommand,
+    ) -> Result<(), DisplayError> {
+        Command::ComPinConfig(true, false).send(iface).await
+    }
+}
+
+/// Size information for the common 102x64 variants
+#[derive(Debug, Copy, Clone)]
+pub struct DisplaySize102x64;
+#[maybe_async_cfg::maybe(sync(keep_self), async(feature = "async", keep_self))]
+impl DisplaySize for DisplaySize102x64 {
+    const WIDTH: u8 = 102;
+    const HEIGHT: u8 = 64;
+    const OFFSETX: u8 = 13;
     type Buffer = [u8; <Self as DisplaySize>::WIDTH as usize *
         <Self as DisplaySize>::HEIGHT as usize / 8];
 

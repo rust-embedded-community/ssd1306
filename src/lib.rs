@@ -130,7 +130,9 @@ use command::CommandAsync;
 use command::{AddrMode, Command, VcomhLevel};
 #[cfg(feature = "async")]
 use display_interface::AsyncWriteOnlyDataCommand;
-use display_interface::{DataFormat::U8, DisplayError, WriteOnlyDataCommand};
+use display_interface::DataFormat::U8;
+use display_interface::DisplayError;
+use display_interface::WriteOnlyDataCommand;
 use embedded_hal::{delay::DelayNs, digital::OutputPin};
 #[cfg(feature = "async")]
 use embedded_hal_async::delay::DelayNs as DelayNsAsync;

@@ -118,6 +118,50 @@ where
         self.clear_impl(false);
     }
 
+    /// Clear a region of the framebuffer.
+    ///
+    /// Clears pixels in the rectangular region from (x0, y0) to (x1, y1).
+    /// You need to call `flush()` to send the cleared region to the display.
+    pub fn clear_region(&mut self, x0: u8, y0: u8, x1: u8, y1: u8) {
+        let (x0, x1) = if x0 <= x1 { (x0, x1) } else { (x1, x0) };
+        let (y0, y1) = if y0 <= y1 { (y0, y1) } else { (y1, y0) };
+
+        let (width, height) = self.dimensions();
+        let x0 = x0.min(width - 1);
+        let x1 = x1.min(width - 1);
+        let y0 = y0.min(height - 1);
+        let y1 = y1.min(height - 1);
+
+        let rotation = self.rotation;
+        match rotation {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                for y in y0..=y1 {
+                    for x in x0..=x1 {
+                        let idx = ((y as usize) / 8 * SIZE::WIDTH as usize) + x as usize;
+                        if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
+                            *byte &= !(1 << (y % 8));
+                        }
+                    }
+                }
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                for x in x0..=x1 {
+                    for y in y0..=y1 {
+                        let idx = ((x as usize) / 8 * SIZE::WIDTH as usize) + y as usize;
+                        if let Some(byte) = self.mode.buffer.as_mut().get_mut(idx) {
+                            *byte &= !(1 << (x % 8));
+                        }
+                    }
+                }
+            }
+        }
+
+        self.mode.min_x = self.mode.min_x.min(x0);
+        self.mode.max_x = self.mode.max_x.max(x1);
+        self.mode.min_y = self.mode.min_y.min(y0);
+        self.mode.max_y = self.mode.max_y.max(y1);
+    }
+
     /// Write out data to a display.
     ///
     /// This only updates the parts of the display that have changed since the last flush.

@@ -12,6 +12,7 @@ SSD1306 monochrome OLED display.
 ### Added
 - Implement `embedded_graphics::draw_target::DrawTarget::fill_contiguous` to more improve performance when filling
   contiguous regions.
+- Add `clear_region(x0, y0, x1, y1)` method to `BufferedGraphicsMode` to clear a rectangular region of the framebuffer.
 
 ## [0.10.0] - 2025-03-22
 ### Changed

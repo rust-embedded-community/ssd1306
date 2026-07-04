@@ -24,7 +24,7 @@ use embassy_stm32::time::Hertz;
 #[cfg(feature = "async")]
 use embassy_stm32::{bind_interrupts, i2c, peripherals};
 use panic_probe as _;
-use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
+use ssd1306::{I2CDisplayInterface, Ssd1306, prelude::*};
 
 #[entry]
 fn main() -> ! {
@@ -65,10 +65,12 @@ fn main() -> ! {
     /* Endless loop */
     loop {
         for c in 97..123 {
-            let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) });
+            let _ = display
+                .write_str(unsafe { core::str::from_utf8_unchecked(core::slice::from_ref(&c)) });
         }
         for c in 65..91 {
-            let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) });
+            let _ = display
+                .write_str(unsafe { core::str::from_utf8_unchecked(core::slice::from_ref(&c)) });
         }
     }
 }

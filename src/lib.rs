@@ -81,10 +81,10 @@
 //!
 //! // Spam some characters to the display
 //! for c in 97..123 {
-//!     let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) });
+//!     let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(core::slice::from_ref(&c)) });
 //! }
 //! for c in 65..91 {
-//!     let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) });
+//!     let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(core::slice::from_ref(&c)) });
 //! }
 //!
 //! // The `write!()` macro is also supported
@@ -502,15 +502,25 @@ where
         let page_lower = upper_left.0 as usize;
         let page_upper = lower_right.0 as usize;
 
-        for c in buffer
-            .chunks(disp_width)
-            .skip(starting_page)
-            .take(num_pages)
-            .map(|s| &s[page_lower..page_upper])
-        {
-            interface.send_data(U8(c)).await?
+        let is_contiguous = page_lower == 0 && page_upper == SIZE::WIDTH as usize;
+
+        if is_contiguous {
+            interface
+                .send_data(U8(
+                    &buffer[starting_page * disp_width..][..num_pages * disp_width]
+                ))
+                .await
+        } else {
+            for c in buffer
+                .chunks(disp_width)
+                .skip(starting_page)
+                .take(num_pages)
+                .map(|s| &s[page_lower..page_upper])
+            {
+                interface.send_data(U8(c)).await?;
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Release the contained interface.

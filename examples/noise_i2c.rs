@@ -27,7 +27,7 @@ use embassy_stm32::{bind_interrupts, i2c, peripherals};
 use embassy_stm32::time::Hertz;
 use panic_probe as _;
 use rand::prelude::*;
-use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
+use ssd1306::{I2CDisplayInterface, Ssd1306, prelude::*};
 
 #[entry]
 fn main() -> ! {

@@ -3,7 +3,7 @@
 mod buffered_graphics;
 mod terminal;
 
-use crate::{command::AddrMode, rotation::DisplayRotation, size::DisplaySize, Ssd1306};
+use crate::{Ssd1306, command::AddrMode, rotation::DisplayRotation, size::DisplaySize};
 pub use buffered_graphics::*;
 use display_interface::{DisplayError, WriteOnlyDataCommand};
 pub use terminal::*;

@@ -1,8 +1,8 @@
 #[cfg(feature = "async")]
 use crate::mode::DisplayConfigAsync;
-use crate::{command::AddrMode, mode::DisplayConfig, rotation::DisplayRotation, size::*, Ssd1306};
+use crate::{Ssd1306, command::AddrMode, mode::DisplayConfig, rotation::DisplayRotation, size::*};
 #[cfg(feature = "async")]
-use crate::{size::DisplaySizeAsync, Ssd1306Async};
+use crate::{Ssd1306Async, size::DisplaySizeAsync};
 use core::{cmp::min, fmt};
 #[cfg(feature = "async")]
 use display_interface::AsyncWriteOnlyDataCommand;

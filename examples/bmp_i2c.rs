@@ -29,7 +29,7 @@ use embassy_stm32::time::Hertz;
 use embassy_stm32::{bind_interrupts, i2c, peripherals};
 use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
 use panic_probe as _;
-use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
+use ssd1306::{I2CDisplayInterface, Ssd1306, prelude::*};
 
 use tinybmp::Bmp;
 

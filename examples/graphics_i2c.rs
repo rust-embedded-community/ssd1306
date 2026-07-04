@@ -29,7 +29,7 @@ use embedded_graphics::{
     primitives::{Circle, PrimitiveStyleBuilder, Rectangle, Triangle},
 };
 use panic_probe as _;
-use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
+use ssd1306::{I2CDisplayInterface, Ssd1306, prelude::*};
 
 #[entry]
 fn main() -> ! {

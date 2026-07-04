@@ -1,13 +1,13 @@
 //! Buffered graphics mode.
 
 use crate::{
+    Ssd1306,
     command::AddrMode,
     rotation::DisplayRotation,
     size::{DisplaySize, NewZeroed},
-    Ssd1306,
 };
 #[cfg(feature = "async")]
-use crate::{size::DisplaySizeAsync, Ssd1306Async};
+use crate::{Ssd1306Async, size::DisplaySizeAsync};
 #[cfg(feature = "async")]
 use display_interface::AsyncWriteOnlyDataCommand;
 use display_interface::{DisplayError, WriteOnlyDataCommand};
@@ -233,11 +233,11 @@ where
 
 #[cfg(feature = "graphics")]
 use embedded_graphics_core::{
+    Pixel,
     draw_target::DrawTarget,
     geometry::{AnchorX, AnchorY, Dimensions, OriginDimensions, Size},
     pixelcolor::BinaryColor,
     primitives::Rectangle,
-    Pixel,
 };
 
 use super::DisplayConfig;

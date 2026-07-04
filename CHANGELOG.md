@@ -13,6 +13,10 @@ SSD1306 monochrome OLED display.
 - Implement `embedded_graphics::draw_target::DrawTarget::fill_contiguous` to more improve performance when filling
   contiguous regions.
 
+### Changed
+- Improved interface utilisation when the buffer to be sent is contiguous.
+- **(breaking)** Increased MSRV to 1.85.0, Rust edition to 2024
+
 ## [0.10.0] - 2025-03-22
 ### Changed
 - Added `DisplaySize64x32` to the prelude

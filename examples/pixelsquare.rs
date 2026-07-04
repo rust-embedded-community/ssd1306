@@ -31,7 +31,7 @@ use embassy_stm32::{
     time::Hertz,
 };
 use panic_probe as _;
-use ssd1306::{prelude::*, Ssd1306};
+use ssd1306::{Ssd1306, prelude::*};
 
 #[entry]
 fn main() -> ! {

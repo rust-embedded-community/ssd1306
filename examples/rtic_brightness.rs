@@ -16,12 +16,11 @@ mod app {
     use defmt_rtt as _;
     use display_interface_spi::SPIInterface;
     use embassy_stm32::{
-        gpio,
+        Config, gpio,
         mode::Blocking,
         spi::{self, Spi},
         time::Hertz,
         timer::low_level::Timer,
-        Config,
     };
     use embedded_graphics::{
         geometry::Point,
@@ -31,7 +30,7 @@ mod app {
         primitives::{PrimitiveStyle, Rectangle},
     };
     use panic_probe as _;
-    use ssd1306::{mode::BufferedGraphicsMode, prelude::*, Ssd1306};
+    use ssd1306::{Ssd1306, mode::BufferedGraphicsMode, prelude::*};
     use tinybmp::Bmp;
 
     type Display = Ssd1306<

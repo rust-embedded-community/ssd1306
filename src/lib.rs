@@ -81,10 +81,10 @@
 //!
 //! // Spam some characters to the display
 //! for c in 97..123 {
-//!     let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) });
+//!     let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(core::slice::from_ref(&c)) });
 //! }
 //! for c in 65..91 {
-//!     let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(&[c]) });
+//!     let _ = display.write_str(unsafe { core::str::from_utf8_unchecked(core::slice::from_ref(&c)) });
 //! }
 //!
 //! // The `write!()` macro is also supported

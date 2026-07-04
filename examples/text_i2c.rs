@@ -25,13 +25,13 @@ use embassy_stm32::time::Hertz;
 #[cfg(feature = "async")]
 use embassy_stm32::{bind_interrupts, i2c, peripherals};
 use embedded_graphics::{
-    mono_font::{ascii::FONT_6X10, MonoTextStyleBuilder},
+    mono_font::{MonoTextStyleBuilder, ascii::FONT_6X10},
     pixelcolor::BinaryColor,
     prelude::*,
     text::{Baseline, Text},
 };
 use panic_probe as _;
-use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306};
+use ssd1306::{I2CDisplayInterface, Ssd1306, prelude::*};
 
 #[entry]
 fn main() -> ! {

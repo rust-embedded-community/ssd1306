@@ -30,14 +30,14 @@
 use defmt_rtt as _;
 use embassy_executor::Spawner;
 use embassy_futures::join::join;
-use embassy_stm32::{bind_interrupts, gpio, i2c, peripherals, spi::Spi, time::Hertz, Config};
+use embassy_stm32::{Config, bind_interrupts, gpio, i2c, peripherals, spi::Spi, time::Hertz};
 use embedded_graphics::{
     image::{Image, ImageRaw},
     pixelcolor::BinaryColor,
     prelude::*,
 };
 use panic_probe as _;
-use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306Async};
+use ssd1306::{I2CDisplayInterface, Ssd1306Async, prelude::*};
 
 bind_interrupts!(struct Irqs {
     I2C1_EV => i2c::EventInterruptHandler<peripherals::I2C1>;

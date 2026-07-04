@@ -21,7 +21,7 @@ use defmt_rtt as _;
 use embassy_executor::Spawner;
 use embassy_stm32::{bind_interrupts, i2c, peripherals, time::Hertz};
 use panic_probe as _;
-use ssd1306::{prelude::*, I2CDisplayInterface, Ssd1306Async};
+use ssd1306::{I2CDisplayInterface, Ssd1306Async, prelude::*};
 
 bind_interrupts!(struct Irqs {
     I2C1_EV => i2c::EventInterruptHandler<peripherals::I2C1>;
@@ -52,12 +52,12 @@ async fn main(_spawner: Spawner) {
     loop {
         for c in 97..123 {
             let _ = display
-                .write_str(unsafe { core::str::from_utf8_unchecked(&[c]) })
+                .write_str(unsafe { core::str::from_utf8_unchecked(core::slice::from_ref(&c)) })
                 .await;
         }
         for c in 65..91 {
             let _ = display
-                .write_str(unsafe { core::str::from_utf8_unchecked(&[c]) })
+                .write_str(unsafe { core::str::from_utf8_unchecked(core::slice::from_ref(&c)) })
                 .await;
         }
     }
